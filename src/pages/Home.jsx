@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
+import Hero_2 from "../pages/Hero_2";
 function Home() {
   const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -115,6 +115,8 @@ function Home() {
   };
 
   return (
+    <>
+     
     <div style={{
       minHeight: "calc(100vh - 80px)",
       display: "flex",
@@ -327,6 +329,8 @@ function Home() {
         ))}
       </div>
     </div>
+    <Hero_2 />
+    </>
   );
 }
 

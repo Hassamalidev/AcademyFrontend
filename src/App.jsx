@@ -3,7 +3,7 @@ import Navbar from "./Component/Navbar";
 
 import Home from "./pages/Home";
 import About from "./pages/About";
-import Courses from "./pages/Courses";
+import Courses from "./pages/TestPage";
 import Contact from "./pages/Contact";
 import Demos from "./pages/Demo";
 import News from "./pages/News";

@@ -1,16 +1,19 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { FaPlay, FaMedal, FaUserGraduate, FaBook, FaHistory } from "react-icons/fa";
 
 function Hero_2() {
   const [isHovered, setIsHovered] = useState(false);
-
+  const navigate = useNavigate();
   const stats = [
     { value: "9+", label: "Years of Experience", icon: <FaHistory /> },
     { value: "100+", label: "ISSB Recommendations", icon: <FaMedal /> },
     { value: "15+", label: "Premium Courses", icon: <FaBook /> },
     { value: "120+", label: "Video Lectures", icon: <FaPlay /> }
   ];
-
+    const handleExploreClick = () => {
+    navigate('./courses'); // Navigate to Courses component
+  };
   return (
     <div style={{
       display: "flex",
@@ -261,16 +264,20 @@ function Hero_2() {
             justifyContent: "center",
             transition: "all 0.3s ease"
           }}>
-            <div style={{
-              background: "#fff",
-              padding: "15px 25px",
-              borderRadius: "8px",
-              fontWeight: "bold",
-              color: "#4e1faf",
-              boxShadow: "0 5px 15px rgba(0,0,0,0.2)",
-              transform: "translateY(0)",
-              animation: "float 3s ease-in-out infinite"
-            }}>
+            <div 
+              style={{
+                background: "#fff",
+                padding: "15px 25px",
+                borderRadius: "8px",
+                fontWeight: "bold",
+                color: "#4e1faf",
+                boxShadow: "0 5px 15px rgba(0,0,0,0.2)",
+                transform: "translateY(0)",
+                animation: "float 3s ease-in-out infinite",
+                cursor: "pointer" // Add pointer cursor
+              }}
+              onClick={handleExploreClick} // Add click handler
+            >
               Explore Our Courses →
             </div>
           </div>

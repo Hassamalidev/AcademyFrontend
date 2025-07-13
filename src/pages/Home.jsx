@@ -2,13 +2,15 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Hero_2 from "../pages/Hero_2";
 import { FaArrowRight, FaArrowLeft, FaWhatsapp } from "react-icons/fa";
+import HomeCategory from "./HomeCategory.jsx";
+import NotesPage from "./NotesPage.jsx";
 
 function Home() {
   const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
-  const whatsappNumber = "923001234567"; // Your WhatsApp number
+  const whatsappNumber = "923001234567"; 
 
   const slides = [
     {
@@ -53,7 +55,6 @@ function Home() {
     },
   ];
 
-  // Handle window resize
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
@@ -62,7 +63,6 @@ function Home() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Auto slide transition
   useEffect(() => {
     const interval = setInterval(() => {
       goToNext();
@@ -110,20 +110,18 @@ function Home() {
         overflow: "hidden",
       }}>
         {/* Animated background elements */}
-        <div className="slider-background" style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          background: `linear-gradient(135deg, ${slides[currentSlide].themeColor} 0%, #000 100%)`,
-          transition: "all 0.8s cubic-bezier(0.77, 0, 0.175, 1)",
-          zIndex: 0,
-          borderRadius: "20px",
-          margin: "20px",
-          width: "calc(100% - 40px)",
-          height: "calc(100% - 40px)",
-        }}></div>
+     <div style={{
+  position: "absolute",
+  top: 0,
+  left: 0,
+  width: "calc(100% - 40px)", // Only define once
+  height: "calc(100% - 40px)", // Only define once
+  background: `linear-gradient(135deg, ${slides[currentSlide].themeColor} 0%, #000 100%)`,
+  transition: "all 0.8s cubic-bezier(0.77, 0, 0.175, 1)",
+  zIndex: 0,
+  borderRadius: "20px",
+  margin: "20px",
+}}></div>
 
         {/* Floating particles */}
         <div className="particles" style={{
@@ -441,8 +439,10 @@ function Home() {
           }
         `}
       </style>
-
-      <Hero_2 />
+     <Hero_2/>
+     <HomeCategory/>
+     <NotesPage/>
+    
     </>
   );
 }

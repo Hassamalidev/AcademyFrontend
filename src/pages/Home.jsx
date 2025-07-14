@@ -4,6 +4,7 @@ import Hero_2 from "../pages/Hero_2";
 import { FaArrowRight, FaArrowLeft, FaWhatsapp } from "react-icons/fa";
 import HomeCategory from "./HomeCategory.jsx";
 import NotesPage from "./NotesPage.jsx";
+import Footer from "./Footer.jsx";
 
 function Home() {
   const navigate = useNavigate();
@@ -442,7 +443,7 @@ function Home() {
      <Hero_2/>
      <HomeCategory/>
      <NotesPage/>
-    
+    <Footer/>
     </>
   );
 }

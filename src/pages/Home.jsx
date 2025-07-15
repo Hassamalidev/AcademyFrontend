@@ -5,6 +5,7 @@ import { FaArrowRight, FaArrowLeft, FaWhatsapp } from "react-icons/fa";
 import HomeCategory from "./HomeCategory.jsx";
 import NotesPage from "./NotesPage.jsx";
 import Footer from "./Footer.jsx";
+import Testimonials from "./Testimonals.jsx";
 
 function Home() {
   const navigate = useNavigate();
@@ -110,13 +111,12 @@ function Home() {
         position: "relative",
         overflow: "hidden",
       }}>
-        {/* Animated background elements */}
      <div style={{
   position: "absolute",
   top: 0,
   left: 0,
-  width: "calc(100% - 40px)", // Only define once
-  height: "calc(100% - 40px)", // Only define once
+  width: "calc(100% - 40px)", 
+  height: "calc(100% - 40px)", 
   background: `linear-gradient(135deg, ${slides[currentSlide].themeColor} 0%, #000 100%)`,
   transition: "all 0.8s cubic-bezier(0.77, 0, 0.175, 1)",
   zIndex: 0,
@@ -124,7 +124,6 @@ function Home() {
   margin: "20px",
 }}></div>
 
-        {/* Floating particles */}
         <div className="particles" style={{
           position: "absolute",
           top: 0,
@@ -149,7 +148,6 @@ function Home() {
           ))}
         </div>
 
-        {/* Main content */}
         <div className="slider-content" style={{
           position: "relative",
           zIndex: 2,
@@ -161,7 +159,6 @@ function Home() {
           borderRadius: "20px",
           overflow: "hidden",
         }}>
-          {/* Text content */}
           <div className="text-content" style={{
             flex: 1,
             color: "#fff",
@@ -237,7 +234,6 @@ function Home() {
               <FaWhatsapp style={{ fontSize: "1.2rem" }} />
             </button>
 
-            {/* Slide indicators */}
             <div style={{
               display: "flex",
               gap: "10px",
@@ -263,7 +259,6 @@ function Home() {
             </div>
           </div>
 
-          {/* Image content - only on desktop */}
           {!isMobile && (
             <div className="image-content" style={{
               flex: 1,
@@ -284,7 +279,6 @@ function Home() {
                 justifyContent: "center",
                 alignItems: "center",
               }}>
-                {/* Shape background */}
                 <div style={{
                   position: "absolute",
                   width: "100%",
@@ -297,7 +291,6 @@ function Home() {
                   filter: "blur(20px)",
                 }}></div>
                 
-                {/* Image with organic shape mask */}
                 <div style={{
                   position: "relative",
                   width: "100%",
@@ -323,7 +316,6 @@ function Home() {
                   />
                 </div>
                 
-                {/* Glow effect */}
                 <div style={{
                   position: "absolute",
                   width: "120%",
@@ -338,7 +330,6 @@ function Home() {
           )}
         </div>
 
-        {/* Navigation arrows */}
         {!isMobile && (
           <>
             <button
@@ -414,7 +405,6 @@ function Home() {
         )}
       </div>
 
-      {/* Animation keyframes */}
       <style>
         {`
           @keyframes float {
@@ -443,6 +433,8 @@ function Home() {
      <Hero_2/>
      <HomeCategory/>
      <NotesPage/>
+    
+    <Testimonials/>
     <Footer/>
     </>
   );

@@ -23,7 +23,6 @@ const NotesPage = () => {
 
   const pageSize = 10;
 
-  // Fetch notes with error handling
   const fetchNotes = async () => {
     setLoading(true);
     setError(null);
@@ -47,7 +46,6 @@ const NotesPage = () => {
     }
   }, [subject, page]);
 
-  // Handle note creation
   const handleCreateNote = async (e) => {
     e.preventDefault();
     setCreatingNote(true);
@@ -87,12 +85,10 @@ const NotesPage = () => {
     setNewNote(prev => ({ ...prev, [name]: value }));
   };
 
-  // Form validation
   const isFormValid = newNote.title.trim() && newNote.answer.trim() && newNote.subject.trim();
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
-  // Modern styling with CSS variables
   const styles = {
     container: {
       maxWidth: '800px',
@@ -278,7 +274,6 @@ const NotesPage = () => {
           {subject ? `${subject} Notes` : 'All Notes'}
         </h1>
 
-        {/* Messages */}
         {error && (
           <div style={{ ...styles.messageBox, ...styles.errorBox }}>
             {error}
@@ -290,7 +285,6 @@ const NotesPage = () => {
           </div>
         )}
 
-        {/* Create Note Form */}
         <div style={styles.formContainer}>
           <h2 style={styles.formHeader}>Create New Note</h2>
           <form onSubmit={handleCreateNote}>
@@ -344,7 +338,6 @@ const NotesPage = () => {
           </form>
         </div>
 
-        {/* Notes List */}
         {loading ? (
           <div style={{ textAlign: 'center', padding: '3rem 0' }}>
             <div style={{ ...styles.loadingSpinner, width: '48px', height: '48px', margin: '0 auto' }}></div>
@@ -378,7 +371,6 @@ const NotesPage = () => {
           </div>
         )}
 
-        {/* Pagination */}
         {totalPages > 1 && (
           <div style={styles.pagination}>
             <button

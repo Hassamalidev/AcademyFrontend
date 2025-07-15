@@ -12,7 +12,7 @@ function Hero_2() {
     { value: "120+", label: "Video Lectures", icon: <FaPlay /> }
   ];
     const handleExploreClick = () => {
-    navigate('./courses'); // Navigate to Courses component
+    navigate('./courses'); 
   };
   return (
     <div style={{
@@ -29,7 +29,7 @@ function Hero_2() {
       position: "relative",
       overflow: "hidden"
     }}>
-      {/* Blue dots background pattern */}
+      
       <div style={{
         position: "absolute",
         top: 0,
@@ -42,7 +42,7 @@ function Hero_2() {
         zIndex: 0
       }} />
       
-      {/* Random blue shapes */}
+      
       <div style={{
         position: "absolute",
         top: "20%",
@@ -66,7 +66,7 @@ function Hero_2() {
         zIndex: 0
       }} />
 
-      {/* Text Content */}
+    
       <div style={{
         flex: "1",
         minWidth: "300px",
@@ -138,7 +138,6 @@ function Hero_2() {
           ))}
         </ul>
 
-        {/* Stats Section with Icons */}
         <div style={{ 
           display: "grid",
           gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
@@ -185,7 +184,6 @@ function Hero_2() {
         </div>
       </div>
 
-      {/* Image Section with Hover Effect */}
       <div 
         style={{
           flex: "1",
@@ -216,7 +214,6 @@ function Hero_2() {
           }}
         />
         
-        {/* 9+ Years Experience Strip */}
         <div style={{
           position: "absolute",
           bottom: "30px",
@@ -250,7 +247,6 @@ function Hero_2() {
           </div>
         </div>
 
-        {/* Hover Overlay */}
         {isHovered && (
           <div style={{
             position: "absolute",
@@ -274,9 +270,9 @@ function Hero_2() {
                 boxShadow: "0 5px 15px rgba(0,0,0,0.2)",
                 transform: "translateY(0)",
                 animation: "float 3s ease-in-out infinite",
-                cursor: "pointer" // Add pointer cursor
+                cursor: "pointer"
               }}
-              onClick={handleExploreClick} // Add click handler
+              onClick={handleExploreClick} 
             >
               Explore Our Courses →
             </div>

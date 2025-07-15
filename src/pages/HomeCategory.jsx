@@ -57,7 +57,7 @@ function HomeCategory() {
   ];
 
   const handleExploreClick = () => {
-    navigate('./courses'); // Navigate to Courses component
+    navigate('./courses'); 
   };
 
   return (
@@ -67,7 +67,6 @@ function HomeCategory() {
       position: "relative",
       overflow: "hidden",
     }}>
-      {/* Section header */}
       <div style={{
         textAlign: "center",
         marginBottom: "50px",
@@ -105,7 +104,6 @@ function HomeCategory() {
         </p>
       </div>
 
-      {/* Categories grid */}
       <div style={{
         display: "grid",
         gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
@@ -130,7 +128,6 @@ function HomeCategory() {
               boxShadow: `0 15px 35px rgba(0,0,0,0.12), 0 0 0 3px ${category.color}`,
             }
           }}>
-            {/* Category image */}
             <div style={{
               height: "180px",
               position: "relative",
@@ -173,7 +170,6 @@ function HomeCategory() {
               </div>
             </div>
 
-            {/* Category content */}
             <div style={{
               padding: "25px",
             }}>
@@ -224,7 +220,6 @@ function HomeCategory() {
         ))}
       </div>
 
-      {/* Decorative elements */}
       <div style={{
         position: "absolute",
         top: "0",

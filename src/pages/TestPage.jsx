@@ -6,7 +6,7 @@ function TestPage() {
   const [current, setCurrent] = useState(0);
   const [score, setScore] = useState(0);
   const [selected, setSelected] = useState(null);
-  const [timeLeft, setTimeLeft] = useState(300); // 5 mins
+  const [timeLeft, setTimeLeft] = useState(300); 
   const [showResult, setShowResult] = useState(false);
   const [answers, setAnswers] = useState([]);
   const [lastFeedback, setLastFeedback] = useState("");
@@ -56,7 +56,7 @@ function TestPage() {
         setTimeout(() => {
           setCurrent(current + 1);
           setLastFeedback("");
-        }, 1500); // Wait before next question
+        }, 1500); 
       } else {
         setTimeout(() => setShowResult(true), 1500);
       }

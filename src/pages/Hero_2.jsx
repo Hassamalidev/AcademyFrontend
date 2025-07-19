@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaPlay, FaMedal, FaUserGraduate, FaBook, FaHistory } from "react-icons/fa";
-
+import cardImage from "../assets/Hero_2.png"
 function Hero_2() {
   const [isHovered, setIsHovered] = useState(false);
   const navigate = useNavigate();
@@ -201,7 +201,7 @@ function Hero_2() {
         onMouseLeave={() => setIsHovered(false)}
       >
         <img
-          src="/about_2.png"
+          src={cardImage}
           alt="Military Training"
           style={{
             width: "100%",

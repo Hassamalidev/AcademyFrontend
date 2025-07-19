@@ -1,407 +1,302 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import axios from 'axios';
+import { getNotes, createNote } from '../api/api';
 
-const BASE_URL = "https://localhost:7218/api/Notes";
+const subjects = [
+  "Maths", "Computer", "General Knowledge",
+  "Who is Who", "What is What", "Academic", "Physics"
+];
 
 const NotesPage = () => {
-  const { subject } = useParams();
+  const [activeSubject, setActiveSubject] = useState(subjects[0]);
   const [notes, setNotes] = useState([]);
-  const [page, setPage] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [formLoading, setFormLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [newNote, setNewNote] = useState({
-    title: '',
-    answer: '',
-    explanation: '',
-    subject: subject || '',
-    createdAt: new Date().toISOString()
-  });
-  const [creatingNote, setCreatingNote] = useState(false);
-  const [successMessage, setSuccessMessage] = useState(null);
+  const [success, setSuccess] = useState(null);
+  const [newNote, setNewNote] = useState({ title: '', answer: '', explanation: '', subject: subjects[0] });
+  const [expandedNoteId, setExpandedNoteId] = useState(null);
 
-  const pageSize = 10;
+  const [page, setPage] = useState(1);
+  const limit = 6;
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalNotes, setTotalNotes] = useState(0);
 
-  const fetchNotes = async () => {
+  const fetchNotes = async (pageNum = 1) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`${BASE_URL}/${subject}`, {
-        params: { page, pageSize }
-      });
-      setNotes(response.data);
-      setTotalCount(parseInt(response.headers['x-total-count']) || 0);
+      const response = await getNotes(activeSubject, pageNum, limit);
+      setNotes(response.notes);
+      setTotalPages(response.totalPages || 1);
+      setTotalNotes(response.totalNotes || 0);
+      setPage(pageNum);
+      setExpandedNoteId(null);
     } catch (err) {
-      setError(`Failed to load notes: ${err.response?.data?.message || err.message}`);
-      console.error('API Error:', err.response?.data || err.message);
+      setError(`Failed to load notes: ${err.message}`);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (subject) {
-      fetchNotes();
-    }
-  }, [subject, page]);
+    fetchNotes(1);
+  }, [activeSubject]);
 
   const handleCreateNote = async (e) => {
     e.preventDefault();
-    setCreatingNote(true);
+    setFormLoading(true);
     setError(null);
-    setSuccessMessage(null);
-    
+    setSuccess(null);
     try {
-      const noteToCreate = {
-        ...newNote,
-        subject: subject || newNote.subject,
-        createdAt: new Date().toISOString()
-      };
-      
-      await axios.post(BASE_URL, noteToCreate);
-      
-      setNewNote({
-        title: '',
-        answer: '',
-        explanation: '',
-        subject: subject || '',
-        createdAt: new Date().toISOString()
-      });
-      
-      setSuccessMessage('Note created successfully!');
-      setPage(1);
-      await fetchNotes();
+      await createNote({ ...newNote, createdAt: new Date().toISOString() });
+      setNewNote({ title: '', answer: '', explanation: '', subject: activeSubject });
+      setSuccess('Note created!');
+      fetchNotes(1);
     } catch (err) {
-      setError(`Failed to create note: ${err.response?.data?.message || err.message}`);
-      console.error('API Error:', err.response?.data || err.message);
+      setError('Failed to create note.');
     } finally {
-      setCreatingNote(false);
+      setFormLoading(false);
     }
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewNote(prev => ({ ...prev, [name]: value }));
+  const toggleExplanation = (id) => {
+    setExpandedNoteId(expandedNoteId === id ? null : id);
   };
 
-  const isFormValid = newNote.title.trim() && newNote.answer.trim() && newNote.subject.trim();
-
-  const totalPages = Math.ceil(totalCount / pageSize);
-
-  const styles = {
-    container: {
-      maxWidth: '800px',
-      margin: '0 auto',
-      padding: '2rem',
-      fontFamily: "'Inter', sans-serif"
-    },
-    header: {
-      fontSize: '2rem',
-      fontWeight: '700',
-      color: 'var(--primary)',
-      marginBottom: '1.5rem',
-      textAlign: 'center'
-    },
-    formContainer: {
-      backgroundColor: 'white',
-      padding: '1.5rem',
-      borderRadius: '12px',
-      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)',
-      marginBottom: '2rem',
-      border: '1px solid #e5e7eb'
-    },
-    formHeader: {
-      fontSize: '1.25rem',
-      fontWeight: '600',
-      color: '#1f2937',
-      marginBottom: '1rem'
-    },
-    inputGroup: {
-      marginBottom: '1rem'
-    },
-    label: {
-      display: 'block',
-      marginBottom: '0.5rem',
-      fontWeight: '500',
-      color: '#374151'
-    },
-    input: {
-      width: '100%',
-      padding: '0.75rem',
-      border: '1px solid #d1d5db',
-      borderRadius: '8px',
-      fontSize: '1rem',
-      transition: 'border-color 0.2s',
-      ':focus': {
-        outline: 'none',
-        borderColor: '#4f46e5',
-        boxShadow: '0 0 0 3px rgba(79, 70, 229, 0.1)'
-      }
-    },
-    textarea: {
-      width: '100%',
-      padding: '0.75rem',
-      border: '1px solid #d1d5db',
-      borderRadius: '8px',
-      minHeight: '120px',
-      fontSize: '1rem',
-      resize: 'vertical'
-    },
-    submitButton: {
-      backgroundColor: 'var(--primary)',
-      color: 'white',
-      padding: '0.75rem 1.5rem',
-      borderRadius: '8px',
-      border: 'none',
-      fontSize: '1rem',
-      fontWeight: '500',
-      cursor: 'pointer',
-      transition: 'background-color 0.2s',
-      ':hover': {
-        backgroundColor: '#4338ca'
-      },
-      ':disabled': {
-        opacity: '0.7',
-        cursor: 'not-allowed'
-      }
-    },
-    noteCard: {
-      backgroundColor: 'white',
-      padding: '1.5rem',
-      borderRadius: '12px',
-      boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
-      marginBottom: '1rem',
-      border: '1px solid #f3f4f6',
-      transition: 'transform 0.2s, box-shadow 0.2s',
-      ':hover': {
-        transform: 'translateY(-2px)',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
-      }
-    },
-    noteTitle: {
-      fontSize: '1.25rem',
-      fontWeight: '600',
-      color: '#1f2937',
-      marginBottom: '0.5rem'
-    },
-    explanationBox: {
-      backgroundColor: '#f9fafb',
-      padding: '1rem',
-      borderRadius: '8px',
-      marginTop: '1rem'
-    },
-    pagination: {
-      display: 'flex',
-      justifyContent: 'center',
-      marginTop: '2rem',
-      gap: '0.5rem'
-    },
-    pageButton: {
-      padding: '0.5rem 1rem',
-      border: '1px solid #d1d5db',
-      backgroundColor: 'white',
-      color: '#374151',
-      borderRadius: '6px',
-      cursor: 'pointer',
-      transition: 'background-color 0.2s',
-      ':hover': {
-        backgroundColor: '#f3f4f6'
-      },
-      ':disabled': {
-        opacity: '0.5',
-        cursor: 'not-allowed'
-      }
-    },
-    pageInfo: {
-      padding: '0.5rem 1rem',
-      backgroundColor: 'white',
-      color: '#374151',
-      display: 'flex',
-      alignItems: 'center'
-    },
-    loadingSpinner: {
-      display: 'inline-block',
-      width: '24px',
-      height: '24px',
-      border: '3px solid rgba(79, 70, 229, 0.3)',
-      borderTopColor: '#4f46e5',
-      borderRadius: '50%',
-      animation: 'spin 1s linear infinite'
-    },
-    messageBox: {
-      padding: '1rem',
-      borderRadius: '8px',
-      marginBottom: '1.5rem'
-    },
-    errorBox: {
-      backgroundColor: '#fef2f2',
-      borderLeft: '4px solid #ef4444',
-      color: '#b91c1c'
-    },
-    successBox: {
-      backgroundColor: '#ecfdf5',
-      borderLeft: '4px solid #10b981',
-      color: '#065f46'
-    },
-    emptyState: {
-      textAlign: 'center',
-      padding: '3rem 0',
-      color: '#6b7280'
-    }
-  };
+  const isFormValid = newNote.title.trim() && newNote.answer.trim();
 
   return (
-    <>
-      <style>
-        {`
-          :root {
-            --primary: #4f46e5;
-          }
-          @keyframes spin {
-            to { transform: rotate(360deg); }
-          }
-          body {
-            background-color: #f9fafb;
-            margin: 0;
-            color: #1f2937;
-          }
-        `}
-      </style>
-      
-      <div style={styles.container}>
-        <h1 style={styles.header}>
-          {subject ? `${subject} Notes` : 'All Notes'}
-        </h1>
+    <div className="container">
+      <h1 className="title">🧠 Notes Manager</h1>
 
-        {error && (
-          <div style={{ ...styles.messageBox, ...styles.errorBox }}>
-            {error}
-          </div>
-        )}
-        {successMessage && (
-          <div style={{ ...styles.messageBox, ...styles.successBox }}>
-            {successMessage}
-          </div>
-        )}
+      <div className="tabs">
+        {subjects.map(subject => (
+          <button
+            key={subject}
+            className={`tab ${activeSubject === subject ? 'active' : ''}`}
+            onClick={() => setActiveSubject(subject)}
+          >
+            {subject}
+          </button>
+        ))}
+      </div>
 
-        <div style={styles.formContainer}>
-          <h2 style={styles.formHeader}>Create New Note</h2>
+      {error && <p className="error">{error}</p>}
+      {success && <p className="success">{success}</p>}
+
+      <div className="grid">
+        {/* Left - Notes */}
+        <div className="notes-section">
+          <h2>{activeSubject} Notes ({totalNotes})</h2>
+          {loading ? (
+            <p>Loading notes...</p>
+          ) : notes.length === 0 ? (
+            <p>No notes yet.</p>
+          ) : (
+            notes.map(note => (
+              <div className="note-card" key={note.id}>
+                <h3>{note.title}</h3>
+                <p><strong>Answer:</strong> {note.answer}</p>
+                <button className="show-btn" onClick={() => toggleExplanation(note.id)}>
+                  {expandedNoteId === note.id ? 'Hide' : 'Show'} Explanation
+                </button>
+                {expandedNoteId === note.id && (
+                  <div className="explanation">
+                    {note.explanation?.trim()
+                      ? <p>{note.explanation}</p>
+                      : <p className="no-explanation">No explanation provided.</p>
+                    }
+                  </div>
+                )}
+                <p className="date">{new Date(note.createdAt).toLocaleString()}</p>
+              </div>
+            ))
+          )}
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="pagination">
+              {Array.from({ length: totalPages }, (_, i) => (
+                <button
+                  key={i}
+                  className={`page-btn ${page === i + 1 ? 'current' : ''}`}
+                  onClick={() => fetchNotes(i + 1)}
+                >
+                  {i + 1}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Right - Form */}
+        <div className="form-card">
+          <h2>Create Note</h2>
           <form onSubmit={handleCreateNote}>
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>Title</label>
-              <input
-                type="text"
-                name="title"
-                style={styles.input}
-                value={newNote.title}
-                onChange={handleInputChange}
-                required
-                placeholder="Enter note title"
-              />
-            </div>
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>Answer</label>
-              <input
-                type="text"
-                name="answer"
-                style={styles.input}
-                value={newNote.answer}
-                onChange={handleInputChange}
-                required
-                placeholder="Enter the answer"
-              />
-            </div>
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>Explanation</label>
-              <textarea
-                name="explanation"
-                style={styles.textarea}
-                value={newNote.explanation}
-                onChange={handleInputChange}
-                placeholder="Add detailed explanation (optional)"
-              />
-            </div>
-            <button
-              type="submit"
-              style={styles.submitButton}
-              disabled={creatingNote || !isFormValid}
-            >
-              {creatingNote ? (
-                <>
-                  <span style={styles.loadingSpinner}></span> Creating...
-                </>
-              ) : (
-                'Create Note'
-              )}
+            <label>Subject</label>
+            <select name="subject" value={newNote.subject} onChange={(e) => setNewNote({ ...newNote, subject: e.target.value })}>
+              {subjects.map(subject => (
+                <option key={subject} value={subject}>{subject}</option>
+              ))}
+            </select>
+
+            <label>Title</label>
+            <input type="text" name="title" value={newNote.title} onChange={e => setNewNote({ ...newNote, title: e.target.value })} required />
+
+            <label>Answer</label>
+            <input type="text" name="answer" value={newNote.answer} onChange={e => setNewNote({ ...newNote, answer: e.target.value })} required />
+
+            <label>Explanation (optional)</label>
+            <textarea name="explanation" value={newNote.explanation} onChange={e => setNewNote({ ...newNote, explanation: e.target.value })} />
+
+            <button type="submit" disabled={!isFormValid || formLoading}>
+              {formLoading ? 'Creating...' : 'Add Note'}
             </button>
           </form>
         </div>
-
-        {loading ? (
-          <div style={{ textAlign: 'center', padding: '3rem 0' }}>
-            <div style={{ ...styles.loadingSpinner, width: '48px', height: '48px', margin: '0 auto' }}></div>
-            <p style={{ marginTop: '1rem', color: '#4b5563' }}>Loading notes...</p>
-          </div>
-        ) : notes.length === 0 ? (
-          <div style={styles.emptyState}>
-            <h3 style={{ marginBottom: '0.5rem' }}>No notes found</h3>
-            <p>Be the first to create a note for this subject!</p>
-          </div>
-        ) : (
-          <div>
-            {notes.map((note) => (
-              <div key={note.id} style={styles.noteCard}>
-                <h3 style={styles.noteTitle}>{note.title}</h3>
-                <div style={{ marginBottom: '0.5rem' }}>
-                  <span style={{ fontWeight: '500', color: '#374151' }}>Answer: </span>
-                  <span style={{ color: '#111827' }}>{note.answer}</span>
-                </div>
-                {note.explanation && (
-                  <div style={styles.explanationBox}>
-                    <h4 style={{ fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>Explanation:</h4>
-                    <p style={{ color: '#111827', whiteSpace: 'pre-wrap' }}>{note.explanation}</p>
-                  </div>
-                )}
-                <div style={{ marginTop: '1rem', fontSize: '0.875rem', color: '#6b7280' }}>
-                  Created: {new Date(note.createdAt).toLocaleString()}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {totalPages > 1 && (
-          <div style={styles.pagination}>
-            <button
-              onClick={() => setPage(p => Math.max(1, p - 1))}
-              disabled={page === 1}
-              style={{
-                ...styles.pageButton,
-                borderTopLeftRadius: '8px',
-                borderBottomLeftRadius: '8px'
-              }}
-            >
-              Previous
-            </button>
-            <span style={styles.pageInfo}>
-              Page {page} of {totalPages}
-            </span>
-            <button
-              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-              style={{
-                ...styles.pageButton,
-                borderTopRightRadius: '8px',
-                borderBottomRightRadius: '8px'
-              }}
-            >
-              Next
-            </button>
-          </div>
-        )}
       </div>
-    </>
+
+      {/* Inline Styles */}
+      <style>{`
+        .container {
+          max-width: 1200px;
+          margin: auto;
+          padding: 2rem;
+          font-family: 'Segoe UI', sans-serif;
+        }
+
+        .title {
+          text-align: center;
+          font-size: 2rem;
+          margin-bottom: 1.5rem;
+        }
+
+        .tabs {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.5rem;
+          margin-bottom: 1.5rem;
+          justify-content: center;
+        }
+
+        .tab {
+          padding: 0.4rem 1rem;
+          background: #e5e7eb;
+          border-radius: 9999px;
+          cursor: pointer;
+          border: none;
+        }
+
+        .tab.active {
+          background: #2563eb;
+          color: white;
+        }
+
+        .error { color: red; }
+        .success { color: green; }
+
+        .grid {
+          display: flex;
+          flex-direction: column-reverse;
+          gap: 2rem;
+        }
+
+        @media(min-width: 768px) {
+          .grid {
+            flex-direction: row;
+          }
+        }
+
+        .notes-section {
+          flex: 2;
+        }
+
+        .form-card {
+          flex: 1;
+          background: #f9fafb;
+          padding: 1rem;
+          border-radius: 0.5rem;
+          box-shadow: 0 0 6px rgba(0,0,0,0.1);
+        }
+
+        form {
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+        }
+
+        input, textarea, select {
+          padding: 0.5rem;
+          border-radius: 0.375rem;
+          border: 1px solid #d1d5db;
+          font-size: 1rem;
+        }
+
+        button {
+          background: #2563eb;
+          color: white;
+          padding: 0.5rem;
+          border: none;
+          border-radius: 0.375rem;
+          cursor: pointer;
+        }
+
+        .note-card {
+          background: white;
+          padding: 1rem;
+          border-radius: 0.5rem;
+          margin-bottom: 1rem;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .show-btn {
+          margin-top: 0.5rem;
+          font-size: 0.9rem;
+          background: none;
+          color: #2563eb;
+          border: none;
+          cursor: pointer;
+        }
+
+        .explanation {
+          margin-top: 0.75rem;
+          background: #f3f4f6;
+          padding: 0.75rem;
+          border-radius: 0.25rem;
+        }
+
+        .no-explanation {
+          color: #6b7280;
+          font-style: italic;
+        }
+
+        .date {
+          margin-top: 0.5rem;
+          font-size: 0.75rem;
+          color: #6b7280;
+        }
+
+        .pagination {
+          display: flex;
+          gap: 0.5rem;
+          flex-wrap: wrap;
+          margin-top: 1rem;
+        }
+
+        .page-btn {
+          padding: 0.3rem 0.7rem;
+          border: none;
+          border-radius: 0.375rem;
+          background: #e5e7eb;
+          cursor: pointer;
+        }
+
+        .page-btn.current {
+          background: #2563eb;
+          color: white;
+        }
+      `}</style>
+    </div>
   );
 };
 

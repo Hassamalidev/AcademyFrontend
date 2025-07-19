@@ -1,8 +1,8 @@
+// src/api/api.js
 import axios from "axios";
 
 const BASE_URL = "https://localhost:7110/api";
 
-// 🔹 For test questions
 export const getRandomQuestions = async (count = 30, categoryId = 1) => {
   try {
     const res = await axios.get(`${BASE_URL}/question/test`, {
@@ -31,13 +31,20 @@ export const getNotes = async (subject, page = 1, pageSize = 5) => {
   }
 };
 
+export const createNote = async (noteData) => {
+  try {
+    const response = await axios.post(`${BASE_URL}/notes`, noteData);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const submitQuestion = async (questionData) => {
   try {
     const response = await axios.post(`${BASE_URL}/questions`, questionData);
-    console.log('Email to admin would be sent here with question details:', questionData);
     return response.data;
-  }
-   catch (error) {
+  } catch (error) {
     throw error;
   }
 };

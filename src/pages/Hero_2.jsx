@@ -1,19 +1,23 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaPlay, FaMedal, FaUserGraduate, FaBook, FaHistory } from "react-icons/fa";
-import cardImage from "../assets/Hero_2.png"
+import cardImage from "../assets/Hero_2.png";
+
 function Hero_2() {
   const [isHovered, setIsHovered] = useState(false);
   const navigate = useNavigate();
+
   const stats = [
     { value: "9+", label: "Years of Experience", icon: <FaHistory /> },
     { value: "100+", label: "ISSB Recommendations", icon: <FaMedal /> },
     { value: "15+", label: "Premium Courses", icon: <FaBook /> },
     { value: "120+", label: "Video Lectures", icon: <FaPlay /> }
   ];
-    const handleExploreClick = () => {
+
+  const handleExploreClick = () => {
     navigate('./courses'); 
   };
+
   return (
     <div style={{
       display: "flex",
@@ -41,8 +45,7 @@ function Hero_2() {
         opacity: 0.1,
         zIndex: 0
       }} />
-      
-      
+
       <div style={{
         position: "absolute",
         top: "20%",
@@ -66,7 +69,6 @@ function Hero_2() {
         zIndex: 0
       }} />
 
-    
       <div style={{
         flex: "1",
         minWidth: "300px",
@@ -89,7 +91,7 @@ function Hero_2() {
         }}>
           About Us
         </span>
-        
+
         <h1 style={{
           fontSize: "2.8rem",
           fontWeight: "700",
@@ -99,7 +101,7 @@ function Hero_2() {
         }}>
           Welcome to the Future of Online Learning
         </h1>
-        
+
         <p style={{
           fontSize: "1.1rem",
           lineHeight: "1.7",
@@ -108,7 +110,7 @@ function Hero_2() {
         }}>
           With 9+ years of expertise, we are dedicated to providing top-notch Pak Army preparation courses that are accessible anytime, anywhere. Our courses are crafted to equip you with the knowledge and skills needed to achieve excellence and secure your future in the armed forces.
         </p>
-        
+
         <ul style={{ 
           listStyle: "none", 
           paddingLeft: "0", 
@@ -150,11 +152,7 @@ function Hero_2() {
               padding: "15px",
               borderRadius: "8px",
               background: "#f9f9f9",
-              transition: "all 0.3s ease",
-              ":hover": {
-                transform: "translateY(-5px)",
-                boxShadow: "0 10px 20px rgba(0,0,0,0.1)"
-              }
+              transition: "all 0.3s ease"
             }}>
               <div style={{
                 color: "#4e1faf",
@@ -213,12 +211,11 @@ function Hero_2() {
             transition: "all 0.3s ease"
           }}
         />
-        
+
         <div style={{
           position: "absolute",
           bottom: "30px",
           left: "50%",
-          transform: "translateX(-50%)",
           background: "#fff",
           padding: "12px 25px",
           borderRadius: "6px",
@@ -268,7 +265,6 @@ function Hero_2() {
                 fontWeight: "bold",
                 color: "#4e1faf",
                 boxShadow: "0 5px 15px rgba(0,0,0,0.2)",
-                transform: "translateY(0)",
                 animation: "float 3s ease-in-out infinite",
                 cursor: "pointer"
               }}

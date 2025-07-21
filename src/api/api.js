@@ -1,7 +1,13 @@
-// src/api/api.js
 import axios from "axios";
 
 const BASE_URL = "https://localhost:7110/api";
+
+const api = axios.create({
+  baseURL: BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
 export const getRandomQuestions = async (count = 30, categoryId = 1) => {
   try {
@@ -15,27 +21,31 @@ export const getRandomQuestions = async (count = 30, categoryId = 1) => {
   }
 };
 
-export const getNotes = async (subject, page = 1, pageSize = 5) => {
+export const getNotes = async (subject, page = 1, pageSize = 6) => {
   try {
-    const res = await axios.get(`${BASE_URL}/notes/${subject}`, {
+    const res = await api.get(`/notes/${subject}`, {
       params: { page, pageSize }
     });
+    
+    // Assuming your backend returns data in this structure:
     return {
-      notes: res.data,
-      totalPages: Math.ceil(res.headers['x-total-count'] / pageSize),
-      currentPage: page
+      items: res.data.items || res.data, // Handle both formats
+      pageNumber: page,
+      pageSize: pageSize,
+      totalCount: res.data.totalCount || res.headers['x-total-count'] || 0,
+      totalPages: res.data.totalPages || Math.ceil((res.data.totalCount || res.headers['x-total-count'] || 0) / pageSize)
     };
   } catch (err) {
     console.error("Error fetching notes:", err);
-    return { notes: [], totalPages: 1, currentPage: 1 };
+    throw err; // Re-throw to handle in component
   }
 };
-
 export const createNote = async (noteData) => {
   try {
-    const response = await axios.post(`${BASE_URL}/notes`, noteData);
+    const response = await api.post("/notes", noteData);
     return response.data;
   } catch (error) {
+    console.error("Error creating note:", error);
     throw error;
   }
 };

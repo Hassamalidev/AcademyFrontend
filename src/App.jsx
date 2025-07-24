@@ -8,6 +8,7 @@ import Contact from "./pages/Contact";
 import Demos from "./pages/Demo";
 import News from "./pages/News";
 import Login from "./pages/Login";
+import LearnMore from "./pages/LearnMore";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
           <Route path="/demos" element={<Demos />} />
           <Route path="/news" element={<News />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/learn-more" element={<LearnMore />} />
         </Routes>
       </div>
     </Router>

@@ -151,7 +151,7 @@ const News = () => {
             url: item.link || '#',
             urlToImage: item.enclosure?.link || 
                        item.thumbnail || 
-                       `https://via.placeholder.com/400x300/${CATEGORY_CONFIG[category]?.color.replace('#', '')}/ffffff?text=${category.toUpperCase()}+News`,
+                       `https://source.unsplash.com/random/800x600/?${category},news&${Math.random()}`,
             publishedAt: item.pubDate || new Date().toISOString(),
             source: { 
               name: data.feed?.title || 'News Source' 
@@ -242,7 +242,7 @@ const News = () => {
           title: "Global Markets Show Mixed Results Amid Economic Uncertainty",
           description: "International markets display varied performance as investors navigate ongoing economic challenges and policy changes worldwide.",
           url: "#",
-          urlToImage: "https://via.placeholder.com/400x300/3b82f6/ffffff?text=World+News",
+          urlToImage: "https://source.unsplash.com/random/800x600/?world,news",
           publishedAt: new Date().toISOString(),
           source: { name: "Global News Network" },
           content: "Economic indicators continue to show mixed signals across major markets...",
@@ -255,7 +255,7 @@ const News = () => {
           title: "Pakistan's Economic Reforms Show Positive Trends",
           description: "Recent policy implementations demonstrate encouraging results in key economic sectors across the country.",
           url: "#",
-          urlToImage: "https://via.placeholder.com/400x300/059669/ffffff?text=Pakistan+News",
+          urlToImage: "https://source.unsplash.com/random/800x600/?pakistan,news",
           publishedAt: new Date().toISOString(),
           source: { name: "Pakistan Today" },
           content: "Government initiatives in agriculture and technology sectors are yielding promising outcomes...",
@@ -268,7 +268,7 @@ const News = () => {
           title: "Pakistan Armed Forces Conduct Joint Training Exercise",
           description: "Military units from all three services participate in comprehensive training operations to enhance readiness and coordination capabilities.",
           url: "#",
-          urlToImage: "https://via.placeholder.com/400x300/dc2626/ffffff?text=Defense+News",
+          urlToImage: "https://source.unsplash.com/random/800x600/?military,army",
           publishedAt: new Date().toISOString(),
           source: { name: "Defense Journal" },
           content: "The exercise involved multiple branches working together in simulated scenarios to test operational readiness...",
@@ -281,7 +281,7 @@ const News = () => {
           title: "AI Revolution Continues with New Breakthrough",
           description: "Latest developments in artificial intelligence are reshaping industries and creating new opportunities for innovation.",
           url: "#",
-          urlToImage: "https://via.placeholder.com/400x300/7c3aed/ffffff?text=Tech+News",
+          urlToImage: "https://source.unsplash.com/random/800x600/?technology,ai",
           publishedAt: new Date().toISOString(),
           source: { name: "Tech Times" },
           content: "Researchers have unveiled new AI capabilities that could transform various sectors...",
@@ -294,7 +294,7 @@ const News = () => {
           title: "Stock Markets React to Federal Reserve Decision",
           description: "Financial markets show volatility following the latest monetary policy announcement from central banks.",
           url: "#",
-          urlToImage: "https://via.placeholder.com/400x300/ea580c/ffffff?text=Business+News",
+          urlToImage: "https://source.unsplash.com/random/800x600/?business,finance",
           publishedAt: new Date().toISOString(),
           source: { name: "Business Weekly" },
           content: "Investors are analyzing the implications of the recent policy changes on market dynamics...",
@@ -307,7 +307,7 @@ const News = () => {
           title: "International Cricket Championship Updates",
           description: "Latest results from ongoing international cricket matches capturing global attention.",
           url: "#",
-          urlToImage: "https://via.placeholder.com/400x300/16a34a/ffffff?text=Sports+News",
+          urlToImage: "https://source.unsplash.com/random/800x600/?sports,cricket",
           publishedAt: new Date().toISOString(),
           source: { name: "Sports Central" },
           content: "Teams are competing in high-stakes matches with significant implications for rankings...",
@@ -320,7 +320,7 @@ const News = () => {
           title: "Medical Research Breakthrough in Treatment",
           description: "Scientists announce promising results from clinical trials for innovative treatment methods.",
           url: "#",
-          urlToImage: "https://via.placeholder.com/400x300/e11d48/ffffff?text=Health+News",
+          urlToImage: "https://source.unsplash.com/random/800x600/?health,medical",
           publishedAt: new Date().toISOString(),
           source: { name: "Medical Journal" },
           content: "The research findings could lead to new therapeutic approaches for patients...",
@@ -386,33 +386,40 @@ const News = () => {
     return () => document.removeEventListener('keydown', handleKeyPress);
   }, [selectedArticle]);
 
+  // Improved styles with better spacing and visual hierarchy
   const styles = {
     container: {
       maxWidth: '1400px',
       margin: '0 auto',
       padding: '20px',
-      fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
+      fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
       backgroundColor: '#f8fafc',
       minHeight: '100vh'
     },
     header: {
       textAlign: 'center',
       marginBottom: '40px',
-      padding: '30px 0'
+      padding: '30px 0',
+      background: 'linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%)',
+      borderRadius: '20px',
+      boxShadow: '0 4px 20px rgba(0,0,0,0.05)'
     },
     title: {
-      fontSize: '3rem',
-      fontWeight: '700',
+      fontSize: '2.5rem',
+      fontWeight: '800',
       margin: '0 0 15px 0',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      background: 'linear-gradient(135deg, #4e1faf 0%, #7c3aed 100%)',
       WebkitBackgroundClip: 'text',
       WebkitTextFillColor: 'transparent',
       backgroundClip: 'text'
     },
     subtitle: {
-      fontSize: '1.2rem',
+      fontSize: '1.1rem',
       color: '#64748b',
-      margin: '0 0 10px 0'
+      margin: '0 0 10px 0',
+      maxWidth: '700px',
+      marginLeft: 'auto',
+      marginRight: 'auto'
     },
     lastUpdated: {
       fontSize: '0.9rem',
@@ -437,7 +444,7 @@ const News = () => {
       border: 'none',
       borderRadius: '12px',
       cursor: 'pointer',
-      fontSize: '1rem',
+      fontSize: '0.95rem',
       fontWeight: '600',
       transition: 'all 0.3s ease',
       backgroundColor: 'transparent',
@@ -449,33 +456,40 @@ const News = () => {
     activeTab: {
       color: 'white',
       transform: 'translateY(-2px)',
-      boxShadow: '0 8px 25px rgba(0,0,0,0.3)'
+      boxShadow: '0 8px 25px rgba(0,0,0,0.2)'
     },
     newsGrid: {
       display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
       gap: '30px',
       margin: '0'
     },
     newsCard: {
       backgroundColor: '#ffffff',
-      borderRadius: '20px',
+      borderRadius: '16px',
       overflow: 'hidden',
-      boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
-      transition: 'all 0.4s ease',
+      boxShadow: '0 5px 15px rgba(0,0,0,0.1)',
+      transition: 'all 0.3s ease',
       cursor: 'pointer',
-      border: '1px solid #e2e8f0'
+      border: '1px solid #e2e8f0',
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100%'
     },
     newsImage: {
       width: '100%',
-      height: '220px',
-      objectFit: 'cover'
+      height: '200px',
+      objectFit: 'cover',
+      borderBottom: '1px solid #e2e8f0'
     },
     newsContent: {
-      padding: '25px'
+      padding: '20px',
+      flex: '1',
+      display: 'flex',
+      flexDirection: 'column'
     },
     newsTitle: {
-      fontSize: '1.4rem',
+      fontSize: '1.25rem',
       fontWeight: '700',
       color: '#1e293b',
       marginBottom: '12px',
@@ -487,29 +501,31 @@ const News = () => {
     },
     newsDescription: {
       color: '#64748b',
-      fontSize: '1rem',
+      fontSize: '0.95rem',
       lineHeight: '1.6',
       marginBottom: '20px',
       display: '-webkit-box',
       WebkitLineClamp: 3,
       WebkitBoxOrient: 'vertical',
-      overflow: 'hidden'
+      overflow: 'hidden',
+      flex: '1'
     },
     newsFooter: {
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
       paddingTop: '15px',
-      borderTop: '1px solid #e2e8f0'
+      borderTop: '1px solid #f1f5f9',
+      marginTop: 'auto'
     },
     newsSource: {
       fontWeight: '600',
       color: '#3b82f6',
-      fontSize: '0.9rem'
+      fontSize: '0.85rem'
     },
     newsDate: {
       color: '#94a3b8',
-      fontSize: '0.85rem'
+      fontSize: '0.8rem'
     },
     loading: {
       textAlign: 'center',
@@ -534,7 +550,7 @@ const News = () => {
       margin: '20px 0'
     },
     refreshButton: {
-      backgroundColor: '#3b82f6',
+      backgroundColor: '#4e1faf',
       color: 'white',
       border: 'none',
       padding: '12px 25px',
@@ -562,6 +578,7 @@ const News = () => {
       backgroundColor: 'white',
       borderRadius: '20px',
       maxWidth: '800px',
+      width: '100%',
       maxHeight: '90vh',
       overflow: 'auto',
       position: 'relative'
@@ -591,7 +608,7 @@ const News = () => {
       justifyContent: 'center'
     },
     modalBody: {
-      padding: '30px'
+      padding: '25px'
     },
     modalTitle: {
       fontSize: '1.8rem',
@@ -610,12 +627,12 @@ const News = () => {
     },
     modalText: {
       color: '#374151',
-      fontSize: '1.1rem',
+      fontSize: '1rem',
       lineHeight: '1.7',
       marginBottom: '25px'
     },
     readMoreButton: {
-      backgroundColor: '#3b82f6',
+      backgroundColor: '#4e1faf',
       color: 'white',
       border: 'none',
       padding: '12px 25px',
@@ -624,13 +641,50 @@ const News = () => {
       fontSize: '1rem',
       fontWeight: '600',
       textDecoration: 'none',
-      display: 'inline-block'
+      display: 'inline-block',
+      transition: 'all 0.3s ease'
     },
     noNews: {
       textAlign: 'center',
       padding: '60px 20px',
       color: '#64748b',
-      fontSize: '1.2rem'
+      fontSize: '1.2rem',
+      backgroundColor: '#ffffff',
+      borderRadius: '15px',
+      boxShadow: '0 4px 20px rgba(0,0,0,0.05)'
+    },
+    statsContainer: {
+      textAlign: 'center',
+      marginTop: '30px',
+      padding: '20px',
+      backgroundColor: '#ffffff',
+      borderRadius: '15px',
+      boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+    },
+    statsTitle: {
+      margin: '0 0 15px 0',
+      color: '#1e293b',
+      fontSize: '1.3rem'
+    },
+    statsGrid: {
+      display: 'flex',
+      justifyContent: 'center',
+      gap: '15px',
+      flexWrap: 'wrap'
+    },
+    statItem: {
+      padding: '10px 15px',
+      backgroundColor: '#4e1faf',
+      color: 'white',
+      borderRadius: '10px',
+      fontSize: '0.9rem',
+      fontWeight: '600',
+      minWidth: '120px'
+    },
+    totalArticles: {
+      margin: '15px 0 0 0',
+      color: '#64748b',
+      fontSize: '0.9rem'
     }
   };
 
@@ -658,8 +712,8 @@ const News = () => {
           <button 
             style={styles.refreshButton}
             onClick={fetchAllNews}
-            onMouseEnter={(e) => e.target.style.backgroundColor = '#2563eb'}
-            onMouseLeave={(e) => e.target.style.backgroundColor = '#3b82f6'}
+            onMouseEnter={(e) => e.target.style.backgroundColor = '#3b82f6'}
+            onMouseLeave={(e) => e.target.style.backgroundColor = '#4e1faf'}
           >
             Try Again
           </button>
@@ -747,12 +801,12 @@ const News = () => {
               style={styles.newsCard}
               onClick={() => openArticleDetail(article)}
               onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-8px)';
-                e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.15)';
+                e.currentTarget.style.transform = 'translateY(-5px)';
+                e.currentTarget.style.boxShadow = '0 10px 25px rgba(0,0,0,0.15)';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.1)';
+                e.currentTarget.style.boxShadow = '0 5px 15px rgba(0,0,0,0.1)';
               }}
             >
               <img
@@ -760,8 +814,7 @@ const News = () => {
                 alt={article.title}
                 style={styles.newsImage}
                 onError={(e) => {
-                  const config = CATEGORY_CONFIG[activeTab];
-                  e.target.src = `https://via.placeholder.com/400x300/${config?.color.replace('#', '')}/ffffff?text=${config?.name.replace(/[^\w\s]/gi, '')}`;
+                  e.target.src = `https://source.unsplash.com/random/800x600/?${article.category},news`;
                 }}
               />
               <div style={styles.newsContent}>
@@ -794,8 +847,7 @@ const News = () => {
                 alt={selectedArticle.title}
                 style={styles.modalImage}
                 onError={(e) => {
-                  const config = CATEGORY_CONFIG[selectedArticle.category] || CATEGORY_CONFIG.world;
-                  e.target.src = `https://via.placeholder.com/800x300/${config.color.replace('#', '')}/ffffff?text=${config.name.replace(/[^\w\s]/gi, '')}`;
+                  e.target.src = `https://source.unsplash.com/random/800x600/?${selectedArticle.category},news`;
                 }}
               />
               <button
@@ -826,6 +878,8 @@ const News = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   style={styles.readMoreButton}
+                  onMouseEnter={(e) => e.target.style.backgroundColor = '#3b82f6'}
+                  onMouseLeave={(e) => e.target.style.backgroundColor = '#4e1faf'}
                 >
                   Read Full Article →
                 </a>
@@ -835,17 +889,24 @@ const News = () => {
         </div>
       )}
 
-      <div style={{ textAlign: 'center', marginTop: '50px', display: 'flex', gap: '15px', justifyContent: 'center', flexWrap: 'wrap' }}>
+      <div style={{ 
+        textAlign: 'center', 
+        marginTop: '40px',
+        display: 'flex',
+        gap: '15px',
+        justifyContent: 'center',
+        flexWrap: 'wrap'
+      }}>
         <button
           style={{
             ...styles.refreshButton,
-            fontSize: '1.1rem',
-            padding: '15px 35px'
+            fontSize: '1rem',
+            padding: '12px 25px'
           }}
           onClick={fetchAllNews}
           disabled={loading}
-          onMouseEnter={(e) => !loading && (e.target.style.backgroundColor = '#2563eb')}
-          onMouseLeave={(e) => !loading && (e.target.style.backgroundColor = '#3b82f6')}
+          onMouseEnter={(e) => !loading && (e.target.style.backgroundColor = '#3b82f6')}
+          onMouseLeave={(e) => !loading && (e.target.style.backgroundColor = '#4e1faf')}
         >
           {loading ? '🔄 Refreshing All...' : '🔄 Refresh All Categories'}
         </button>
@@ -853,59 +914,34 @@ const News = () => {
         <button
           style={{
             ...styles.refreshButton,
-            fontSize: '1.1rem',
-            padding: '15px 35px',
-            backgroundColor: CATEGORY_CONFIG[activeTab]?.color || '#3b82f6'
+            fontSize: '1rem',
+            padding: '12px 25px',
+            backgroundColor: CATEGORY_CONFIG[activeTab]?.color || '#4e1faf'
           }}
           onClick={() => fetchCategoryNews(activeTab)}
           disabled={categoryLoading[activeTab]}
-          onMouseEnter={(e) => !categoryLoading[activeTab] && (e.target.style.opacity = '0.8')}
+          onMouseEnter={(e) => !categoryLoading[activeTab] && (e.target.style.opacity = '0.9')}
           onMouseLeave={(e) => !categoryLoading[activeTab] && (e.target.style.opacity = '1')}
         >
           {categoryLoading[activeTab] ? '🔄 Refreshing...' : `🔄 Refresh ${CATEGORY_CONFIG[activeTab]?.name}`}
         </button>
       </div>
 
-      <div style={{
-        textAlign: 'center',
-        marginTop: '30px',
-        padding: '20px',
-        backgroundColor: '#ffffff',
-        borderRadius: '15px',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
-      }}>
-        <h3 style={{
-          margin: '0 0 15px 0',
-          color: '#1e293b',
-          fontSize: '1.3rem'
-        }}>
+      <div style={styles.statsContainer}>
+        <h3 style={styles.statsTitle}>
           📊 News Statistics
         </h3>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          gap: '20px',
-          flexWrap: 'wrap'
-        }}>
+        <div style={styles.statsGrid}>
           {Object.entries(CATEGORY_CONFIG).map(([key, config]) => (
             <div key={key} style={{
-              padding: '10px 15px',
-              backgroundColor: config.color,
-              color: 'white',
-              borderRadius: '10px',
-              fontSize: '0.9rem',
-              fontWeight: '600',
-              minWidth: '120px'
+              ...styles.statItem,
+              backgroundColor: config.color
             }}>
               {config.name.split(' ')[0]} {news[key]?.length || 0}
             </div>
           ))}
         </div>
-        <p style={{
-          margin: '15px 0 0 0',
-          color: '#64748b',
-          fontSize: '0.9rem'
-        }}>
+        <p style={styles.totalArticles}>
           Total Articles: {Object.values(news).reduce((sum, categoryNews) => sum + categoryNews.length, 0)}
         </p>
       </div>

@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
 import { 
   Award, 
   Users, 
@@ -11,6 +13,8 @@ import {
   ArrowRight 
 } from "lucide-react";
 
+// Inside the About component, add this at the beginning:
+
 // Image imports
 import aboutBackground from "../assets/about_us_background.jpg";
 import seniorTeacher from "../assets/senior_teacher.jpg";
@@ -22,6 +26,7 @@ const TeamMember = ({ member, index }) => {
   const [isHovered, setIsHovered] = useState(false);
   
   return (
+    
     <div 
       className="group relative"
       onMouseEnter={() => setIsHovered(true)}
@@ -151,7 +156,7 @@ const AnimatedCounter = ({ end, duration = 2000, suffix = "" }) => {
 
 const About = () => {
   const [activeFeature, setActiveFeature] = useState(0);
-
+ const navigate = useNavigate();
   const teamMembers = [
     {
       name: "Col. (Retd) Ali Khan",
@@ -457,7 +462,7 @@ const About = () => {
                   color: "#475569",
                   marginBottom: "24px"
                 }}>
-                  At ISSB SMART STUDY, we transform dreams into selections through scientifically-proven training methods, cultivating the leadership and confidence needed for success at ISSB and beyond.
+                  At Frontline Prep, we transform dreams into selections through scientifically-proven training methods, cultivating the leadership and confidence needed for success at ISSB and beyond.
                 </p>
                 
                 <div style={{
@@ -752,70 +757,76 @@ const About = () => {
                 color: "#64748b",
                 lineHeight: "1.7"
               }}>
-                Join thousands of successful candidates who transformed their dreams into reality with ISSB SMART STUDY
+                Join thousands of successful candidates who transformed their dreams into reality with Frontline
               </p>
-              
-              <div style={{
-                display: "flex",
-                gap: "16px",
-                justifyContent: "center",
-                flexWrap: "wrap"
-              }}>
-                <button style={{
-                  background: "linear-gradient(135deg, #4e1faf 0%, #7c3aed 100%)",
-                  color: "white",
-                  padding: "16px 32px",
-                  fontSize: "1.125rem",
-                  fontWeight: "600",
-                  border: "none",
-                  borderRadius: "16px",
-                  cursor: "pointer",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "12px",
-                  boxShadow: "0 8px 20px rgba(78, 31, 175, 0.3)",
-                  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                  position: "relative",
-                  overflow: "hidden"
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.transform = "translateY(-2px)";
-                  e.target.style.boxShadow = "0 12px 30px rgba(78, 31, 175, 0.4)";
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.transform = "translateY(0)";
-                  e.target.style.boxShadow = "0 8px 20px rgba(78, 31, 175, 0.3)";
-                }}>
-                  Enroll Now <ArrowRight size={20} />
-                </button>
-                
-                <button style={{
-                  backgroundColor: "transparent",
-                  color: "#4e1faf",
-                  padding: "16px 32px",
-                  fontSize: "1.125rem",
-                  fontWeight: "600",
-                  border: "2px solid #4e1faf",
-                  borderRadius: "16px",
-                  cursor: "pointer",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "12px",
-                  transition: "all 0.3s ease"
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.backgroundColor = "#4e1faf";
-                  e.target.style.color = "white";
-                  e.target.style.transform = "translateY(-2px)";
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.backgroundColor = "transparent";
-                  e.target.style.color = "#4e1faf";
-                  e.target.style.transform = "translateY(0)";
-                }}>
-                  Learn More <ChevronRight size={20} />
-                </button>
-              </div>
+             
+<div style={{
+  display: "flex",
+  gap: "16px",
+  justifyContent: "center",
+  flexWrap: "wrap"
+}}>
+  <button 
+    onClick={() => window.open("https://wa.me/923001234567", "_blank")}
+    style={{
+      background: "linear-gradient(135deg, #4e1faf 0%, #7c3aed 100%)",
+      color: "white",
+      padding: "16px 32px",
+      fontSize: "1.125rem",
+      fontWeight: "600",
+      border: "none",
+      borderRadius: "16px",
+      cursor: "pointer",
+      display: "inline-flex",
+      alignItems: "center",
+      gap: "12px",
+      boxShadow: "0 8px 20px rgba(78, 31, 175, 0.3)",
+      transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+      position: "relative",
+      overflow: "hidden"
+    }}
+    onMouseEnter={(e) => {
+      e.target.style.transform = "translateY(-2px)";
+      e.target.style.boxShadow = "0 12px 30px rgba(78, 31, 175, 0.4)";
+    }}
+    onMouseLeave={(e) => {
+      e.target.style.transform = "translateY(0)";
+      e.target.style.boxShadow = "0 8px 20px rgba(78, 31, 175, 0.3)";
+    }}
+  >
+    Enroll Now <ArrowRight size={20} />
+  </button>
+  
+  <button 
+    onClick={() => navigate("/learn-more")}
+    style={{
+      backgroundColor: "transparent",
+      color: "#4e1faf",
+      padding: "16px 32px",
+      fontSize: "1.125rem",
+      fontWeight: "600",
+      border: "2px solid #4e1faf",
+      borderRadius: "16px",
+      cursor: "pointer",
+      display: "inline-flex",
+      alignItems: "center",
+      gap: "12px",
+      transition: "all 0.3s ease"
+    }}
+    onMouseEnter={(e) => {
+      e.target.style.backgroundColor = "#4e1faf";
+      e.target.style.color = "white";
+      e.target.style.transform = "translateY(-2px)";
+    }}
+    onMouseLeave={(e) => {
+      e.target.style.backgroundColor = "transparent";
+      e.target.style.color = "#4e1faf";
+      e.target.style.transform = "translateY(0)";
+    }}
+  >
+    Learn More <ChevronRight size={20} />
+  </button>
+</div>
             </div>
           </div>
         </div>

@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-
 import { 
   Award, 
   Users, 
@@ -10,23 +9,21 @@ import {
   ChevronRight, 
   Play, 
   CheckCircle, 
-  ArrowRight 
+  ArrowRight,
+  Volume2,
+  VolumeX
 } from "lucide-react";
-
-// Inside the About component, add this at the beginning:
 
 // Image imports
 import aboutBackground from "../assets/about_us_background.jpg";
 import seniorTeacher from "../assets/senior_teacher.jpg";
 import psychTeacher from "../assets/virtual_trainer.jpg";
 import virtualTrainer from "../assets/logo-badge.jpg";
-import aboutUsHeroImage from "../assets/about_us_background.jpg"; // Make sure this path is correct
 
 const TeamMember = ({ member, index }) => {
   const [isHovered, setIsHovered] = useState(false);
   
   return (
-    
     <div 
       className="group relative"
       onMouseEnter={() => setIsHovered(true)}
@@ -156,7 +153,57 @@ const AnimatedCounter = ({ end, duration = 2000, suffix = "" }) => {
 
 const About = () => {
   const [activeFeature, setActiveFeature] = useState(0);
- const navigate = useNavigate();
+  const [isMuted, setIsMuted] = useState(true);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const videoRef = useRef(null);
+  const navigate = useNavigate();
+  
+  // Military training video (placeholder - replace with your actual video)
+  const videoSrc = "https://assets.mixkit.co/videos/preview/mixkit-soldiers-on-a-military-parade-1233-large.mp4";
+  
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handlePlay = () => setIsVideoPlaying(true);
+    const handlePause = () => setIsVideoPlaying(false);
+
+    video.addEventListener('play', handlePlay);
+    video.addEventListener('pause', handlePause);
+
+    // Attempt autoplay
+    const playPromise = video.play();
+    
+    if (playPromise !== undefined) {
+      playPromise.catch(error => {
+        console.log("Autoplay prevented:", error);
+        // Show fallback play button
+      });
+    }
+
+    return () => {
+      video.removeEventListener('play', handlePlay);
+      video.removeEventListener('pause', handlePause);
+    };
+  }, []);
+
+  const toggleMute = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = !isMuted;
+      setIsMuted(!isMuted);
+    }
+  };
+
+  const togglePlay = () => {
+    if (videoRef.current) {
+      if (isVideoPlaying) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play();
+      }
+    }
+  };
+
   const teamMembers = [
     {
       name: "Col. (Retd) Ali Khan",
@@ -246,6 +293,11 @@ const About = () => {
       0%, 100% { transform: translateY(0px); }
       50% { transform: translateY(-10px); }
     }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
   `;
 
   return (
@@ -256,16 +308,16 @@ const About = () => {
         margin: "0 auto",
         fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
         background: "linear-gradient(135deg, #f8fafc 0%, #ffffff 50%, #f1f5f9 100%)",
-        minHeight: "100vh"
+        minHeight: "100vh",
+        overflowX: "hidden"
       }}>
-     
+        {/* Hero Section */}
         <div style={{
           position: "relative",
           padding: "120px 24px 80px",
           textAlign: "center",
           overflow: "hidden"
         }}>
-        
           <div style={{
             position: "absolute",
             top: "0",
@@ -362,45 +414,91 @@ const About = () => {
               position: "relative",
               maxWidth: "800px",
               margin: "0 auto",
-              animation: "fadeInUp 1s ease-out 0.6s both"
+              animation: "fadeInUp 1s ease-out 0.6s both",
+              borderRadius: "24px",
+              overflow: "hidden",
+              boxShadow: "0 25px 50px rgba(0, 0, 0, 0.15)"
             }}>
-              <img 
-                src={aboutUsHeroImage}
-                alt="ISSB Candidates in Training"
+              <video
+                ref={videoRef}
+                src={videoSrc}
+                autoPlay
+                muted={isMuted}
+                loop
+                playsInline
+                poster="https://images.unsplash.com/photo-1540324155974-7523202daa3f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
                 style={{
                   width: "100%",
                   height: "400px",
                   objectFit: "cover",
-                  borderRadius: "24px",
-                  boxShadow: "0 25px 50px rgba(0, 0, 0, 0.15)",
-                  border: "1px solid rgba(255, 255, 255, 0.2)"
+                  display: "block"
                 }}
               />
               
-        
+              {/* Video overlay controls */}
               <div style={{
                 position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                width: "80px",
-                height: "80px",
-                backgroundColor: "rgba(78, 31, 175, 0.9)",
-                borderRadius: "50%",
+                bottom: 0,
+                left: 0,
+                right: 0,
+                padding: "16px",
+                background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)",
                 display: "flex",
+                justifyContent: "flex-end",
                 alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-                transition: "all 0.3s ease",
-                animation: "pulse 2s infinite"
+                gap: "12px"
               }}>
-                <Play size={32} color="white" style={{ marginLeft: "4px" }} />
+                {/* Play/Pause button (only shown if autoplay fails) */}
+                {!isVideoPlaying && (
+                  <button
+                    onClick={togglePlay}
+                    style={{
+                      width: "44px",
+                      height: "44px",
+                      backgroundColor: "rgba(78, 31, 175, 0.9)",
+                      borderRadius: "50%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      border: "none",
+                      cursor: "pointer",
+                      transition: "all 0.3s ease",
+                      animation: "pulse 2s infinite"
+                    }}
+                  >
+                    <Play size={20} color="white" />
+                  </button>
+                )}
+                
+                {/* Mute toggle button */}
+                <button
+                  onClick={toggleMute}
+                  style={{
+                    width: "44px",
+                    height: "44px",
+                    backgroundColor: "rgba(255, 255, 255, 0.2)",
+                    backdropFilter: "blur(5px)",
+                    borderRadius: "50%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    border: "none",
+                    cursor: "pointer",
+                    transition: "all 0.3s ease"
+                  }}
+                >
+                  {isMuted ? (
+                    <VolumeX size={20} color="white" />
+                  ) : (
+                    <Volume2 size={20} color="white" />
+                  )}
+                </button>
               </div>
             </div>
           </div>
         </div>
 
-     
+        {/* Mission & Features Section */}
         <div style={{
           padding: "80px 24px",
           backgroundColor: "rgba(255, 255, 255, 0.8)",
@@ -414,8 +512,6 @@ const About = () => {
             maxWidth: "1200px",
             margin: "0 auto"
           }}>
-            
-            
             <div style={{ animation: "slideInLeft 1s ease-out" }}>
               <div style={{
                 display: "inline-block",
@@ -444,9 +540,7 @@ const About = () => {
                 }}>Leaders</span>
               </h3>
               
-              <div style={{
-                space: "24px"
-              }}>
+              <div style={{ marginBottom: "24px" }}>
                 <p style={{
                   fontSize: "1.125rem",
                   lineHeight: "1.8",
@@ -487,7 +581,6 @@ const About = () => {
               </div>
             </div>
             
-         
             <div style={{ animation: "slideInRight 1s ease-out 0.2s both" }}>
               <div style={{
                 display: "flex",
@@ -562,7 +655,7 @@ const About = () => {
           </div>
         </div>
 
-   
+        {/* Team Section */}
         <div style={{
           padding: "80px 24px",
           backgroundColor: "rgba(248, 250, 252, 0.8)"
@@ -625,14 +718,13 @@ const About = () => {
           </div>
         </div>
 
-      
+        {/* Stats Section */}
         <div style={{
           background: "linear-gradient(135deg, #4e1faf 0%, #7c3aed 50%, #a855f7 100%)",
           padding: "80px 24px",
           position: "relative",
           overflow: "hidden"
         }}>
-       
           <div style={{
             position: "absolute",
             top: "-50%",
@@ -711,7 +803,7 @@ const About = () => {
           </div>
         </div>
 
-      
+        {/* CTA Section */}
         <div style={{
           padding: "80px 24px",
           backgroundColor: "rgba(255, 255, 255, 0.9)"
@@ -728,7 +820,6 @@ const About = () => {
             position: "relative",
             overflow: "hidden"
           }}>
-         
             <div style={{
               position: "absolute",
               top: "-50%",
@@ -760,73 +851,73 @@ const About = () => {
                 Join thousands of successful candidates who transformed their dreams into reality with Frontline
               </p>
              
-<div style={{
-  display: "flex",
-  gap: "16px",
-  justifyContent: "center",
-  flexWrap: "wrap"
-}}>
-  <button 
-    onClick={() => window.open("https://wa.me/923001234567", "_blank")}
-    style={{
-      background: "linear-gradient(135deg, #4e1faf 0%, #7c3aed 100%)",
-      color: "white",
-      padding: "16px 32px",
-      fontSize: "1.125rem",
-      fontWeight: "600",
-      border: "none",
-      borderRadius: "16px",
-      cursor: "pointer",
-      display: "inline-flex",
-      alignItems: "center",
-      gap: "12px",
-      boxShadow: "0 8px 20px rgba(78, 31, 175, 0.3)",
-      transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-      position: "relative",
-      overflow: "hidden"
-    }}
-    onMouseEnter={(e) => {
-      e.target.style.transform = "translateY(-2px)";
-      e.target.style.boxShadow = "0 12px 30px rgba(78, 31, 175, 0.4)";
-    }}
-    onMouseLeave={(e) => {
-      e.target.style.transform = "translateY(0)";
-      e.target.style.boxShadow = "0 8px 20px rgba(78, 31, 175, 0.3)";
-    }}
-  >
-    Enroll Now <ArrowRight size={20} />
-  </button>
-  
-  <button 
-    onClick={() => navigate("/learn-more")}
-    style={{
-      backgroundColor: "transparent",
-      color: "#4e1faf",
-      padding: "16px 32px",
-      fontSize: "1.125rem",
-      fontWeight: "600",
-      border: "2px solid #4e1faf",
-      borderRadius: "16px",
-      cursor: "pointer",
-      display: "inline-flex",
-      alignItems: "center",
-      gap: "12px",
-      transition: "all 0.3s ease"
-    }}
-    onMouseEnter={(e) => {
-      e.target.style.backgroundColor = "#4e1faf";
-      e.target.style.color = "white";
-      e.target.style.transform = "translateY(-2px)";
-    }}
-    onMouseLeave={(e) => {
-      e.target.style.backgroundColor = "transparent";
-      e.target.style.color = "#4e1faf";
-      e.target.style.transform = "translateY(0)";
-    }}
-  >
-    Learn More <ChevronRight size={20} />
-  </button>
-</div>
+              <div style={{
+                display: "flex",
+                gap: "16px",
+                justifyContent: "center",
+                flexWrap: "wrap"
+              }}>
+                <button 
+                  onClick={() => window.open("https://wa.me/923001234567", "_blank")}
+                  style={{
+                    background: "linear-gradient(135deg, #4e1faf 0%, #7c3aed 100%)",
+                    color: "white",
+                    padding: "16px 32px",
+                    fontSize: "1.125rem",
+                    fontWeight: "600",
+                    border: "none",
+                    borderRadius: "16px",
+                    cursor: "pointer",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "12px",
+                    boxShadow: "0 8px 20px rgba(78, 31, 175, 0.3)",
+                    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                    position: "relative",
+                    overflow: "hidden"
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.transform = "translateY(-2px)";
+                    e.target.style.boxShadow = "0 12px 30px rgba(78, 31, 175, 0.4)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.transform = "translateY(0)";
+                    e.target.style.boxShadow = "0 8px 20px rgba(78, 31, 175, 0.3)";
+                  }}
+                >
+                  Enroll Now <ArrowRight size={20} />
+                </button>
+                
+                <button 
+                  onClick={() => navigate("/learn-more")}
+                  style={{
+                    backgroundColor: "transparent",
+                    color: "#4e1faf",
+                    padding: "16px 32px",
+                    fontSize: "1.125rem",
+                    fontWeight: "600",
+                    border: "2px solid #4e1faf",
+                    borderRadius: "16px",
+                    cursor: "pointer",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "12px",
+                    transition: "all 0.3s ease"
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.backgroundColor = "#4e1faf";
+                    e.target.style.color = "white";
+                    e.target.style.transform = "translateY(-2px)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.backgroundColor = "transparent";
+                    e.target.style.color = "#4e1faf";
+                    e.target.style.transform = "translateY(0)";
+                  }}
+                >
+                  Learn More <ChevronRight size={20} />
+                </button>
+              </div>
             </div>
           </div>
         </div>

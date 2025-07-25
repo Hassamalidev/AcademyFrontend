@@ -57,4 +57,25 @@ export const submitQuestion = async (questionData) => {
   } catch (error) {
     throw error;
   }
+}
+  export const fetchCategories = async () => {
+  const response = await fetch(`${BASE_URL}/categories`);
+  return await response.json();
+};
+
+export const fetchSubjectsByCategory = async (categoryId) => {
+  const response = await fetch(`${BASE_URL}/categories/${categoryId}/subjects`);
+  return await response.json();
+};
+
+export const fetchRandomQuestions = async (categoryId, count = 10) => {
+  const response = await fetch(
+    `${BASE_URL}/questions/random?categoryId=${categoryId}&count=${count}`
+  );
+  return await response.json();
+};
+
+export const fetchQuestionsBySubject = async (subjectId) => {
+  const response = await fetch(`${BASE_URL}/questions?subjectId=${subjectId}`);
+  return await response.json();
 };

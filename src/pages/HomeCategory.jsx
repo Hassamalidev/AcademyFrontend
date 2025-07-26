@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaArrowRight } from 'react-icons/fa';
+
 import LCC from "../assets/LCC.jpg"
 import LongCourse from "../assets/Long_Course.jpg"
 import medicalCorp from "../assets/medical_corp.jpg"
@@ -64,7 +65,7 @@ function HomeCategory() {
   ];
 
   const handleExploreClick = () => {
-    navigate('./courses'); 
+    navigate('./category-selection'); 
   };
 
   return (

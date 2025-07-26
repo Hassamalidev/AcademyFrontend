@@ -27,7 +27,6 @@ export const getNotes = async (subject, page = 1, pageSize = 6) => {
       params: { page, pageSize }
     });
     
-    // Assuming your backend returns data in this structure:
     return {
       items: res.data.items || res.data, // Handle both formats
       pageNumber: page,
@@ -58,15 +57,18 @@ export const submitQuestion = async (questionData) => {
     throw error;
   }
 }
-  export const fetchCategories = async () => {
-  const response = await fetch(`${BASE_URL}/categories`);
+  export const fetchQuestionCategories = async () => {
+  const response = await fetch(`${BASE_URL}/questionscategories`);
   return await response.json();
 };
 
-export const fetchSubjectsByCategory = async (categoryId) => {
-  const response = await fetch(`${BASE_URL}/categories/${categoryId}/subjects`);
+
+export const getAllQuestionCategories = async () => {
+  const response = await fetch(`${BASE_URL}/questionscategories`);
+  if (!response.ok) throw new Error('Failed to fetch question categories');
   return await response.json();
 };
+
 
 export const fetchRandomQuestions = async (categoryId, count = 10) => {
   const response = await fetch(
@@ -74,8 +76,41 @@ export const fetchRandomQuestions = async (categoryId, count = 10) => {
   );
   return await response.json();
 };
-
+export const getAllCategories = async () => {
+  const response = await fetch('https://localhost:7110/api/QuestionCategory');
+  if (!response.ok) throw new Error('Failed to fetch categories');
+  return await response.json();
+};
 export const fetchQuestionsBySubject = async (subjectId) => {
   const response = await fetch(`${BASE_URL}/questions?subjectId=${subjectId}`);
   return await response.json();
+};
+
+export const fetchSubjectsByCategory = async (categoryId) => {
+  const response = await fetch(`${BASE_URL}/QuestionCategory/${categoryId}`);
+  return await response.json(); 
+};
+
+
+export const getQuestionsByCategory = async (categoryId) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/questions?categoryId=${categoryId}`);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    // If your backend returns just the questions array:
+    return {
+      questions: data,
+      category: { name: "Category Name" } // You might need to fetch this separately
+    };
+    
+    // If your backend returns a different structure, adjust accordingly
+  } catch (err) {
+    console.error("Error fetching questions:", err);
+    throw new Error("Failed to fetch questions");
+  }
 };

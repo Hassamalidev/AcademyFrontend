@@ -1,14 +1,15 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./Component/Navbar";
-
 import Home from "./pages/Home";
 import About from "./pages/About";
-import Courses from "./pages/TestPage";
+import TestPage from "./pages/TestPage";
 import Contact from "./pages/Contact";
 import Demos from "./pages/Demo";
 import News from "./pages/News";
 import Login from "./pages/Login";
 import LearnMore from "./pages/LearnMore";
+import CategorySelection from "./pages/CategorySelection";
+import Courses from "./pages/Courses";
 
 function App() {
   return (
@@ -16,14 +17,19 @@ function App() {
       <Navbar />
       <div style={{ padding: "2rem" }}>
         <Routes>
-          <Route path="/" element={<Home />} />
+           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/courses" element={<Courses />} />
+          {/* Add nested route under /courses */}
+          <Route path="/courses/category-selection" element={<CategorySelection />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/demos" element={<Demos />} />
           <Route path="/news" element={<News />} />
           <Route path="/login" element={<Login />} />
           <Route path="/learn-more" element={<LearnMore />} />
+          {/* Keep this if you also want the standalone route */}
+          <Route path="/category-selection" element={<CategorySelection />} />
+          <Route path="/test/:categoryId" element={<TestPage />} />
         </Routes>
       </div>
     </Router>

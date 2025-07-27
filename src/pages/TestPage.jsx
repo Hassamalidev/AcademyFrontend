@@ -9,13 +9,15 @@ function TestPage() {
   const [current, setCurrent] = useState(0);
   const [score, setScore] = useState(0);
   const [selected, setSelected] = useState(null);
-  const [timeLeft, setTimeLeft] = useState(300); // 5 minutes in seconds
+  const [timeLeft, setTimeLeft] = useState(0);
   const [showResult, setShowResult] = useState(false);
   const [answers, setAnswers] = useState([]);
   const [lastFeedback, setLastFeedback] = useState("");
   const [loading, setLoading] = useState(true);
   const [categoryName, setCategoryName] = useState("");
   const [error, setError] = useState(null);
+  const [testStarted, setTestStarted] = useState(false);
+  const [timerRunning, setTimerRunning] = useState(false);
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -24,6 +26,8 @@ function TestPage() {
         if (data.questions && data.category) {
           setQuestions(data.questions);
           setCategoryName(data.category.name);
+         
+          setTimeLeft(data.category.time ? parseInt(data.category.time) * 60 : 300);
         } else {
           throw new Error("Invalid data format");
         }
@@ -38,7 +42,7 @@ function TestPage() {
   }, [categoryId]);
 
   useEffect(() => {
-    if (questions.length === 0) return;
+    if (!timerRunning || !testStarted) return;
 
     const timer = setInterval(() => {
       setTimeLeft(prev => {
@@ -52,7 +56,12 @@ function TestPage() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [questions]);
+  }, [timerRunning, testStarted]);
+
+  const startTest = () => {
+    setTestStarted(true);
+    setTimerRunning(true);
+  };
 
   const handleNext = () => {
     if (selected) {
@@ -70,7 +79,7 @@ function TestPage() {
         },
       ]);
 
-      setLastFeedback(isCorrect ? "Correct!" : `Wrong! Correct Answer: ${q.correctOption.toUpperCase()}`);
+      setLastFeedback(isCorrect ? "Correct! ✅" : `Wrong! Correct Answer: ${q.correctOption.toUpperCase()}`);
       setSelected(null);
       if (current + 1 < questions.length) {
         setTimeout(() => {
@@ -78,23 +87,29 @@ function TestPage() {
           setLastFeedback("");
         }, 1500);
       } else {
-        setTimeout(() => setShowResult(true), 1500);
+        setTimeout(() => {
+          setShowResult(true);
+          setTimerRunning(false);
+        }, 1500);
       }
     }
   };
 
   const handleFinish = () => {
     setShowResult(true);
+    setTimerRunning(false);
   };
 
   const handleRestart = () => {
     setCurrent(0);
     setScore(0);
     setSelected(null);
-    setTimeLeft(300);
+    setTimeLeft(questions.length * 60); // Reset time based on question count
     setShowResult(false);
     setAnswers([]);
     setLastFeedback("");
+    setTestStarted(false);
+    setTimerRunning(false);
   };
 
   const handleReturnToCategories = () => {
@@ -110,17 +125,47 @@ function TestPage() {
   if (loading) {
     return (
       <div style={{ 
-        padding: "2rem", 
-        textAlign: "center",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        height: "100vh"
+        minHeight: "100vh",
+        backgroundColor: "#f8f9fa",
+        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
       }}>
-        <div>
-          <p>Loading questions for {categoryName || "this category"}...</p>
-          <div className="spinner"></div>
+        <div style={{
+          textAlign: "center",
+          padding: "2rem",
+          backgroundColor: "#fff",
+          borderRadius: "12px",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+          maxWidth: "500px",
+          width: "90%"
+        }}>
+          <div style={{
+            width: "50px",
+            height: "50px",
+            border: "4px solid #f3f3f3",
+            borderTop: "4px solid #4CAF50",
+            borderRadius: "50%",
+            margin: "0 auto 1rem",
+            animation: "spin 1s linear infinite"
+          }}></div>
+          <p style={{ 
+            color: "#333",
+            fontSize: "1rem",
+            fontWeight: "500"
+          }}>
+            Loading questions for {categoryName || "this category"}...
+          </p>
         </div>
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+          `
+        }} />
       </div>
     );
   }
@@ -128,189 +173,62 @@ function TestPage() {
   if (error) {
     return (
       <div style={{ 
-        padding: "2rem", 
-        textAlign: "center",
-        maxWidth: "600px",
-        margin: "0 auto"
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        minHeight: "100vh",
+        backgroundColor: "#f8f9fa",
+        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
       }}>
-        <h2 style={{ color: "#e53935" }}>Error Loading Test</h2>
-        <p>{error}</p>
-        <button
-          onClick={handleReturnToCategories}
-          style={{
-            marginTop: "1rem",
-            backgroundColor: "#1565C0",
-            color: "white",
-            padding: "0.6rem 1.5rem",
-            border: "none",
-            borderRadius: "5px",
-            cursor: "pointer",
-            fontWeight: "bold"
-          }}
-        >
-          Return to Categories
-        </button>
-      </div>
-    );
-  }
-
-  if (!questions.length && !loading) {
-    return (
-      <div style={{ 
-        padding: "2rem", 
-        textAlign: "center",
-        maxWidth: "600px",
-        margin: "0 auto"
-      }}>
-        <h2>No Questions Available</h2>
-        <p>There are no questions available for {categoryName || "this category"}.</p>
-        <button
-          onClick={handleReturnToCategories}
-          style={{
-            marginTop: "1rem",
-            backgroundColor: "#1565C0",
-            color: "white",
-            padding: "0.6rem 1.5rem",
-            border: "none",
-            borderRadius: "5px",
-            cursor: "pointer",
-            fontWeight: "bold"
-          }}
-        >
-          Return to Categories
-        </button>
-      </div>
-    );
-  }
-
-  const currentQuestion = questions[current];
-
-  if (showResult) {
-    const attempted = answers.length;
-    const percentage = attempted > 0 ? ((score / attempted) * 100).toFixed(2) : 0;
-    const wrongAnswers = answers.filter(a => !a.isCorrect);
-
-    return (
-      <div style={{ 
-        padding: "2rem", 
-        maxWidth: "800px", 
-        margin: "0 auto", 
-        backgroundColor: "#fff",
-        borderRadius: "10px",
-        boxShadow: "0 2px 10px rgba(0,0,0,0.1)"
-      }}>
-        <h2 style={{ 
-          textAlign: "center", 
-          color: "#1565C0",
-          marginBottom: "1rem"
-        }}>
-          Test Results: {categoryName}
-        </h2>
-        
-        <div style={{ 
-          display: "flex",
-          justifyContent: "space-between",
-          marginBottom: "1.5rem",
-          padding: "1rem",
-          backgroundColor: "#f5f5f5",
-          borderRadius: "8px"
-        }}>
-          <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: "0.9rem", color: "#616161" }}>Questions</div>
-            <div style={{ fontSize: "1.5rem", fontWeight: "bold" }}>{questions.length}</div>
-          </div>
-          <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: "0.9rem", color: "#616161" }}>Attempted</div>
-            <div style={{ fontSize: "1.5rem", fontWeight: "bold" }}>{attempted}</div>
-          </div>
-          <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: "0.9rem", color: "#616161" }}>Correct</div>
-            <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#388e3c" }}>{score}</div>
-          </div>
-          <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: "0.9rem", color: "#616161" }}>Score</div>
-            <div style={{ fontSize: "1.5rem", fontWeight: "bold" }}>{percentage}%</div>
-          </div>
-        </div>
-
-        {wrongAnswers.length === 0 ? (
-          <div style={{ 
-            textAlign: "center",
-            padding: "2rem",
-            backgroundColor: "#e8f5e9",
-            borderRadius: "8px",
-            marginBottom: "2rem"
-          }}>
-            <h3 style={{ color: "#388e3c" }}>Perfect Score! 🎉</h3>
-            <p>You answered all questions correctly!</p>
-          </div>
-        ) : (
-          <>
-            <h3 style={{ 
-              marginTop: "1rem", 
-              color: "#e53935",
-              paddingBottom: "0.5rem",
-              borderBottom: "1px solid #eee"
-            }}>
-              Review Incorrect Answers ({wrongAnswers.length})
-            </h3>
-            {wrongAnswers.map((a, i) => (
-              <div
-                key={i}
-                style={{
-                  border: "1px solid #ffcdd2",
-                  padding: "1rem",
-                  marginBottom: "1rem",
-                  borderRadius: "6px",
-                  backgroundColor: "#ffebee"
-                }}
-              >
-                <strong>Question {answers.findIndex(ans => ans.question === a.question) + 1}:</strong> {a.question}
-                <div style={{ marginTop: "0.5rem" }}>
-                  <span style={{ color: "#d32f2f", display: "inline-block", marginRight: "1rem" }}>
-                    <strong>Your Answer:</strong> {a.selected.toUpperCase()}
-                  </span>
-                  <span style={{ color: "#388e3c" }}>
-                    <strong>Correct Answer:</strong> {a.correct.toUpperCase()}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </>
-        )}
-
         <div style={{
-          display: "flex",
-          justifyContent: "center",
-          gap: "1rem",
-          marginTop: "2rem"
+          textAlign: "center",
+          padding: "2rem",
+          backgroundColor: "#fff",
+          borderRadius: "12px",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+          maxWidth: "500px",
+          width: "90%"
         }}>
-          <button
-            onClick={handleRestart}
-            style={{
-              backgroundColor: "#1565C0",
-              color: "white",
-              border: "none",
-              borderRadius: "5px",
-              padding: "0.8rem 1.5rem",
-              cursor: "pointer",
-              fontWeight: "bold",
-              fontSize: "1rem"
-            }}
-          >
-            Restart Test
-          </button>
+          <div style={{
+            width: "60px",
+            height: "60px",
+            backgroundColor: "#fee2e2",
+            borderRadius: "50%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            margin: "0 auto 1rem",
+            color: "#dc2626",
+            fontSize: "24px"
+          }}>
+            !
+          </div>
+          <h3 style={{ 
+            color: "#dc2626",
+            fontSize: "1.25rem",
+            marginBottom: "0.5rem"
+          }}>
+            Error Loading Test
+          </h3>
+          <p style={{ 
+            color: "#666",
+            marginBottom: "1.5rem",
+            lineHeight: "1.5"
+          }}>
+            {error}
+          </p>
           <button
             onClick={handleReturnToCategories}
             style={{
-              backgroundColor: "#e0e0e0",
-              color: "#424242",
+              backgroundColor: "#4CAF50",
+              color: "white",
               border: "none",
-              borderRadius: "5px",
+              borderRadius: "6px",
               padding: "0.8rem 1.5rem",
+              fontSize: "1rem",
+              fontWeight: "600",
               cursor: "pointer",
-              fontWeight: "bold",
-              fontSize: "1rem"
+              transition: "background-color 0.3s"
             }}
           >
             Return to Categories
@@ -320,157 +238,642 @@ function TestPage() {
     );
   }
 
-  return (
-    <div style={{ 
-      padding: "2rem", 
-      maxWidth: "800px", 
-      margin: "0 auto", 
-      fontFamily: "Arial, sans-serif"
-    }}>
+  if (!questions.length && !loading) {
+    return (
       <div style={{ 
-        display: "flex", 
-        justifyContent: "space-between", 
+        display: "flex",
+        justifyContent: "center",
         alignItems: "center",
-        marginBottom: "1.5rem",
-        paddingBottom: "1rem",
-        borderBottom: "1px solid #eee"
+        minHeight: "100vh",
+        backgroundColor: "#f8f9fa",
+        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
       }}>
-        <div>
-          <h2 style={{ 
-            fontSize: "1.2rem", 
-            color: "#1565C0",
-            margin: 0
+        <div style={{
+          textAlign: "center",
+          padding: "2rem",
+          backgroundColor: "#fff",
+          borderRadius: "12px",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+          maxWidth: "500px",
+          width: "90%"
+        }}>
+          <h3 style={{ 
+            color: "#2c3e50",
+            fontSize: "1.25rem",
+            marginBottom: "0.5rem"
           }}>
-            {categoryName}
-          </h2>
+            No Questions Available
+          </h3>
           <p style={{ 
-            fontSize: "0.9rem", 
-            color: "#616161",
-            margin: "0.25rem 0 0 0"
+            color: "#666",
+            marginBottom: "1.5rem",
+            lineHeight: "1.5"
           }}>
-            Question {current + 1} of {questions.length}
+            There are no questions available for {categoryName || "this category"}.
           </p>
-        </div>
-        
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <div style={{ 
-            backgroundColor: "#e3f2fd",
-            padding: "0.5rem 1rem",
-            borderRadius: "20px",
-            fontWeight: "bold",
-            color: "#0d47a1"
-          }}>
-            Time: {formatTime(timeLeft)}
-          </div>
           <button
-            onClick={handleFinish}
+            onClick={handleReturnToCategories}
             style={{
-              backgroundColor: "#e53935",
+              backgroundColor: "#4CAF50",
               color: "white",
               border: "none",
-              borderRadius: "5px",
-              padding: "0.5rem 1rem",
+              borderRadius: "6px",
+              padding: "0.8rem 1.5rem",
+              fontSize: "1rem",
+              fontWeight: "600",
               cursor: "pointer",
-              fontWeight: "bold",
-              fontSize: "0.9rem"
+              transition: "background-color 0.3s"
             }}
           >
-            Finish Test
+            Return to Categories
           </button>
         </div>
       </div>
+    );
+  }
 
-      <div
-        style={{
-          border: "1px solid #e0e0e0",
-          padding: "2rem",
-          borderRadius: "10px",
+  if (showResult) {
+    const attempted = answers.length;
+    const percentage = attempted > 0 ? ((score / attempted) * 100).toFixed(2) : 0;
+    const wrongAnswers = answers.filter(a => !a.isCorrect);
+
+    return (
+      <div style={{ 
+        minHeight: "100vh",
+        backgroundColor: "#f8f9fa",
+        padding: "2rem 1rem",
+        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+      }}>
+        <div style={{ 
+          maxWidth: "800px", 
+          margin: "0 auto", 
           backgroundColor: "#fff",
-          boxShadow: "0 2px 6px rgba(0,0,0,0.05)"
-        }}
-      >
-        <h2 style={{ 
-          fontSize: "1.4rem", 
-          fontWeight: "bold", 
-          color: "#0d47a1",
-          marginBottom: "1.5rem"
+          borderRadius: "16px",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+          padding: "2.5rem",
+          position: "relative",
+          overflow: "hidden"
         }}>
-          {currentQuestion.questionText}
-        </h2>
+          {/* Decorative elements */}
+          <div style={{
+            position: "absolute",
+            top: "-50px",
+            right: "-50px",
+            width: "200px",
+            height: "200px",
+            backgroundColor: "rgba(76, 175, 80, 0.1)",
+            borderRadius: "50%"
+          }}></div>
+          <div style={{
+            position: "absolute",
+            bottom: "-30px",
+            left: "-30px",
+            width: "100px",
+            height: "100px",
+            backgroundColor: "rgba(76, 175, 80, 0.05)",
+            borderRadius: "50%"
+          }}></div>
+          
+          <h2 style={{ 
+            textAlign: "center", 
+            color: "#2c3e50",
+            fontSize: "2rem",
+            marginBottom: "1.5rem",
+            position: "relative"
+          }}>
+            Test Results: {categoryName}
+          </h2>
+          
+          <div style={{ 
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+            gap: "1rem",
+            marginBottom: "2rem",
+            padding: "1.5rem",
+            backgroundColor: "#f5f7fa",
+            borderRadius: "12px",
+            border: "1px solid #e0e6ed"
+          }}>
+            <div style={{ 
+              textAlign: "center",
+              padding: "1rem",
+              backgroundColor: "#fff",
+              borderRadius: "8px",
+              boxShadow: "0 2px 6px rgba(0,0,0,0.05)"
+            }}>
+              <div style={{ fontSize: "0.9rem", color: "#7f8c8d", marginBottom: "0.5rem" }}>Questions</div>
+              <div style={{ fontSize: "1.8rem", fontWeight: "bold", color: "#2c3e50" }}>{questions.length}</div>
+            </div>
+            <div style={{ 
+              textAlign: "center",
+              padding: "1rem",
+              backgroundColor: "#fff",
+              borderRadius: "8px",
+              boxShadow: "0 2px 6px rgba(0,0,0,0.05)"
+            }}>
+              <div style={{ fontSize: "0.9rem", color: "#7f8c8d", marginBottom: "0.5rem" }}>Attempted</div>
+              <div style={{ fontSize: "1.8rem", fontWeight: "bold", color: "#2c3e50" }}>{attempted}</div>
+            </div>
+            <div style={{ 
+              textAlign: "center",
+              padding: "1rem",
+              backgroundColor: "#fff",
+              borderRadius: "8px",
+              boxShadow: "0 2px 6px rgba(0,0,0,0.05)"
+            }}>
+              <div style={{ fontSize: "0.9rem", color: "#7f8c8d", marginBottom: "0.5rem" }}>Correct</div>
+              <div style={{ fontSize: "1.8rem", fontWeight: "bold", color: "#27ae60" }}>{score}</div>
+            </div>
+            <div style={{ 
+              textAlign: "center",
+              padding: "1rem",
+              backgroundColor: "#fff",
+              borderRadius: "8px",
+              boxShadow: "0 2px 6px rgba(0,0,0,0.05)"
+            }}>
+              <div style={{ fontSize: "0.9rem", color: "#7f8c8d", marginBottom: "0.5rem" }}>Score</div>
+              <div style={{ fontSize: "1.8rem", fontWeight: "bold", color: "#2c3e50" }}>{percentage}%</div>
+            </div>
+          </div>
 
-        <div style={{ marginTop: "1.2rem" }}>
-          {["A", "B", "C", "D"].map((opt) => (
-            <label
-              key={opt}
+          {wrongAnswers.length === 0 ? (
+            <div style={{ 
+              textAlign: "center",
+              padding: "2rem",
+              backgroundColor: "#e8f5e9",
+              borderRadius: "12px",
+              marginBottom: "2rem",
+              border: "1px solid #c8e6c9"
+            }}>
+              <h3 style={{ color: "#27ae60", fontSize: "1.5rem", marginBottom: "0.5rem" }}>Perfect Score! 🎉</h3>
+              <p style={{ color: "#2ecc71", fontSize: "1.1rem" }}>You answered all questions correctly!</p>
+            </div>
+          ) : (
+            <>
+              <h3 style={{ 
+                marginTop: "1rem", 
+                color: "#e74c3c",
+                fontSize: "1.3rem",
+                paddingBottom: "0.8rem",
+                borderBottom: "1px solid #f1f1f1"
+              }}>
+                Review Incorrect Answers ({wrongAnswers.length})
+              </h3>
+              {wrongAnswers.map((a, i) => (
+                <div
+                  key={i}
+                  style={{
+                    border: "1px solid #ffcdd2",
+                    padding: "1.5rem",
+                    marginBottom: "1.2rem",
+                    borderRadius: "10px",
+                    backgroundColor: "#ffebee",
+                    position: "relative"
+                  }}
+                >
+                  <div style={{
+                    position: "absolute",
+                    top: "10px",
+                    right: "10px",
+                    backgroundColor: "#e74c3c",
+                    color: "white",
+                    borderRadius: "4px",
+                    padding: "0.2rem 0.5rem",
+                    fontSize: "0.8rem"
+                  }}>
+                    Question {answers.findIndex(ans => ans.question === a.question) + 1}
+                  </div>
+                  <p style={{ 
+                    color: "#2c3e50",
+                    fontWeight: "500",
+                    marginBottom: "1rem"
+                  }}>
+                    {a.question}
+                  </p>
+                  <div style={{ 
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: "1rem"
+                  }}>
+                    <div style={{
+                      padding: "0.8rem 1rem",
+                      backgroundColor: "#ffebee",
+                      borderRadius: "8px",
+                      border: "1px solid #ef9a9a",
+                      flex: "1",
+                      minWidth: "200px"
+                    }}>
+                      <div style={{ 
+                        fontSize: "0.8rem",
+                        color: "#e74c3c",
+                        marginBottom: "0.3rem"
+                      }}>
+                        Your Answer
+                      </div>
+                      <div style={{ 
+                        fontWeight: "bold",
+                        color: "#c0392b"
+                      }}>
+                        {a.selected.toUpperCase()}
+                      </div>
+                    </div>
+                    <div style={{
+                      padding: "0.8rem 1rem",
+                      backgroundColor: "#e8f5e9",
+                      borderRadius: "8px",
+                      border: "1px solid #a5d6a7",
+                      flex: "1",
+                      minWidth: "200px"
+                    }}>
+                      <div style={{ 
+                        fontSize: "0.8rem",
+                        color: "#27ae60",
+                        marginBottom: "0.3rem"
+                      }}>
+                        Correct Answer
+                      </div>
+                      <div style={{ 
+                        fontWeight: "bold",
+                        color: "#27ae60"
+                      }}>
+                        {a.correct.toUpperCase()}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
+
+          <div style={{
+            display: "flex",
+            justifyContent: "center",
+            gap: "1.5rem",
+            marginTop: "3rem",
+            flexWrap: "wrap"
+          }}>
+            <button
+              onClick={handleRestart}
               style={{
-                display: "block",
-                margin: "0.8rem 0",
-                padding: "0.8rem 1.2rem",
-                backgroundColor: selected === opt ? "#e3f2fd" : "#f5f5f5",
-                border: selected === opt ? "2px solid #1565C0" : "1px solid #e0e0e0",
+                backgroundColor: "#4CAF50",
+                color: "white",
+                border: "none",
                 borderRadius: "8px",
+                padding: "1rem 2rem",
                 cursor: "pointer",
-                transition: "all 0.2s ease"
+                fontWeight: "600",
+                fontSize: "1rem",
+                transition: "all 0.3s",
+                minWidth: "200px",
+                ":hover": {
+                  backgroundColor: "#3e8e41",
+                  transform: "translateY(-2px)",
+                  boxShadow: "0 4px 8px rgba(0,0,0,0.1)"
+                }
               }}
             >
-              <input
-                type="radio"
-                name="option"
-                value={opt}
-                checked={selected === opt}
-                onChange={() => setSelected(opt)}
-                style={{ 
-                  marginRight: "0.8rem",
-                  transform: "scale(1.2)"
-                }}
-              />
-              <span style={{ fontWeight: selected === opt ? "bold" : "normal" }}>
-                {currentQuestion[`option${opt}`]}
-              </span>
-            </label>
-          ))}
+              Restart Test
+            </button>
+            <button
+              onClick={handleReturnToCategories}
+              style={{
+                backgroundColor: "#f5f5f5",
+                color: "#2c3e50",
+                border: "none",
+                borderRadius: "8px",
+                padding: "1rem 2rem",
+                cursor: "pointer",
+                fontWeight: "600",
+                fontSize: "1rem",
+                transition: "all 0.3s",
+                minWidth: "200px",
+                ":hover": {
+                  backgroundColor: "#e0e0e0",
+                  transform: "translateY(-2px)",
+                  boxShadow: "0 4px 8px rgba(0,0,0,0.1)"
+                }
+              }}
+            >
+              Return to Categories
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!testStarted) {
+    return (
+      <div style={{ 
+        minHeight: "100vh",
+        backgroundColor: "#f8f9fa",
+        padding: "2rem 1rem",
+        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center"
+      }}>
+        <div style={{ 
+          maxWidth: "600px", 
+          margin: "0 auto", 
+          backgroundColor: "#fff",
+          borderRadius: "16px",
+          boxShadow: "0 8px 30px rgba(0,0,0,0.1)",
+          padding: "3rem",
+          textAlign: "center",
+          position: "relative",
+          overflow: "hidden"
+        }}>
+          {/* Decorative elements */}
+          <div style={{
+            position: "absolute",
+            top: "-100px",
+            right: "-100px",
+            width: "300px",
+            height: "300px",
+            backgroundColor: "rgba(76, 175, 80, 0.1)",
+            borderRadius: "50%"
+          }}></div>
+          <div style={{
+            position: "absolute",
+            bottom: "-50px",
+            left: "-50px",
+            width: "200px",
+            height: "200px",
+            backgroundColor: "rgba(76, 175, 80, 0.05)",
+            borderRadius: "50%"
+          }}></div>
+          
+          <h2 style={{ 
+            color: "#2c3e50",
+            fontSize: "2rem",
+            marginBottom: "1rem",
+            position: "relative"
+          }}>
+            {categoryName} Challenge
+          </h2>
+          
+          <div style={{ 
+            backgroundColor: "#f5f7fa",
+            borderRadius: "12px",
+            padding: "1.5rem",
+            margin: "2rem 0",
+            border: "1px solid #e0e6ed",
+            position: "relative"
+          }}>
+            <div style={{
+              display: "flex",
+              justifyContent: "space-between",
+              marginBottom: "1rem"
+            }}>
+              <div style={{ textAlign: "left" }}>
+                <div style={{ fontSize: "0.9rem", color: "#7f8c8d" }}>Questions</div>
+                <div style={{ fontSize: "1.2rem", fontWeight: "bold" }}>{questions.length}</div>
+              </div>
+              <div style={{ textAlign: "left" }}>
+                <div style={{ fontSize: "0.9rem", color: "#7f8c8d" }}>Time</div>
+                <div style={{ fontSize: "1.2rem", fontWeight: "bold" }}>{formatTime(timeLeft)}</div>
+              </div>
+            </div>
+            <p style={{ 
+              color: "#7f8c8d",
+              fontSize: "0.95rem",
+              lineHeight: "1.6"
+            }}>
+              This test contains {questions.length} questions to be completed in {Math.floor(timeLeft / 60)} minutes.
+              Answer carefully as you can't go back to previous questions.
+            </p>
+          </div>
+          
+          <button
+            onClick={startTest}
+            style={{
+              backgroundColor: "#4CAF50",
+              color: "white",
+              border: "none",
+              borderRadius: "8px",
+              padding: "1rem 2.5rem",
+              fontSize: "1.1rem",
+              fontWeight: "600",
+              cursor: "pointer",
+              transition: "all 0.3s",
+              boxShadow: "0 4px 12px rgba(76, 175, 80, 0.3)",
+              ":hover": {
+                backgroundColor: "#3e8e41",
+                transform: "translateY(-2px)",
+                boxShadow: "0 6px 16px rgba(76, 175, 80, 0.4)"
+              }
+            }}
+          >
+            Start Test Now
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const currentQuestion = questions[current];
+
+  return (
+    <div style={{ 
+      minHeight: "100vh",
+      backgroundColor: "#f8f9fa",
+      padding: "2rem 1rem",
+      fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+    }}>
+      <div style={{ 
+        maxWidth: "800px", 
+        margin: "0 auto", 
+        backgroundColor: "#fff",
+        borderRadius: "16px",
+        boxShadow: "0 8px 30px rgba(0,0,0,0.1)",
+        overflow: "hidden"
+      }}>
+        {/* Header with progress and timer */}
+        <div style={{ 
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "1.5rem 2rem",
+          backgroundColor: "#2c3e50",
+          color: "white"
+        }}>
+          <div>
+            <h2 style={{ 
+              fontSize: "1.2rem", 
+              margin: 0,
+              fontWeight: "500"
+            }}>
+              {categoryName}
+            </h2>
+            <p style={{ 
+              fontSize: "0.9rem", 
+              margin: "0.25rem 0 0 0",
+              opacity: 0.8
+            }}>
+              Question {current + 1} of {questions.length}
+            </p>
+          </div>
+          
+          <div style={{ 
+            display: "flex",
+            alignItems: "center",
+            gap: "1.5rem"
+          }}>
+            <div style={{ 
+              backgroundColor: "rgba(255,255,255,0.2)",
+              padding: "0.5rem 1rem",
+              borderRadius: "20px",
+              fontWeight: "bold",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem"
+            }}>
+              <span>⏱️</span>
+              <span>{formatTime(timeLeft)}</span>
+            </div>
+            <button
+              onClick={handleFinish}
+              style={{
+                backgroundColor: "#e74c3c",
+                color: "white",
+                border: "none",
+                borderRadius: "20px",
+                padding: "0.5rem 1.5rem",
+                cursor: "pointer",
+                fontWeight: "500",
+                fontSize: "0.9rem",
+                transition: "all 0.3s",
+                ":hover": {
+                  backgroundColor: "#c0392b"
+                }
+              }}
+            >
+              Finish Test
+            </button>
+          </div>
         </div>
 
-        {lastFeedback && (
-          <div
-            style={{
-              marginTop: "1.5rem",
-              padding: "1rem",
-              fontWeight: "bold",
-              color: lastFeedback.startsWith("Correct") ? "#388e3c" : "#d32f2f",
-              fontSize: "1rem",
-              backgroundColor: lastFeedback.startsWith("Correct") ? "#e8f5e9" : "#ffebee",
-              borderRadius: "6px",
-              textAlign: "center"
-            }}
-          >
-            {lastFeedback}
-          </div>
-        )}
-
+        {/* Progress bar */}
         <div style={{
-          display: "flex",
-          justifyContent: "flex-end",
-          marginTop: "2rem"
+          width: "100%",
+          height: "4px",
+          backgroundColor: "#ecf0f1"
         }}>
-          <button
-            onClick={handleNext}
-            disabled={!selected}
-            style={{
-              backgroundColor: "#1565C0",
-              color: "white",
-              padding: "0.8rem 2rem",
-              border: "none",
-              borderRadius: "6px",
-              cursor: selected ? "pointer" : "not-allowed",
-              fontWeight: "bold",
-              fontSize: "1rem",
-              opacity: selected ? 1 : 0.7,
-              transition: "all 0.2s ease"
-            }}
-          >
-            {current + 1 < questions.length ? "Next Question →" : "Finish Test"}
-          </button>
+          <div style={{
+            width: `${((current + 1) / questions.length) * 100}%`,
+            height: "100%",
+            backgroundColor: "#4CAF50",
+            transition: "width 0.3s ease"
+          }}></div>
+        </div>
+
+        {/* Question content */}
+        <div style={{ padding: "2.5rem" }}>
+          <h2 style={{ 
+            fontSize: "1.5rem", 
+            fontWeight: "600", 
+            color: "#2c3e50",
+            marginBottom: "2rem",
+            lineHeight: "1.4"
+          }}>
+            {currentQuestion.questionText}
+          </h2>
+
+          <div style={{ marginTop: "1.5rem" }}>
+            {["A", "B", "C", "D"].map((opt) => (
+              <label
+                key={opt}
+                style={{
+                  display: "block",
+                  margin: "1rem 0",
+                  padding: "1.2rem 1.5rem",
+                  backgroundColor: selected === opt ? "#e8f5e9" : "#f5f7fa",
+                  border: selected === opt ? "2px solid #4CAF50" : "1px solid #e0e6ed",
+                  borderRadius: "10px",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                  ":hover": {
+                    backgroundColor: selected === opt ? "#e8f5e9" : "#ebf0f5"
+                  }
+                }}
+              >
+                <input
+                  type="radio"
+                  name="option"
+                  value={opt}
+                  checked={selected === opt}
+                  onChange={() => setSelected(opt)}
+                  style={{ 
+                    marginRight: "1rem",
+                    transform: "scale(1.3)",
+                    accentColor: "#4CAF50"
+                  }}
+                />
+                <span style={{ 
+                  fontWeight: selected === opt ? "600" : "500",
+                  color: selected === opt ? "#2c3e50" : "#2c3e50"
+                }}>
+                  {currentQuestion[`option${opt}`]}
+                </span>
+              </label>
+            ))}
+          </div>
+
+          {lastFeedback && (
+            <div
+              style={{
+                marginTop: "1.5rem",
+                padding: "1.2rem",
+                fontWeight: "bold",
+                color: lastFeedback.startsWith("Correct") ? "#27ae60" : "#e74c3c",
+                fontSize: "1rem",
+                backgroundColor: lastFeedback.startsWith("Correct") ? "#e8f5e9" : "#ffebee",
+                borderRadius: "8px",
+                textAlign: "center",
+                border: lastFeedback.startsWith("Correct") ? "1px solid #a5d6a7" : "1px solid #ef9a9a"
+              }}
+            >
+              {lastFeedback}
+            </div>
+          )}
+
+          <div style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            marginTop: "2.5rem"
+          }}>
+            <button
+              onClick={handleNext}
+              disabled={!selected}
+              style={{
+                backgroundColor: !selected ? "#bdc3c7" : "#4CAF50",
+                color: "white",
+                padding: "1rem 3rem",
+                border: "none",
+                borderRadius: "8px",
+                cursor: selected ? "pointer" : "not-allowed",
+                fontWeight: "600",
+                fontSize: "1rem",
+                transition: "all 0.3s",
+                display: "flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                ":hover": {
+                  backgroundColor: selected ? "#3e8e41" : "#bdc3c7",
+                  transform: selected ? "translateY(-2px)" : "none",
+                  boxShadow: selected ? "0 4px 12px rgba(76, 175, 80, 0.3)" : "none"
+                }
+              }}
+            >
+              <span>{current + 1 < questions.length ? "Next Question" : "Finish Test"}</span>
+              <span style={{ 
+                transition: "transform 0.3s",
+                transform: selected ? "translateX(3px)" : "none",
+                fontSize: "1.2rem"
+              }}>→</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>

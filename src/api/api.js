@@ -28,7 +28,7 @@ export const getNotes = async (subject, page = 1, pageSize = 6) => {
     });
     
     return {
-      items: res.data.items || res.data, // Handle both formats
+      items: res.data.items || res.data,
       pageNumber: page,
       pageSize: pageSize,
       totalCount: res.data.totalCount || res.headers['x-total-count'] || 0,
@@ -36,7 +36,7 @@ export const getNotes = async (subject, page = 1, pageSize = 6) => {
     };
   } catch (err) {
     console.error("Error fetching notes:", err);
-    throw err; // Re-throw to handle in component
+    throw err;
   }
 };
 export const createNote = async (noteData) => {
@@ -56,7 +56,8 @@ export const submitQuestion = async (questionData) => {
   } catch (error) {
     throw error;
   }
-}
+};
+
   export const fetchQuestionCategories = async () => {
   const response = await fetch(`${BASE_URL}/questionscategories`);
   return await response.json();
@@ -94,21 +95,18 @@ export const fetchSubjectsByCategory = async (categoryId) => {
 
 export const getQuestionsByCategory = async (categoryId) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/questions?categoryId=${categoryId}`);
+    const response = await fetch(`${BASE_URL}/Question/byCategory/${categoryId}`);
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
+
     const data = await response.json();
-    
-    // If your backend returns just the questions array:
+
     return {
-      questions: data,
-      category: { name: "Category Name" } // You might need to fetch this separately
+      questions: data, // assuming your API returns an array of questions
+      category: { name: "Category Name" } // replace with actual name if API returns it
     };
-    
-    // If your backend returns a different structure, adjust accordingly
   } catch (err) {
     console.error("Error fetching questions:", err);
     throw new Error("Failed to fetch questions");

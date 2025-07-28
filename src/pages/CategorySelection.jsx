@@ -128,7 +128,6 @@ function ErrorScreen({ message }) {
   );
 }
 
-// --- Styles ---
 const styles = {
   wrapper: {
     minHeight: "100vh",

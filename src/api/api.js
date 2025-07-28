@@ -98,17 +98,23 @@ export const getQuestionsByCategory = async (categoryId) => {
     const response = await fetch(`${BASE_URL}/Question/byCategory/${categoryId}`);
     
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      // More specific error message
+      const errorData = await response.json().catch(() => null);
+      throw new Error(errorData?.message || `Failed to fetch questions for category ${categoryId}`);
     }
 
     const data = await response.json();
 
+    if (!data || !Array.isArray(data)) {
+      throw new Error("Invalid data format received from server");
+    }
+
     return {
-      questions: data, // assuming your API returns an array of questions
-      category: { name: "Category Name" } // replace with actual name if API returns it
+      questions: data, 
+      category: { name: "Category Name" }  // This should come from the API
     };
   } catch (err) {
-    console.error("Error fetching questions:", err);
-    throw new Error("Failed to fetch questions");
+    console.error(`Error fetching questions for category ${categoryId}:`, err);
+    throw new Error(`Failed to fetch questions: ${err.message}`);
   }
 };

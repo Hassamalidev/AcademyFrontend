@@ -5,20 +5,12 @@ import {
   FaInstagram, 
   FaYoutube,
   FaRocket,
-  FaEnvelope,
-  FaPhone,
-  FaGraduationCap,
-  FaUsers,
-  FaTrophy,
-  FaArrowRight,
-  FaStar
+  FaArrowRight
 } from 'react-icons/fa';
 
 const Footer = () => {
   const [hoveredSocial, setHoveredSocial] = useState(null);
   const [hoveredLink, setHoveredLink] = useState(null);
-  const [email, setEmail] = useState('');
-  const [newsletterHover, setNewsletterHover] = useState(false);
 
   // Animated background particles
   const BackgroundParticles = () => (
@@ -71,10 +63,6 @@ const Footer = () => {
             0%, 100% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.3); }
             50% { box-shadow: 0 0 30px rgba(16, 185, 129, 0.6), 0 0 40px rgba(16, 185, 129, 0.3); }
           }
-          @keyframes shimmer {
-            0% { background-position: -200% center; }
-            100% { background-position: 200% center; }
-          }
         `}
       </style>
     </div>
@@ -84,7 +72,7 @@ const Footer = () => {
     position: 'relative',
     background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)',
     color: '#e2e8f0',
-    padding: '80px 20px 20px',
+    padding: '60px 20px 20px',
     fontFamily: "'Inter', 'Segoe UI', sans-serif",
     overflow: 'hidden',
   };
@@ -99,32 +87,39 @@ const Footer = () => {
   const topSectionStyle = {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-    gap: '50px',
-    marginBottom: '60px',
+    gap: '40px',
+    marginBottom: '40px',
   };
 
   const brandSectionStyle = {
-    gridColumn: 'span 2',
-    maxWidth: '600px',
+    gridColumn: '1 / -1',
+    maxWidth: '100%',
+    '@media (min-width: 768px)': {
+      gridColumn: 'span 2',
+      maxWidth: '600px',
+    },
   };
 
   const logoStyle = {
     display: 'flex',
     alignItems: 'center',
     gap: '12px',
-    marginBottom: '24px',
-    fontSize: '28px',
+    marginBottom: '20px',
+    fontSize: '24px',
     fontWeight: '700',
     background: 'linear-gradient(135deg, #10b981 0%, #34d399 100%)',
     WebkitBackgroundClip: 'text',
     WebkitTextFillColor: 'transparent',
     backgroundClip: 'text',
+    '@media (min-width: 768px)': {
+      fontSize: '28px',
+    },
   };
 
   const logoIconStyle = {
-    width: '40px',
-    height: '40px',
-    borderRadius: '12px',
+    width: '36px',
+    height: '36px',
+    borderRadius: '10px',
     background: 'linear-gradient(135deg, #10b981, #059669)',
     display: 'flex',
     alignItems: 'center',
@@ -132,52 +127,81 @@ const Footer = () => {
     color: 'white',
     boxShadow: '0 8px 25px rgba(16, 185, 129, 0.4)',
     animation: 'pulse-glow 4s ease-in-out infinite',
+    '@media (min-width: 768px)': {
+      width: '40px',
+      height: '40px',
+      borderRadius: '12px',
+    },
   };
 
   const descriptionStyle = {
-    fontSize: '16px',
-    lineHeight: '1.7',
+    fontSize: '15px',
+    lineHeight: '1.6',
     color: '#cbd5e1',
-    marginBottom: '30px',
+    marginBottom: '25px',
+    '@media (min-width: 768px)': {
+      fontSize: '16px',
+      lineHeight: '1.7',
+      marginBottom: '30px',
+    },
   };
 
   const statsContainerStyle = {
     display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)',
-    gap: '20px',
-    marginBottom: '30px',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
+    gap: '15px',
+    marginBottom: '25px',
+    '@media (min-width: 480px)': {
+      gridTemplateColumns: 'repeat(3, 1fr)',
+      gap: '20px',
+      marginBottom: '30px',
+    },
   };
 
   const statStyle = {
     textAlign: 'center',
-    padding: '20px',
+    padding: '15px',
     background: 'rgba(16, 185, 129, 0.1)',
-    borderRadius: '16px',
+    borderRadius: '12px',
     border: '1px solid rgba(16, 185, 129, 0.2)',
     backdropFilter: 'blur(10px)',
+    '@media (min-width: 480px)': {
+      padding: '20px',
+      borderRadius: '16px',
+    },
   };
 
   const statNumberStyle = {
-    fontSize: '24px',
+    fontSize: '20px',
     fontWeight: '700',
     color: '#10b981',
     display: 'block',
+    '@media (min-width: 768px)': {
+      fontSize: '24px',
+    },
   };
 
   const statLabelStyle = {
-    fontSize: '12px',
+    fontSize: '11px',
     color: '#94a3b8',
     textTransform: 'uppercase',
     letterSpacing: '1px',
+    '@media (min-width: 768px)': {
+      fontSize: '12px',
+    },
   };
 
   const sectionTitleStyle = {
-    fontSize: '20px',
+    fontSize: '18px',
     fontWeight: '600',
     color: '#f1f5f9',
-    marginBottom: '25px',
+    marginBottom: '20px',
     position: 'relative',
     paddingLeft: '15px',
+    '@media (min-width: 768px)': {
+      fontSize: '20px',
+      marginBottom: '25px',
+    },
   };
 
   const sectionTitleBeforeStyle = {
@@ -186,9 +210,12 @@ const Footer = () => {
     left: '0',
     top: '2px',
     width: '3px',
-    height: '20px',
+    height: '18px',
     background: 'linear-gradient(135deg, #10b981, #34d399)',
     borderRadius: '2px',
+    '@media (min-width: 768px)': {
+      height: '20px',
+    },
   };
 
   const linkListStyle = {
@@ -201,73 +228,32 @@ const Footer = () => {
     display: 'block',
     color: hoveredLink === name ? '#10b981' : '#cbd5e1',
     textDecoration: 'none',
-    padding: '10px 0',
-    fontSize: '15px',
+    padding: '8px 0',
+    fontSize: '14px',
     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
     borderBottom: '1px solid rgba(148, 163, 184, 0.1)',
     position: 'relative',
     paddingLeft: hoveredLink === name ? '15px' : '0',
+    '@media (min-width: 768px)': {
+      padding: '10px 0',
+      fontSize: '15px',
+    },
   });
-
-  const newsletterSectionStyle = {
-    background: 'rgba(16, 185, 129, 0.05)',
-    borderRadius: '20px',
-    padding: '30px',
-    border: '1px solid rgba(16, 185, 129, 0.2)',
-    backdropFilter: 'blur(10px)',
-  };
-
-  const inputContainerStyle = {
-    display: 'flex',
-    gap: '10px',
-    marginTop: '20px',
-    flexWrap: 'wrap',
-  };
-
-  const emailInputStyle = {
-    flex: '1',
-    minWidth: '200px',
-    padding: '12px 16px',
-    borderRadius: '12px',
-    border: '1px solid rgba(16, 185, 129, 0.3)',
-    background: 'rgba(15, 23, 42, 0.5)',
-    color: '#e2e8f0',
-    fontSize: '14px',
-    outline: 'none',
-    transition: 'all 0.3s ease',
-  };
-
-  const subscribeButtonStyle = {
-    padding: '12px 24px',
-    background: newsletterHover 
-      ? 'linear-gradient(135deg, #059669, #047857)' 
-      : 'linear-gradient(135deg, #10b981, #059669)',
-    color: 'white',
-    border: 'none',
-    borderRadius: '12px',
-    cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: '600',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    transform: newsletterHover ? 'translateY(-2px)' : 'translateY(0)',
-    boxShadow: newsletterHover 
-      ? '0 12px 35px rgba(16, 185, 129, 0.4)' 
-      : '0 8px 25px rgba(16, 185, 129, 0.3)',
-  };
 
   const socialContainerStyle = {
     display: 'flex',
-    gap: '15px',
+    gap: '12px',
     marginTop: '20px',
+    flexWrap: 'wrap',
+    '@media (min-width: 480px)': {
+      gap: '15px',
+    },
   };
 
   const getSocialStyle = (platform) => ({
-    width: '48px',
-    height: '48px',
-    borderRadius: '12px',
+    width: '42px',
+    height: '42px',
+    borderRadius: '10px',
     background: hoveredSocial === platform 
       ? 'linear-gradient(135deg, #10b981, #059669)' 
       : 'rgba(16, 185, 129, 0.1)',
@@ -282,34 +268,62 @@ const Footer = () => {
     boxShadow: hoveredSocial === platform 
       ? '0 12px 35px rgba(16, 185, 129, 0.4)' 
       : '0 4px 15px rgba(16, 185, 129, 0.2)',
+    '@media (min-width: 768px)': {
+      width: '48px',
+      height: '48px',
+      borderRadius: '12px',
+    },
   });
 
   const bottomSectionStyle = {
     borderTop: '1px solid rgba(148, 163, 184, 0.2)',
-    paddingTop: '30px',
+    paddingTop: '20px',
     display: 'flex',
+    flexDirection: 'column',
     justifyContent: 'space-between',
     alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: '20px',
+    gap: '15px',
+    textAlign: 'center',
+    '@media (min-width: 768px)': {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingTop: '30px',
+      gap: '20px',
+      textAlign: 'left',
+    },
   };
 
   const copyrightStyle = {
-    fontSize: '14px',
+    fontSize: '13px',
     color: '#94a3b8',
+    order: '2',
+    '@media (min-width: 768px)': {
+      fontSize: '14px',
+      order: '1',
+    },
   };
 
   const legalLinksStyle = {
     display: 'flex',
-    gap: '30px',
+    gap: '15px',
     flexWrap: 'wrap',
+    justifyContent: 'center',
+    order: '1',
+    '@media (min-width: 768px)': {
+      gap: '30px',
+      justifyContent: 'flex-end',
+      order: '2',
+    },
   };
 
   const legalLinkStyle = {
     color: '#cbd5e1',
     textDecoration: 'none',
-    fontSize: '14px',
+    fontSize: '13px',
     transition: 'color 0.3s ease',
+    '@media (min-width: 768px)': {
+      fontSize: '14px',
+    },
   };
 
   return (
@@ -322,7 +336,7 @@ const Footer = () => {
           <div style={brandSectionStyle}>
             <div style={logoStyle}>
               <div style={logoIconStyle}>
-                <FaRocket size={20} />
+                <FaRocket size={18} />
               </div>
               Frontline Prep
             </div>
@@ -363,7 +377,7 @@ const Footer = () => {
                   onMouseEnter={() => setHoveredSocial(platform)}
                   onMouseLeave={() => setHoveredSocial(null)}
                 >
-                  <Icon size={20} />
+                  <Icon size={18} />
                 </a>
               ))}
             </div>
@@ -395,71 +409,6 @@ const Footer = () => {
                 </li>
               ))}
             </ul>
-          </div>
-
-          {/* Programs */}
-          <div>
-            <h3 style={sectionTitleStyle}>
-              <div style={sectionTitleBeforeStyle}></div>
-              Our Programs
-            </h3>
-            <ul style={linkListStyle}>
-              {[
-                { label: 'Officer Training Prep', href: '/programs/officer' },
-                { label: 'Military Academy Guidance', href: '/programs/academy' },
-                { label: 'Career Development', href: '/programs/career' },
-                { label: 'Leadership Training', href: '/programs/leadership' },
-                { label: 'Specialized Courses', href: '/programs/specialized' },
-              ].map((program) => (
-                <li key={program.label}>
-                  <a
-                    href={program.href}
-                    style={getLinkStyle(program.label)}
-                    onMouseEnter={() => setHoveredLink(program.label)}
-                    onMouseLeave={() => setHoveredLink(null)}
-                  >
-                    {program.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Newsletter */}
-          <div style={newsletterSectionStyle}>
-            <h3 style={sectionTitleStyle}>
-              <div style={sectionTitleBeforeStyle}></div>
-              Stay Updated
-            </h3>
-            <p style={{ ...descriptionStyle, marginBottom: '15px', fontSize: '14px' }}>
-              Get the latest military prep tips, course updates, and success strategies delivered to your inbox.
-            </p>
-            
-            <div style={inputContainerStyle}>
-              <input
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                style={emailInputStyle}
-                onFocus={(e) => {
-                  e.target.style.borderColor = 'rgba(16, 185, 129, 0.5)';
-                  e.target.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = 'rgba(16, 185, 129, 0.3)';
-                  e.target.style.boxShadow = 'none';
-                }}
-              />
-              <button
-                style={subscribeButtonStyle}
-                onMouseEnter={() => setNewsletterHover(true)}
-                onMouseLeave={() => setNewsletterHover(false)}
-              >
-                Subscribe
-                <FaArrowRight size={14} />
-              </button>
-            </div>
           </div>
         </div>
 

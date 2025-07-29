@@ -283,7 +283,7 @@ function Navbar() {
     { to: "/about", label: "About Us" },
     { to: "/courses", label: "Our Courses" },
     { to: "/contact", label: "Contact Us" },
-    { to: "/demos", label: "Demos" },
+    { to: "/bmi", label: "BMI" },
     { to: "/news", label: "Latest News" },
   ];
 

@@ -4,7 +4,6 @@ const News = () => {
   const [news, setNews] = useState({
     world: [],
     pakistan: [],
-    pakArmy: [],
     technology: [],
     business: [],
     sports: [],
@@ -32,11 +31,6 @@ const News = () => {
         'https://www.geo.tv/rss/1/1',
         'https://www.thenews.com.pk/rss/1/1'
       ],
-      pakArmy: [
-        'https://www.dawn.com/feeds/newspaper/national',
-        'https://www.thenews.com.pk/rss/1/6', // Defense section
-        'https://www.radio.gov.pk/rss.xml'
-      ],
       technology: [
         'https://feeds.feedburner.com/TechCrunch',
         'https://rss.cnn.com/rss/edition_technology.rss',
@@ -60,47 +54,41 @@ const News = () => {
     }
   };
 
-  // Category configurations with specific filtering keywords
+  // Category configurations with subtle colors
   const CATEGORY_CONFIG = {
     world: {
       name: '🌍 World News',
-      color: '#3b82f6',
+      color: '#1f2937',
       keywords: ['international', 'global', 'world', 'countries', 'diplomatic'],
       excludeKeywords: ['pakistan', 'army', 'military', 'defense', 'tech', 'business', 'sport', 'health']
     },
     pakistan: {
       name: '🇵🇰 Pakistan',
-      color: '#059669',
+      color: '#065f46',
       keywords: ['pakistan', 'karachi', 'lahore', 'islamabad', 'sindh', 'punjab', 'balochistan', 'kpk'],
       excludeKeywords: ['army', 'military', 'defense', 'forces', 'tech', 'business', 'sport']
     },
-    pakArmy: {
-      name: '🛡️ Defense & Security',
-      color: '#dc2626',
-      keywords: ['army', 'military', 'defense', 'security', 'forces', 'navy', 'air force', 'ispr', 'coas'],
-      excludeKeywords: ['civilian', 'politics', 'economy']
-    },
     technology: {
       name: '💻 Technology',
-      color: '#7c3aed',
+      color: '#581c87',
       keywords: ['technology', 'tech', 'AI', 'software', 'digital', 'internet', 'computer', 'innovation'],
       excludeKeywords: ['army', 'military', 'sport', 'health']
     },
     business: {
       name: '💼 Business',
-      color: '#ea580c',
+      color: '#c2410c',
       keywords: ['business', 'economy', 'finance', 'market', 'trade', 'investment', 'stock', 'economic'],
       excludeKeywords: ['army', 'military', 'sport', 'health', 'tech']
     },
     sports: {
       name: '⚽ Sports',
-      color: '#16a34a',
+      color: '#166534',
       keywords: ['sport', 'football', 'cricket', 'tennis', 'match', 'game', 'player', 'tournament'],
       excludeKeywords: ['army', 'military', 'business', 'tech', 'health']
     },
     health: {
       name: '🏥 Health',
-      color: '#e11d48',
+      color: '#be123c',
       keywords: ['health', 'medical', 'hospital', 'doctor', 'disease', 'treatment', 'medicine', 'patient'],
       excludeKeywords: ['army', 'military', 'sport', 'business', 'tech']
     }
@@ -125,10 +113,6 @@ const News = () => {
       const hasExcludedKeywords = config.excludeKeywords.some(keyword => 
         content.includes(keyword.toLowerCase())
       );
-
-      if (category === 'pakArmy') {
-        return hasKeywords && !hasExcludedKeywords;
-      }
 
       return hasKeywords && !hasExcludedKeywords;
     });
@@ -262,19 +246,6 @@ const News = () => {
           category: category
         }
       ],
-      pakArmy: [
-        {
-          id: `fallback-army-1-${Date.now()}`,
-          title: "Pakistan Armed Forces Conduct Joint Training Exercise",
-          description: "Military units from all three services participate in comprehensive training operations to enhance readiness and coordination capabilities.",
-          url: "#",
-          urlToImage: "https://source.unsplash.com/random/800x600/?military,army",
-          publishedAt: new Date().toISOString(),
-          source: { name: "Defense Journal" },
-          content: "The exercise involved multiple branches working together in simulated scenarios to test operational readiness...",
-          category: category
-        }
-      ],
       technology: [
         {
           id: `fallback-tech-1-${Date.now()}`,
@@ -386,43 +357,65 @@ const News = () => {
     return () => document.removeEventListener('keydown', handleKeyPress);
   }, [selectedArticle]);
 
-  // Improved styles with better spacing and visual hierarchy
+  // Get trending topics from current news
+  const getTrendingTopics = () => {
+    const currentNews = news[activeTab] || [];
+    const keywords = [];
+    
+    currentNews.forEach(article => {
+      const words = article.title.toLowerCase().split(' ')
+        .filter(word => word.length > 3 && !['with', 'from', 'this', 'that', 'they', 'will', 'have', 'been', 'said', 'says', 'news', 'after', 'more', 'over', 'than'].includes(word));
+      keywords.push(...words.slice(0, 2));
+    });
+
+    const wordCount = {};
+    keywords.forEach(word => {
+      wordCount[word] = (wordCount[word] || 0) + 1;
+    });
+
+    return Object.entries(wordCount)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 5)
+      .map(([word]) => word.charAt(0).toUpperCase() + word.slice(1));
+  };
+
+  // Clean, professional styles with white background
   const styles = {
     container: {
       maxWidth: '1400px',
       margin: '0 auto',
       padding: '20px',
-      fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
-      backgroundColor: '#f8fafc',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+      backgroundColor: '#ffffff',
       minHeight: '100vh'
     },
     header: {
       textAlign: 'center',
-      marginBottom: '40px',
-      padding: '30px 0',
-      background: 'linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%)',
-      borderRadius: '20px',
-      boxShadow: '0 4px 20px rgba(0,0,0,0.05)'
+      marginBottom: '48px',
+      padding: '48px 32px',
+      backgroundColor: '#f8fafc',
+      borderRadius: '16px',
+      border: '1px solid #e2e8f0',
+      position: 'relative'
     },
     title: {
       fontSize: '2.5rem',
-      fontWeight: '800',
-      margin: '0 0 15px 0',
-      background: 'linear-gradient(135deg, #4e1faf 0%, #7c3aed 100%)',
-      WebkitBackgroundClip: 'text',
-      WebkitTextFillColor: 'transparent',
-      backgroundClip: 'text'
+      fontWeight: '700',
+      margin: '0 0 16px 0',
+      color: '#1e293b',
+      letterSpacing: '-0.025em'
     },
     subtitle: {
-      fontSize: '1.1rem',
+      fontSize: '1.125rem',
       color: '#64748b',
-      margin: '0 0 10px 0',
-      maxWidth: '700px',
+      margin: '0 0 12px 0',
+      maxWidth: '600px',
       marginLeft: 'auto',
-      marginRight: 'auto'
+      marginRight: 'auto',
+      lineHeight: '1.6'
     },
     lastUpdated: {
-      fontSize: '0.9rem',
+      fontSize: '0.875rem',
       color: '#94a3b8',
       fontStyle: 'italic'
     },
@@ -431,56 +424,58 @@ const News = () => {
       flexWrap: 'wrap',
       justifyContent: 'center',
       marginBottom: '40px',
-      backgroundColor: '#ffffff',
-      borderRadius: '15px',
-      padding: '12px',
-      boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-      maxWidth: '1200px',
+      backgroundColor: '#f8fafc',
+      borderRadius: '12px',
+      padding: '8px',
+      border: '1px solid #e2e8f0',
+      maxWidth: '1000px',
       margin: '0 auto 40px auto',
-      gap: '8px'
+      gap: '4px'
     },
     tab: {
       padding: '12px 20px',
       border: 'none',
-      borderRadius: '12px',
+      borderRadius: '8px',
       cursor: 'pointer',
-      fontSize: '0.95rem',
-      fontWeight: '600',
-      transition: 'all 0.3s ease',
+      fontSize: '0.875rem',
+      fontWeight: '500',
+      transition: 'all 0.2s ease',
       backgroundColor: 'transparent',
       color: '#64748b',
       textAlign: 'center',
-      minWidth: '140px',
+      minWidth: '120px',
       position: 'relative'
     },
     activeTab: {
-      color: 'white',
-      transform: 'translateY(-2px)',
-      boxShadow: '0 8px 25px rgba(0,0,0,0.2)'
+      backgroundColor: '#ffffff',
+      color: '#1e293b',
+      boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+      fontWeight: '600'
     },
     newsGrid: {
       display: 'grid',
       gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
-      gap: '30px',
+      gap: '24px',
       margin: '0'
     },
     newsCard: {
       backgroundColor: '#ffffff',
-      borderRadius: '16px',
+      borderRadius: '12px',
       overflow: 'hidden',
-      boxShadow: '0 5px 15px rgba(0,0,0,0.1)',
+      boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
       transition: 'all 0.3s ease',
       cursor: 'pointer',
       border: '1px solid #e2e8f0',
       display: 'flex',
       flexDirection: 'column',
-      height: '100%'
+      height: '100%',
+      position: 'relative'
     },
     newsImage: {
       width: '100%',
       height: '200px',
       objectFit: 'cover',
-      borderBottom: '1px solid #e2e8f0'
+      transition: 'transform 0.3s ease'
     },
     newsContent: {
       padding: '20px',
@@ -489,11 +484,11 @@ const News = () => {
       flexDirection: 'column'
     },
     newsTitle: {
-      fontSize: '1.25rem',
-      fontWeight: '700',
+      fontSize: '1.125rem',
+      fontWeight: '600',
       color: '#1e293b',
       marginBottom: '12px',
-      lineHeight: '1.4',
+      lineHeight: '1.5',
       display: '-webkit-box',
       WebkitLineClamp: 2,
       WebkitBoxOrient: 'vertical',
@@ -501,9 +496,9 @@ const News = () => {
     },
     newsDescription: {
       color: '#64748b',
-      fontSize: '0.95rem',
+      fontSize: '0.875rem',
       lineHeight: '1.6',
-      marginBottom: '20px',
+      marginBottom: '16px',
       display: '-webkit-box',
       WebkitLineClamp: 3,
       WebkitBoxOrient: 'vertical',
@@ -514,52 +509,61 @@ const News = () => {
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      paddingTop: '15px',
-      borderTop: '1px solid #f1f5f9',
+      paddingTop: '16px',
+      borderTop: '1px solid #e2e8f0',
       marginTop: 'auto'
     },
     newsSource: {
       fontWeight: '600',
       color: '#3b82f6',
-      fontSize: '0.85rem'
+      fontSize: '0.75rem',
+      textTransform: 'uppercase',
+      letterSpacing: '0.05em'
     },
     newsDate: {
       color: '#94a3b8',
-      fontSize: '0.8rem'
+      fontSize: '0.75rem'
     },
     loading: {
       textAlign: 'center',
       padding: '80px 20px',
-      fontSize: '1.3rem',
-      color: '#64748b'
+      color: '#64748b',
+      backgroundColor: '#f8fafc',
+      borderRadius: '12px',
+      border: '1px solid #e2e8f0',
+      fontSize: '1.125rem'
     },
     categoryLoading: {
       textAlign: 'center',
-      padding: '40px 20px',
-      fontSize: '1.1rem',
-      color: '#64748b'
+      padding: '60px 20px',
+      fontSize: '1rem',
+      color: '#64748b',
+      backgroundColor: '#f8fafc',
+      borderRadius: '12px',
+      border: '1px solid #e2e8f0'
     },
     error: {
       textAlign: 'center',
-      padding: '60px 20px',
-      color: '#ef4444',
-      fontSize: '1.2rem',
+      padding: '40px 20px',
+      color: '#dc2626',
+      fontSize: '1rem',
       backgroundColor: '#fef2f2',
       border: '1px solid #fecaca',
-      borderRadius: '15px',
+      borderRadius: '12px',
       margin: '20px 0'
     },
     refreshButton: {
-      backgroundColor: '#4e1faf',
+      backgroundColor: '#3b82f6',
       color: 'white',
       border: 'none',
-      padding: '12px 25px',
-      borderRadius: '10px',
+      padding: '12px 24px',
+      borderRadius: '8px',
       cursor: 'pointer',
-      marginTop: '15px',
-      fontSize: '1rem',
-      fontWeight: '600',
-      transition: 'all 0.3s ease'
+      fontSize: '0.875rem',
+      fontWeight: '500',
+      transition: 'all 0.2s ease',
+      boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+      marginTop: '16px'
     },
     modal: {
       position: 'fixed',
@@ -567,7 +571,7 @@ const News = () => {
       left: 0,
       right: 0,
       bottom: 0,
-      backgroundColor: 'rgba(0,0,0,0.8)',
+      backgroundColor: 'rgba(0,0,0,0.75)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -575,13 +579,14 @@ const News = () => {
       padding: '20px'
     },
     modalContent: {
-      backgroundColor: 'white',
-      borderRadius: '20px',
+      backgroundColor: '#ffffff',
+      borderRadius: '16px',
       maxWidth: '800px',
       width: '100%',
       maxHeight: '90vh',
       overflow: 'auto',
-      position: 'relative'
+      position: 'relative',
+      boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.25)'
     },
     modalHeader: {
       position: 'relative'
@@ -593,8 +598,8 @@ const News = () => {
     },
     closeButton: {
       position: 'absolute',
-      top: '15px',
-      right: '15px',
+      top: '16px',
+      right: '16px',
       backgroundColor: 'rgba(0,0,0,0.7)',
       color: 'white',
       border: 'none',
@@ -602,349 +607,283 @@ const News = () => {
       width: '40px',
       height: '40px',
       cursor: 'pointer',
-      fontSize: '1.2rem',
+      fontSize: '1.25rem',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center'
     },
     modalBody: {
-      padding: '25px'
+      padding: '24px'
     },
     modalTitle: {
-      fontSize: '1.8rem',
+      fontSize: '1.5rem',
       fontWeight: '700',
       color: '#1e293b',
-      marginBottom: '15px',
-      lineHeight: '1.3'
+      marginBottom: '16px',
+      lineHeight: '1.4'
     },
     modalMeta: {
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
       marginBottom: '20px',
-      paddingBottom: '15px',
+      paddingBottom: '16px',
       borderBottom: '1px solid #e2e8f0'
     },
     modalText: {
       color: '#374151',
       fontSize: '1rem',
       lineHeight: '1.7',
-      marginBottom: '25px'
+      marginBottom: '24px'
     },
     readMoreButton: {
-      backgroundColor: '#4e1faf',
+      backgroundColor: '#3b82f6',
       color: 'white',
       border: 'none',
-      padding: '12px 25px',
-      borderRadius: '10px',
+      padding: '12px 24px',
+      borderRadius: '8px',
       cursor: 'pointer',
-      fontSize: '1rem',
-      fontWeight: '600',
+      fontSize: '0.875rem',
+      fontWeight: '500',
       textDecoration: 'none',
       display: 'inline-block',
-      transition: 'all 0.3s ease'
+      transition: 'all 0.2s ease'
     },
     noNews: {
       textAlign: 'center',
       padding: '60px 20px',
       color: '#64748b',
-      fontSize: '1.2rem',
-      backgroundColor: '#ffffff',
-      borderRadius: '15px',
-      boxShadow: '0 4px 20px rgba(0,0,0,0.05)'
+      fontSize: '1rem',
+      backgroundColor: '#f8fafc',
+      borderRadius: '12px',
+      border: '1px solid #e2e8f0'
     },
-    statsContainer: {
-      textAlign: 'center',
-      marginTop: '30px',
-      padding: '20px',
-      backgroundColor: '#ffffff',
-      borderRadius: '15px',
-      boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+    trendingSection: {
+      marginTop: '40px',
+      padding: '24px',
+      backgroundColor: '#f8fafc',
+      borderRadius: '12px',
+      border: '1px solid #e2e8f0',
+      textAlign: 'center'
     },
-    statsTitle: {
-      margin: '0 0 15px 0',
+    trendingTitle: {
       color: '#1e293b',
-      fontSize: '1.3rem'
-    },
-    statsGrid: {
-      display: 'flex',
-      justifyContent: 'center',
-      gap: '15px',
-      flexWrap: 'wrap'
-    },
-    statItem: {
-      padding: '10px 15px',
-      backgroundColor: '#4e1faf',
-      color: 'white',
-      borderRadius: '10px',
-      fontSize: '0.9rem',
+      fontSize: '1.25rem',
       fontWeight: '600',
-      minWidth: '120px'
+      marginBottom: '20px'
     },
-    totalArticles: {
-      margin: '15px 0 0 0',
+    trendingTags: {
+      display: 'flex',
+      flexWrap: 'wrap',
+      justifyContent: 'center',
+      gap: '8px'
+    },
+    trendingTag: {
+      padding: '6px 12px',
+      backgroundColor: '#ffffff',
+      borderRadius: '20px',
       color: '#64748b',
-      fontSize: '0.9rem'
+      fontSize: '0.75rem',
+      fontWeight: '500',
+      border: '1px solid #e2e8f0',
+      transition: 'all 0.2s ease'
+    },
+    floatingButton: {
+      position: 'fixed',
+      bottom: '24px',
+      right: '24px',
+      zIndex: 100,
+      backgroundColor: '#3b82f6',
+      color: 'white',
+      border: 'none',
+      padding: '12px 20px',
+      borderRadius: '50px',
+      cursor: 'pointer',
+      fontSize: '0.875rem',
+      fontWeight: '500',
+      boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
+      transition: 'all 0.2s ease'
     }
   };
 
-  if (loading) {
-    return (
-      <div style={styles.container}>
-        <div style={styles.loading}>
-          <div style={{fontSize: '3rem', marginBottom: '20px'}}>📰</div>
-          Fetching latest news from all categories...
-          <div style={{fontSize: '0.9rem', marginTop: '10px', color: '#94a3b8'}}>
-            Loading from multiple sources with enhanced filtering
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error && Object.values(news).every(categoryNews => categoryNews.length === 0)) {
-    return (
-      <div style={styles.container}>
-        <div style={styles.error}>
-          <div style={{fontSize: '2rem', marginBottom: '15px'}}>⚠️</div>
-          {error}
-          <br />
-          <button 
-            style={styles.refreshButton}
-            onClick={fetchAllNews}
-            onMouseEnter={(e) => e.target.style.backgroundColor = '#3b82f6'}
-            onMouseLeave={(e) => e.target.style.backgroundColor = '#4e1faf'}
-          >
-            Try Again
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  const currentNews = news[activeTab] || [];
-  const isCurrentCategoryLoading = categoryLoading[activeTab];
-
   return (
     <div style={styles.container}>
+      {/* Header Section */}
       <div style={styles.header}>
-        <h1 style={styles.title}>📰 Frontline Prep News Hub</h1>
-        <p style={styles.subtitle}>Real-time updates from categorized sources worldwide</p>
-        {lastUpdated[activeTab] && (
-          <p style={styles.lastUpdated}>
-            {CATEGORY_CONFIG[activeTab]?.name} last updated: {lastUpdated[activeTab]}
-          </p>
-        )}
-        {error && (
-          <p style={{color: '#f59e0b', fontSize: '0.9rem', marginTop: '10px'}}>
-            ⚠️ Some sources unavailable - showing available content
-          </p>
-        )}
+        <h1 style={styles.title}>News Hub</h1>
+        <p style={styles.subtitle}>Stay informed with the latest news from trusted sources around the world</p>
+        <p style={styles.lastUpdated}>
+          Last updated: {lastUpdated[activeTab] ? `${lastUpdated[activeTab]}` : 'Loading...'}
+        </p>
       </div>
 
+      {/* Tabs Navigation */}
       <div style={styles.tabContainer}>
-        {Object.entries(CATEGORY_CONFIG).map(([key, config]) => (
+        {Object.keys(CATEGORY_CONFIG).map(category => (
           <button
-            key={key}
+            key={category}
             style={{
               ...styles.tab,
-              ...(activeTab === key ? {
-                ...styles.activeTab,
-                backgroundColor: config.color
-              } : {}),
-              ...(categoryLoading[key] ? {
-                opacity: 0.7,
-                cursor: 'not-allowed'
-              } : {})
+              ...(activeTab === category ? styles.activeTab : {})
             }}
-            onClick={() => !categoryLoading[key] && handleTabSwitch(key)}
-            disabled={categoryLoading[key]}
+            onClick={() => handleTabSwitch(category)}
+            onMouseEnter={(e) => {
+              if (activeTab !== category) {
+                e.target.style.backgroundColor = '#f1f5f9';
+                e.target.style.color = '#1e293b';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (activeTab !== category) {
+                e.target.style.backgroundColor = 'transparent';
+                e.target.style.color = '#64748b';
+              }
+            }}
           >
-            {config.name} ({news[key]?.length || 0})
-            {categoryLoading[key] && (
-              <div style={{
-                position: 'absolute',
-                top: '50%',
-                right: '8px',
-                transform: 'translateY(-50%)',
-                fontSize: '0.8rem'
-              }}>
-                🔄
-              </div>
-            )}
+            {CATEGORY_CONFIG[category].name}
           </button>
         ))}
       </div>
 
-      {isCurrentCategoryLoading ? (
-        <div style={styles.categoryLoading}>
-          <div style={{fontSize: '2rem', marginBottom: '15px'}}>🔄</div>
-          Loading {CATEGORY_CONFIG[activeTab]?.name} news...
-        </div>
-      ) : currentNews.length === 0 ? (
-        <div style={styles.noNews}>
-          <div style={{fontSize: '3rem', marginBottom: '20px'}}>📭</div>
-          No {CATEGORY_CONFIG[activeTab]?.name} available at the moment.
-          <br />
-          <button 
-            style={{...styles.refreshButton, marginTop: '20px'}}
-            onClick={() => fetchCategoryNews(activeTab)}
-          >
-            Refresh {CATEGORY_CONFIG[activeTab]?.name}
-          </button>
-        </div>
+      {/* Error Display */}
+      {error && <div style={styles.error}>{error}</div>}
+
+      {/* Main Content Area */}
+      {loading ? (
+        <div style={styles.loading}>Loading news articles...</div>
+      ) : categoryLoading[activeTab] ? (
+        <div style={styles.categoryLoading}>Updating {CATEGORY_CONFIG[activeTab].name}...</div>
       ) : (
-        <div style={styles.newsGrid}>
-          {currentNews.map((article) => (
-            <div
-              key={article.id}
-              style={styles.newsCard}
-              onClick={() => openArticleDetail(article)}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-5px)';
-                e.currentTarget.style.boxShadow = '0 10px 25px rgba(0,0,0,0.15)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 5px 15px rgba(0,0,0,0.1)';
-              }}
-            >
-              <img
-                src={article.urlToImage}
-                alt={article.title}
-                style={styles.newsImage}
-                onError={(e) => {
-                  e.target.src = `https://source.unsplash.com/random/800x600/?${article.category},news`;
+        <>
+          {/* News Grid */}
+          {news[activeTab].length === 0 ? (
+            <div style={styles.noNews}>
+              No articles found for {CATEGORY_CONFIG[activeTab].name}
+              <button 
+                style={styles.refreshButton} 
+                onClick={() => fetchCategoryNews(activeTab)}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = '#2563eb';
                 }}
-              />
-              <div style={styles.newsContent}>
-                <h3 style={styles.newsTitle}>
-                  {article.title}
-                </h3>
-                <p style={styles.newsDescription}>
-                  {article.description}
-                </p>
-                <div style={styles.newsFooter}>
-                  <span style={styles.newsSource}>
-                    {article.source?.name || 'News Source'}
-                  </span>
-                  <span style={styles.newsDate}>
-                    {formatDate(article.publishedAt)}
-                  </span>
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = '#3b82f6';
+                }}
+              >
+                Refresh News
+              </button>
+            </div>
+          ) : (
+            <div style={styles.newsGrid}>
+              {news[activeTab].map(article => (
+                <div 
+                  key={article.id} 
+                  style={styles.newsCard}
+                  onClick={() => openArticleDetail(article)}
+                  onMouseEnter={(e) => {
+                    e.target.style.transform = 'translateY(-4px)';
+                    e.target.style.boxShadow = '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.transform = 'translateY(0)';
+                    e.target.style.boxShadow = '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)';
+                  }}
+                >
+                  <img 
+                    src={article.urlToImage} 
+                    alt={article.title} 
+                    style={styles.newsImage}
+                    onError={(e) => {                      e.target.src = `https://source.unsplash.com/random/800x600/?${article.category},news&${Math.random()}`;
+                    }}
+                  />
+                  <div style={styles.newsContent}>
+                    <h3 style={styles.newsTitle}>{article.title}</h3>
+                    <p style={styles.newsDescription}>{article.description}</p>
+                    <div style={styles.newsFooter}>
+                      <span style={styles.newsSource}>{article.source.name}</span>
+                      <span style={styles.newsDate}>{formatDate(article.publishedAt)}</span>
+                    </div>
+                  </div>
                 </div>
+              ))}
+            </div>
+          )}
+
+          {/* Trending Topics Section */}
+          {news[activeTab].length > 0 && (
+            <div style={styles.trendingSection}>
+              <h3 style={styles.trendingTitle}>Trending in {CATEGORY_CONFIG[activeTab].name}</h3>
+              <div style={styles.trendingTags}>
+                {getTrendingTopics().map((topic, index) => (
+                  <span key={index} style={styles.trendingTag}>#{topic}</span>
+                ))}
               </div>
             </div>
-          ))}
-        </div>
+          )}
+        </>
       )}
 
+      {/* Article Detail Modal */}
       {selectedArticle && (
-        <div style={styles.modal} onClick={closeArticleDetail}>
-          <div style={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+        <div style={styles.modal}>
+          <div style={styles.modalContent}>
             <div style={styles.modalHeader}>
-              <img
-                src={selectedArticle.urlToImage}
-                alt={selectedArticle.title}
+              <img 
+                src={selectedArticle.urlToImage} 
+                alt={selectedArticle.title} 
                 style={styles.modalImage}
                 onError={(e) => {
-                  e.target.src = `https://source.unsplash.com/random/800x600/?${selectedArticle.category},news`;
+                  e.target.src = `https://source.unsplash.com/random/800x600/?${selectedArticle.category},news&${Math.random()}`;
                 }}
               />
-              <button
-                style={styles.closeButton}
+              <button 
+                style={styles.closeButton} 
                 onClick={closeArticleDetail}
+                aria-label="Close article"
               >
                 ×
               </button>
             </div>
             <div style={styles.modalBody}>
-              <h2 style={styles.modalTitle}>
-                {selectedArticle.title}
-              </h2>
+              <h2 style={styles.modalTitle}>{selectedArticle.title}</h2>
               <div style={styles.modalMeta}>
-                <span style={styles.newsSource}>
-                  {selectedArticle.source?.name}
-                </span>
-                <span style={styles.newsDate}>
-                  {formatDate(selectedArticle.publishedAt)}
-                </span>
+                <span style={styles.newsSource}>{selectedArticle.source.name}</span>
+                <span style={styles.newsDate}>{formatDate(selectedArticle.publishedAt)}</span>
               </div>
-              <div style={styles.modalText}>
-                {selectedArticle.content || selectedArticle.description}
-              </div>
-              {selectedArticle.url && selectedArticle.url !== '#' && (
-                <a
-                  href={selectedArticle.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={styles.readMoreButton}
-                  onMouseEnter={(e) => e.target.style.backgroundColor = '#3b82f6'}
-                  onMouseLeave={(e) => e.target.style.backgroundColor = '#4e1faf'}
-                >
-                  Read Full Article →
-                </a>
-              )}
+              <p style={styles.modalText}>{selectedArticle.content}</p>
+              <a 
+                href={selectedArticle.url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                style={styles.readMoreButton}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = '#2563eb';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = '#3b82f6';
+                }}
+              >
+                Read Full Article
+              </a>
             </div>
           </div>
         </div>
       )}
 
-      <div style={{ 
-        textAlign: 'center', 
-        marginTop: '40px',
-        display: 'flex',
-        gap: '15px',
-        justifyContent: 'center',
-        flexWrap: 'wrap'
-      }}>
-        <button
-          style={{
-            ...styles.refreshButton,
-            fontSize: '1rem',
-            padding: '12px 25px'
-          }}
-          onClick={fetchAllNews}
-          disabled={loading}
-          onMouseEnter={(e) => !loading && (e.target.style.backgroundColor = '#3b82f6')}
-          onMouseLeave={(e) => !loading && (e.target.style.backgroundColor = '#4e1faf')}
-        >
-          {loading ? '🔄 Refreshing All...' : '🔄 Refresh All Categories'}
-        </button>
-        
-        <button
-          style={{
-            ...styles.refreshButton,
-            fontSize: '1rem',
-            padding: '12px 25px',
-            backgroundColor: CATEGORY_CONFIG[activeTab]?.color || '#4e1faf'
-          }}
-          onClick={() => fetchCategoryNews(activeTab)}
-          disabled={categoryLoading[activeTab]}
-          onMouseEnter={(e) => !categoryLoading[activeTab] && (e.target.style.opacity = '0.9')}
-          onMouseLeave={(e) => !categoryLoading[activeTab] && (e.target.style.opacity = '1')}
-        >
-          {categoryLoading[activeTab] ? '🔄 Refreshing...' : `🔄 Refresh ${CATEGORY_CONFIG[activeTab]?.name}`}
-        </button>
-      </div>
-
-      <div style={styles.statsContainer}>
-        <h3 style={styles.statsTitle}>
-          📊 News Statistics
-        </h3>
-        <div style={styles.statsGrid}>
-          {Object.entries(CATEGORY_CONFIG).map(([key, config]) => (
-            <div key={key} style={{
-              ...styles.statItem,
-              backgroundColor: config.color
-            }}>
-              {config.name.split(' ')[0]} {news[key]?.length || 0}
-            </div>
-          ))}
-        </div>
-        <p style={styles.totalArticles}>
-          Total Articles: {Object.values(news).reduce((sum, categoryNews) => sum + categoryNews.length, 0)}
-        </p>
-      </div>
+      {/* Floating Refresh Button */}
+      <button 
+        style={styles.floatingButton}
+        onClick={() => fetchCategoryNews(activeTab)}
+        onMouseEnter={(e) => {
+          e.target.style.backgroundColor = '#2563eb';
+          e.target.style.transform = 'translateY(-2px)';
+        }}
+        onMouseLeave={(e) => {
+          e.target.style.backgroundColor = '#3b82f6';
+          e.target.style.transform = 'translateY(0)';
+        }}
+      >
+        Refresh News
+      </button>
     </div>
   );
 };

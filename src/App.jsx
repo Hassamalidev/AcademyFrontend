@@ -4,7 +4,7 @@ import Home from "./pages/Home";
 import About from "./pages/About";
 import TestPage from "./pages/TestPage";
 import Contact from "./pages/Contact";
-import Demos from "./pages/Demo";
+import BMI from "./pages/BMI";
 import News from "./pages/News";
 import Login from "./pages/Login";
 import LearnMore from "./pages/LearnMore";
@@ -23,7 +23,7 @@ function App() {
           
           <Route path="/courses/category-selection" element={<CategorySelection />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/demos" element={<Demos />} />
+          <Route path="/bmi" element={<BMI />} />
           <Route path="/news" element={<News />} />
           <Route path="/login" element={<Login />} />
           <Route path="/learn-more" element={<LearnMore />} />

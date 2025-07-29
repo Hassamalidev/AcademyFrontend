@@ -566,7 +566,7 @@ function Home() {
             perspective: 1000px;
           }
           
-          /* Mobile specific optimizations */
+    
           @media (max-width: 768px) {
             .hero-slider .particles {
               display: none;
@@ -575,7 +575,6 @@ function Home() {
         `}
       </style>
 
-      {/* Other components */}
       <Hero_2 />
       <HomeCategory />
       <NotesPage />

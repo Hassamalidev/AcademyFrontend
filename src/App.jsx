@@ -10,6 +10,7 @@ import Login from "./pages/Login";
 import LearnMore from "./pages/LearnMore";
 import CategorySelection from "./pages/CategorySelection";
 import Courses from "./pages/Courses";
+import Signup from "./pages/Signup"
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
            <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/courses" element={<Courses />} />
+          <Route path="/signup" element={<Signup />} />
           
           <Route path="/courses/category-selection" element={<CategorySelection />} />
           <Route path="/contact" element={<Contact />} />

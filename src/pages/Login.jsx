@@ -17,7 +17,7 @@ function Login() {
       ...prev,
       [name]: value
     }));
-    // Clear error when user types
+    
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,

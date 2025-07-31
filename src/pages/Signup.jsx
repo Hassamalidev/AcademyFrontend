@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
 function Signup() {
   const [formData, setFormData] = useState({
     name: '',
@@ -11,8 +10,8 @@ function Signup() {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [signupError, setSignupError] = useState('');
+  const [signupSuccess, setSignupSuccess] = useState(false);
   const navigate = useNavigate();
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -64,24 +63,22 @@ function Signup() {
     setIsLoading(true);
     
     try {
-      // Simulate API call (replace with actual signup API)
+      // Simulate API call for demo
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // In a real app, you would call your signup API here
-      // const response = await fetch('/api/signup', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({
-      //     name: formData.name,
-      //     email: formData.email,
-      //     password: formData.password
-      // })
-      // });
-      // const data = await response.json();
-      // if (!response.ok) throw new Error(data.message || 'Signup failed');
-      
+      // Mock successful signup
       console.log('Signup successful', formData);
-      navigate('/login'); // Redirect to login after successful signup
+      setSignupSuccess(true);
+      setSignupError('');
+      
+      // Reset form
+      setFormData({
+        name: '',
+        email: '',
+        password: '',
+        confirmPassword: ''
+      });
+      
     } catch (error) {
       console.error('Signup error:', error);
       setSignupError(error.message || 'Signup failed. Please try again.');
@@ -89,6 +86,113 @@ function Signup() {
       setIsLoading(false);
     }
   };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSubmit(e);
+    }
+  };
+
+  const handleLoginClick = () => {
+    console.log('Navigate to login page');
+    setSignupSuccess(false);
+  };
+
+  const handleBackToSignup = () => {
+    setSignupSuccess(false);
+  };
+
+  // Show success message if signup completed
+  if (signupSuccess) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh',
+        backgroundColor: '#f5f5f5',
+        padding: '1rem'
+      }}>
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '8px',
+          boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
+          padding: '2rem',
+          width: '100%',
+          maxWidth: '400px',
+          textAlign: 'center'
+        }}>
+          <div style={{
+            width: '60px',
+            height: '60px',
+            backgroundColor: '#4CAF50',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 1.5rem auto'
+          }}>
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20,6 9,17 4,12"></polyline>
+            </svg>
+          </div>
+          
+          <h1 style={{
+            color: '#2E7D32',
+            marginBottom: '1rem',
+            fontSize: '1.8rem',
+            margin: '0 0 1rem 0'
+          }}>Account Created!</h1>
+          
+          <p style={{
+            color: '#666',
+            marginBottom: '1.5rem',
+            lineHeight: '1.5',
+            margin: '0 0 1.5rem 0'
+          }}>
+            Your account has been successfully created. You can now log in with your credentials.
+          </p>
+
+          <div style={{
+            display: 'flex',
+            gap: '1rem',
+            flexDirection: 'column'
+          }}>
+            <button 
+              onClick={() => navigate('/login')}
+              style={{
+                backgroundColor: '#4CAF50',
+                color: 'white',
+                padding: '0.75rem 1.5rem',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: '1rem',
+                fontWeight: '600',
+                cursor: 'pointer'
+              }}
+            >
+              Go to Login
+            </button>
+            
+            <button
+              onClick={handleBackToSignup}
+              style={{
+                backgroundColor: 'transparent',
+                color: '#666',
+                padding: '0.5rem',
+                border: 'none',
+                fontSize: '0.9rem',
+                cursor: 'pointer',
+                textDecoration: 'underline'
+              }}
+            >
+              Create another account
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{
@@ -111,7 +215,8 @@ function Signup() {
           color: '#2E7D32',
           textAlign: 'center',
           marginBottom: '1.5rem',
-          fontSize: '1.8rem'
+          fontSize: '1.8rem',
+          margin: '0 0 1.5rem 0'
         }}>Sign Up</h1>
         
         {signupError && (
@@ -126,7 +231,7 @@ function Signup() {
           }}>{signupError}</div>
         )}
         
-        <form onSubmit={handleSubmit} style={{
+        <div style={{
           display: 'flex',
           flexDirection: 'column',
           gap: '1.25rem'
@@ -147,11 +252,13 @@ function Signup() {
               name="name"
               value={formData.name}
               onChange={handleChange}
+              onKeyPress={handleKeyPress}
               style={{
                 padding: '0.75rem',
                 border: `1px solid ${errors.name ? '#d32f2f' : '#ddd'}`,
                 borderRadius: '6px',
                 fontSize: '1rem',
+                outline: 'none',
                 transition: 'border-color 0.3s'
               }}
               placeholder="Enter your name"
@@ -159,8 +266,7 @@ function Signup() {
             />
             {errors.name && <span style={{
               color: '#d32f2f',
-              fontSize: '0.85rem',
-              marginTop: '0.25rem'
+              fontSize: '0.85rem'
             }}>{errors.name}</span>}
           </div>
           
@@ -180,11 +286,13 @@ function Signup() {
               name="email"
               value={formData.email}
               onChange={handleChange}
+              onKeyPress={handleKeyPress}
               style={{
                 padding: '0.75rem',
                 border: `1px solid ${errors.email ? '#d32f2f' : '#ddd'}`,
                 borderRadius: '6px',
                 fontSize: '1rem',
+                outline: 'none',
                 transition: 'border-color 0.3s'
               }}
               placeholder="Enter your email"
@@ -192,8 +300,7 @@ function Signup() {
             />
             {errors.email && <span style={{
               color: '#d32f2f',
-              fontSize: '0.85rem',
-              marginTop: '0.25rem'
+              fontSize: '0.85rem'
             }}>{errors.email}</span>}
           </div>
           
@@ -213,11 +320,13 @@ function Signup() {
               name="password"
               value={formData.password}
               onChange={handleChange}
+              onKeyPress={handleKeyPress}
               style={{
                 padding: '0.75rem',
                 border: `1px solid ${errors.password ? '#d32f2f' : '#ddd'}`,
                 borderRadius: '6px',
                 fontSize: '1rem',
+                outline: 'none',
                 transition: 'border-color 0.3s'
               }}
               placeholder="Enter your password"
@@ -225,8 +334,7 @@ function Signup() {
             />
             {errors.password && <span style={{
               color: '#d32f2f',
-              fontSize: '0.85rem',
-              marginTop: '0.25rem'
+              fontSize: '0.85rem'
             }}>{errors.password}</span>}
           </div>
           
@@ -246,11 +354,13 @@ function Signup() {
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleChange}
+              onKeyPress={handleKeyPress}
               style={{
                 padding: '0.75rem',
                 border: `1px solid ${errors.confirmPassword ? '#d32f2f' : '#ddd'}`,
                 borderRadius: '6px',
                 fontSize: '1rem',
+                outline: 'none',
                 transition: 'border-color 0.3s'
               }}
               placeholder="Confirm your password"
@@ -258,35 +368,34 @@ function Signup() {
             />
             {errors.confirmPassword && <span style={{
               color: '#d32f2f',
-              fontSize: '0.85rem',
-              marginTop: '0.25rem'
+              fontSize: '0.85rem'
             }}>{errors.confirmPassword}</span>}
           </div>
           
           <button
-            type="submit"
+            type="button"
+            onClick={handleSubmit}
             style={{
-              backgroundColor: '#4CAF50',
+              backgroundColor: isLoading ? '#cccccc' : '#4CAF50',
               color: 'white',
               padding: '0.75rem',
               border: 'none',
               borderRadius: '6px',
               fontSize: '1rem',
               fontWeight: '600',
-              cursor: 'pointer',
+              cursor: isLoading ? 'not-allowed' : 'pointer',
               marginTop: '0.5rem',
               transition: 'background-color 0.3s',
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
-              gap: '0.5rem',
-              opacity: isLoading ? 0.7 : 1
+              gap: '0.5rem'
             }}
             disabled={isLoading}
           >
             {isLoading ? 'Creating account...' : 'Sign Up'}
           </button>
-        </form>
+        </div>
         
         <div style={{
           textAlign: 'center',
@@ -295,7 +404,7 @@ function Signup() {
           fontSize: '0.95rem'
         }}>
           Already have an account?{' '}
-          <button 
+         <button 
             onClick={() => navigate('/login')} 
             style={{
               background: 'none',
@@ -304,7 +413,8 @@ function Signup() {
               cursor: 'pointer',
               fontWeight: '600',
               padding: '0',
-              textDecoration: 'underline'
+              textDecoration: 'underline',
+              fontSize: '0.95rem'
             }}
           >
             Login

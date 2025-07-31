@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 function Login() {
   const [formData, setFormData] = useState({
     email: '',
-    password: ''
+    password: '',
+    role: 'user' // Default role
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -65,7 +66,8 @@ function Login() {
       // if (!response.ok) throw new Error(data.message || 'Login failed');
       
       console.log('Login successful', formData);
-      navigate('/dashboard'); // Redirect to dashboard on success
+      // Redirect based on role
+      navigate(formData.role === 'admin' ? '/admin' : '/'); 
     } catch (error) {
       console.error('Login error:', error);
       setLoginError(error.message || 'Login failed. Please try again.');
@@ -84,6 +86,20 @@ function Login() {
         )}
         
         <form onSubmit={handleSubmit} style={styles.form}>
+          <div style={styles.formGroup}>
+            <label htmlFor="role" style={styles.label}>Role</label>
+            <select
+              id="role"
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+              style={styles.input}
+            >
+              <option value="user">User</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+
           <div style={styles.formGroup}>
             <label htmlFor="email" style={styles.label}>Email</label>
             <input

@@ -97,6 +97,10 @@ function Home() {
     window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
+  const handleLearnMore = () => {
+    navigate('/learn-more');
+  };
+
   const getShapeStyle = (shape) => {
     const shapes = {
       wave: { borderRadius: '30% 70% 70% 30% / 30% 30% 70% 70%' },
@@ -111,14 +115,15 @@ function Home() {
 
   return (
     <>
-      {/* Hero Slider Section */}
+    
       <div style={{
         minHeight: "100vh",
         position: "relative",
         overflow: "hidden",
-        background: "#f8fafc"
+        background: "#f8fafc",
+        borderRadius: "40px 40px 40px 40px" 
       }}>
-        {/* Enhanced Background with better gradient transition */}
+        
         <div style={{
           position: "absolute",
           top: 0,
@@ -128,9 +133,9 @@ function Home() {
           background: `linear-gradient(135deg, ${currentSlideData.themeColor} 0%, ${currentSlideData.gradientColor} 40%, #1a202c 100%)`,
           transition: "all 1s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
           zIndex: 0,
+          borderRadius: "40px 40px 40px 40px" 
         }} />
 
-        {/* Improved animated particles with better performance */}
         <div style={{
           position: "absolute",
           top: 0,
@@ -139,7 +144,8 @@ function Home() {
           height: "100%",
           zIndex: 1,
           opacity: 0.15,
-          pointerEvents: "none"
+          pointerEvents: "none",
+          borderRadius: "40px 40px 40px 40px" 
         }}>
           {Array.from({ length: 25 }).map((_, i) => (
             <div key={i} style={{
@@ -156,7 +162,6 @@ function Home() {
           ))}
         </div>
 
-        {/* Main content container with improved layout */}
         <div style={{
           position: "relative",
           zIndex: 2,
@@ -174,7 +179,6 @@ function Home() {
             alignItems: "center",
             width: "100%"
           }}>
-            {/* Enhanced text content */}
             <div style={{
               color: "#fff",
               maxWidth: isMobile ? "100%" : "600px",
@@ -187,7 +191,6 @@ function Home() {
               transform: "translateY(0)",
               animation: "slideInLeft 0.8s ease-out"
             }}>
-              {/* Enhanced category badge */}
               <div style={{
                 display: "inline-flex",
                 alignItems: "center",
@@ -205,7 +208,6 @@ function Home() {
                 <span>Military Career Preparation</span>
               </div>
 
-              {/* Enhanced title */}
               <h1 style={{
                 fontSize: isMobile ? "2.5rem" : "4rem",
                 fontWeight: "800",
@@ -220,7 +222,6 @@ function Home() {
                 {currentSlideData.title}
               </h1>
 
-              {/* Enhanced subtitle */}
               <p style={{
                 fontSize: isMobile ? "1.1rem" : "1.3rem",
                 lineHeight: "1.7",
@@ -231,7 +232,6 @@ function Home() {
                 {currentSlideData.subtitle}
               </p>
 
-              {/* Enhanced CTA buttons */}
               <div style={{
                 display: "flex",
                 flexDirection: isMobile ? "column" : "row",
@@ -271,39 +271,40 @@ function Home() {
                   <FaWhatsapp style={{ fontSize: "1.3rem", color: "#25D366" }} />
                 </button>
 
-                <button style={{
-                  background: "transparent",
-                  color: "#fff",
-                  border: "2px solid rgba(255, 255, 255, 0.8)",
-                  padding: "16px 32px",
-                  fontSize: "1.1rem",
-                  fontWeight: "600",
-                  borderRadius: "50px",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "12px",
-                  transition: "all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-                  backdropFilter: "blur(10px)"
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.background = "rgba(255, 255, 255, 0.1)";
-                  e.target.style.borderColor = "#fff";
-                  e.target.style.transform = "translateY(-2px)";
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.background = "transparent";
-                  e.target.style.borderColor = "rgba(255, 255, 255, 0.8)";
-                  e.target.style.transform = "translateY(0)";
-                }}
+                <button 
+                  onClick={handleLearnMore}
+                  style={{
+                    background: "transparent",
+                    color: "#fff",
+                    border: "2px solid rgba(255, 255, 255, 0.8)",
+                    padding: "16px 32px",
+                    fontSize: "1.1rem",
+                    fontWeight: "600",
+                    borderRadius: "50px",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "12px",
+                    transition: "all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+                    backdropFilter: "blur(10px)"
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.background = "rgba(255, 255, 255, 0.1)";
+                    e.target.style.borderColor = "#fff";
+                    e.target.style.transform = "translateY(-2px)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.background = "transparent";
+                    e.target.style.borderColor = "rgba(255, 255, 255, 0.8)";
+                    e.target.style.transform = "translateY(0)";
+                  }}
                 >
                   Learn More
                   <FaArrowRight />
                 </button>
               </div>
 
-              {/* Enhanced slide indicators */}
               <div style={{
                 display: "flex",
                 gap: "12px",
@@ -341,7 +342,6 @@ function Home() {
               </div>
             </div>
 
-            {/* Enhanced image content for desktop */}
             {!isMobile && (
               <div style={{
                 display: "flex",
@@ -360,7 +360,6 @@ function Home() {
                   justifyContent: "center",
                   alignItems: "center"
                 }}>
-                  {/* Background glow effect */}
                   <div style={{
                     position: "absolute",
                     width: "120%",
@@ -373,7 +372,6 @@ function Home() {
                     zIndex: -1
                   }} />
 
-                  {/* Main image container */}
                   <div style={{
                     position: "relative",
                     width: "100%",
@@ -406,8 +404,7 @@ function Home() {
                         filter: "brightness(1.1) contrast(1.05) saturate(1.1)"
                       }}
                     />
-                    
-                    {/* Image overlay gradient */}
+      
                     <div style={{
                       position: "absolute",
                       inset: 0,
@@ -416,7 +413,6 @@ function Home() {
                     }} />
                   </div>
 
-                  {/* Decorative ring */}
                   <div style={{
                     position: "absolute",
                     width: "110%",
@@ -432,7 +428,6 @@ function Home() {
           </div>
         </div>
 
-        {/* Enhanced navigation arrows */}
         {!isMobile && (
           <>
             <button
@@ -512,7 +507,6 @@ function Home() {
         )}
       </div>
 
-      {/* Enhanced CSS animations */}
       <style>
         {`
           @keyframes floatParticle {
@@ -566,7 +560,6 @@ function Home() {
             perspective: 1000px;
           }
           
-    
           @media (max-width: 768px) {
             .hero-slider .particles {
               display: none;

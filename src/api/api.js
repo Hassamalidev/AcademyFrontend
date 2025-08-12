@@ -57,6 +57,25 @@ export const submitQuestion = async (questionData) => {
     throw error;
   }
 };
+export const updateNote = async (id, noteData) => {
+  try {
+    const response = await api.put(`/notes/${id}`, noteData);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating note:", error);
+    throw error;
+  }
+};
+
+export const deleteNote = async (id) => {
+  try {
+    const response = await api.delete(`/notes/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting note:", error);
+    throw error;
+  }
+};
 
   export const fetchQuestionCategories = async () => {
   const response = await fetch(`${BASE_URL}/questionscategories`);
@@ -98,7 +117,7 @@ export const getQuestionsByCategory = async (categoryId) => {
     const response = await fetch(`${BASE_URL}/Question/byCategory/${categoryId}`);
     
     if (!response.ok) {
-      // More specific error message
+    
       const errorData = await response.json().catch(() => null);
       throw new Error(errorData?.message || `Failed to fetch questions for category ${categoryId}`);
     }
@@ -111,7 +130,7 @@ export const getQuestionsByCategory = async (categoryId) => {
 
     return {
       questions: data, 
-      category: { name: "Category Name" }  // This should come from the API
+      category: { name: "Category Name" } 
     };
   } catch (err) {
     console.error(`Error fetching questions for category ${categoryId}:`, err);

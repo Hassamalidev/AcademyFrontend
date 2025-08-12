@@ -137,3 +137,23 @@ export const getQuestionsByCategory = async (categoryId) => {
     throw new Error(`Failed to fetch questions: ${err.message}`);
   }
 };
+// Student Remarks API functions
+export const getApprovedRemarks = async () => {
+  try {
+    const response = await axios.get(`${BASE_URL}/StudentRemarks/approved`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching approved remarks:", error);
+    throw error;
+  }
+};
+
+export const createRemark = async (remarkData) => {
+  try {
+    const response = await axios.post(`${BASE_URL}/StudentRemarks`, remarkData);
+    return response.data;
+  } catch (error) {
+    console.error("Error creating remark:", error);
+    throw error;
+  }
+};

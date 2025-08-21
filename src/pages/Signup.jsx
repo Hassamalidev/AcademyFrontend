@@ -1,18 +1,20 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { registerUser } from '../api/api'; 
 
 function Signup() {
   const [formData, setFormData] = useState({
-    name: '',
+    username: '',
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'user' // Added role field with default value
+    role: 'User' 
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [signupError, setSignupError] = useState('');
   const [signupSuccess, setSignupSuccess] = useState(false);
+  const [requiresApproval, setRequiresApproval] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -33,10 +35,11 @@ function Signup() {
 
   const validate = () => {
     const newErrors = {};
-    if (!formData.name) {
-      newErrors.name = 'Name is required';
-    } else if (formData.name.length < 3) {
-      newErrors.name = 'Name must be at least 3 characters';
+    
+    if (!formData.username) {
+      newErrors.username = 'Username is required';
+    } else if (formData.username.length < 3) {
+      newErrors.username = 'Username must be at least 3 characters';
     }
     
     if (!formData.email) {
@@ -64,28 +67,36 @@ function Signup() {
     if (!validate()) return;
     
     setIsLoading(true);
+    setSignupError('');
     
     try {
-      // Simulate API call for demo
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Prepare data for API (exclude confirmPassword)
+      const { confirmPassword, ...apiData } = formData;
       
-      // Mock successful signup
-      console.log('Signup successful', formData);
+      const response = await registerUser(apiData);
+      
+      if (response.requiresApproval) {
+        setRequiresApproval(true);
+      }
+      
       setSignupSuccess(true);
-      setSignupError('');
       
       // Reset form
       setFormData({
-        name: '',
+        username: '',
         email: '',
         password: '',
         confirmPassword: '',
-        role: 'user' // Reset role to default
+        role: 'User'
       });
       
     } catch (error) {
       console.error('Signup error:', error);
-      setSignupError(error.message || 'Signup failed. Please try again.');
+      setSignupError(
+        error.response?.data?.message || 
+        error.message || 
+        'Signup failed. Please try again.'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -101,10 +112,17 @@ function Signup() {
             </svg>
           </div>
           
-          <h1 style={styles.title}>Account Created!</h1>
+          <h1 style={styles.title}>{
+            requiresApproval 
+              ? "Registration Submitted!" 
+              : "Account Created!"
+          }</h1>
           
           <p style={styles.successMessage}>
-            Your account has been successfully created. You can now log in with your credentials.
+            {requiresApproval 
+              ? "Your admin registration has been submitted. Please wait for approval via email before logging in."
+              : "Your account has been successfully created. You can now log in with your credentials."
+            }
           </p>
 
           <div style={styles.successActions}>
@@ -116,7 +134,10 @@ function Signup() {
             </button>
             
             <button
-              onClick={() => setSignupSuccess(false)}
+              onClick={() => {
+                setSignupSuccess(false);
+                setRequiresApproval(false);
+              }}
               style={styles.secondaryButton}
             >
               Create another account
@@ -146,27 +167,27 @@ function Signup() {
               onChange={handleChange}
               style={styles.input}
             >
-              <option value="user">User</option>
-              <option value="admin">Admin</option>
+              <option value="User">User</option>
+              <option value="Admin">Admin</option>
             </select>
           </div>
 
           <div style={styles.formGroup}>
-            <label htmlFor="name" style={styles.label}>Name</label>
+            <label htmlFor="username" style={styles.label}>Username</label>
             <input
               type="text"
-              id="name"
-              name="name"
-              value={formData.name}
+              id="username"
+              name="username"
+              value={formData.username}
               onChange={handleChange}
               style={{
                 ...styles.input,
-                ...(errors.name && styles.inputError)
+                ...(errors.username && styles.inputError)
               }}
-              placeholder="Enter your name"
-              autoComplete="name"
+              placeholder="Enter your username"
+              autoComplete="username"
             />
-            {errors.name && <span style={styles.error}>{errors.name}</span>}
+            {errors.username && <span style={styles.error}>{errors.username}</span>}
           </div>
 
           <div style={styles.formGroup}>
@@ -246,6 +267,7 @@ function Signup() {
   );
 }
 
+// Styles remain the same as in your original code
 const styles = {
   container: {
     display: 'flex',
@@ -341,7 +363,7 @@ const styles = {
     padding: '0',
     textDecoration: 'underline',
   },
-  // Success screen styles
+  
   successIcon: {
     width: '60px',
     height: '60px',

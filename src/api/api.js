@@ -39,12 +39,45 @@ export const getNotes = async (subject, page = 1, pageSize = 6) => {
     throw err;
   }
 };
-export const createNote = async (noteData) => {
+// Update these API functions to accept a token parameter
+export const createNote = async (noteData, token) => {
   try {
-    const response = await api.post("/notes", noteData);
+    const response = await api.post("/notes", noteData, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
     return response.data;
   } catch (error) {
     console.error("Error creating note:", error);
+    throw error;
+  }
+};
+
+export const updateNote = async (id, noteData, token) => {
+  try {
+    const response = await api.put(`/notes/${id}`, noteData, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating note:", error);
+    throw error;
+  }
+};
+
+export const deleteNote = async (id, token) => {
+  try {
+    const response = await api.delete(`/notes/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting note:", error);
     throw error;
   }
 };
@@ -57,25 +90,7 @@ export const submitQuestion = async (questionData) => {
     throw error;
   }
 };
-export const updateNote = async (id, noteData) => {
-  try {
-    const response = await api.put(`/notes/${id}`, noteData);
-    return response.data;
-  } catch (error) {
-    console.error("Error updating note:", error);
-    throw error;
-  }
-};
 
-export const deleteNote = async (id) => {
-  try {
-    const response = await api.delete(`/notes/${id}`);
-    return response.data;
-  } catch (error) {
-    console.error("Error deleting note:", error);
-    throw error;
-  }
-};
 
   export const fetchQuestionCategories = async () => {
   const response = await fetch(`${BASE_URL}/questionscategories`);
@@ -155,5 +170,38 @@ export const createRemark = async (remarkData) => {
   } catch (error) {
     console.error("Error creating remark:", error);
     throw error;
+  }
+};
+export const registerUser = async (userData) => {
+  try {
+    const response = await api.post("/auth/register", userData);
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      throw new Error(error.response.data.message || 'Registration failed');
+    } else if (error.request) {
+      throw new Error('No response from server. Please try again later.');
+    } else {
+      throw new Error('Request setup error: ' + error.message);
+    }
+  }
+};
+
+export const loginUser = async (loginData) => {
+  try {
+    const response = await api.post("/auth/login", loginData);
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      if (error.response.status === 401) {
+        throw new Error('Invalid credentials or account not approved');
+      } else {
+        throw new Error(error.response.data || 'Login failed');
+      }
+    } else if (error.request) {
+      throw new Error('No response from server. Please try again later.');
+    } else {
+      throw new Error('Request setup error: ' + error.message);
+    }
   }
 };

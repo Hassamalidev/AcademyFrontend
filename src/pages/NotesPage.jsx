@@ -23,6 +23,7 @@ const NotesPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [editingNote, setEditingNote] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const [pagination, setPagination] = useState({
     page: 1,
@@ -32,8 +33,27 @@ const NotesPage = () => {
   });
 
   useEffect(() => {
+    // Check if user is admin on component mount
+    checkAdminStatus();
     fetchNotes(1);
   }, [activeSubject]);
+
+  // Function to check if the current user is an admin
+  const checkAdminStatus = () => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        // Decode the token to check user role
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        setIsAdmin(payload.role === 'admin');
+      } catch (err) {
+        console.error('Error decoding token:', err);
+        setIsAdmin(false);
+      }
+    } else {
+      setIsAdmin(false);
+    }
+  };
 
   const fetchNotes = async (pageNum = 1) => {
     setLoading(true);
@@ -64,14 +84,28 @@ const NotesPage = () => {
 
   const handleCreateNote = async (e) => {
     e.preventDefault();
+    // Check admin status again before proceeding
+    checkAdminStatus();
+    if (!isAdmin) {
+      setError('Only administrators can create notes');
+      return;
+    }
+    
     setFormLoading(true);
     setError(null);
     setSuccess(null);
     try {
+      // Get token from localStorage
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+      
       await createNote({ 
         ...newNote, 
         createdAt: new Date().toISOString() 
-      });
+      }, token); // Pass token to API call
+      
       setNewNote({ 
         title: '', 
         answer: '', 
@@ -89,11 +123,24 @@ const NotesPage = () => {
 
   const handleUpdateNote = async (e) => {
     e.preventDefault();
+    // Check admin status again before proceeding
+    checkAdminStatus();
+    if (!isAdmin) {
+      setError('Only administrators can update notes');
+      return;
+    }
+    
     setFormLoading(true);
     setError(null);
     setSuccess(null);
     try {
-      await updateNote(editingNote.id, editingNote);
+      // Get token from localStorage
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+      
+      await updateNote(editingNote.id, editingNote, token); // Pass token to API call
       setSuccess('Note updated successfully!');
       setIsEditing(false);
       setEditingNote(null);
@@ -106,10 +153,23 @@ const NotesPage = () => {
   };
 
   const handleDeleteNote = async (id) => {
+    // Check admin status again before proceeding
+    checkAdminStatus();
+    if (!isAdmin) {
+      setError('Only administrators can delete notes');
+      return;
+    }
+    
     if (!window.confirm('Are you sure you want to delete this note?')) return;
     
     try {
-      await deleteNote(id);
+      // Get token from localStorage
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+      
+      await deleteNote(id, token); // Pass token to API call
       setSuccess('Note deleted successfully!');
       if (notes.length === 1 && pagination.page > 1) {
         fetchNotes(pagination.page - 1);
@@ -122,6 +182,13 @@ const NotesPage = () => {
   };
 
   const startEditing = (note) => {
+    // Check admin status before allowing edit
+    checkAdminStatus();
+    if (!isAdmin) {
+      setError('Only administrators can edit notes');
+      return;
+    }
+    
     setEditingNote({ ...note });
     setIsEditing(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -200,6 +267,20 @@ const NotesPage = () => {
           color: '#718096',
           marginBottom: '0'
         }}>Organize and manage your study notes</p>
+        
+        {/* Admin status indicator */}
+        <div style={{
+          marginTop: '0.5rem',
+          padding: '0.5rem 1rem',
+          backgroundColor: isAdmin ? '#c6f6d5' : '#fed7d7',
+          color: isAdmin ? '#22543d' : '#742a2a',
+          borderRadius: '9999px',
+          display: 'inline-block',
+          fontSize: '0.875rem',
+          fontWeight: '500'
+        }}>
+          {isAdmin ? 'Admin Mode' : 'Viewer Mode'}
+        </div>
       </header>
 
       <div style={{
@@ -434,30 +515,36 @@ const NotesPage = () => {
                         >
                           {expandedNoteId === note.id ? '▲' : '▼'}
                         </button>
-                        <button
-                          style={{
-                            background: 'none', 
-                            border: 'none', 
-                            cursor: 'pointer', 
-                            color: '#4299e1',
-                            fontSize: '1rem'
-                          }}
-                          onClick={() => startEditing(note)}
-                        >
-                          ✏️
-                        </button>
-                        <button
-                          style={{
-                            background: 'none', 
-                            border: 'none', 
-                            cursor: 'pointer', 
-                            color: '#e53e3e',
-                            fontSize: '1rem'
-                          }}
-                          onClick={() => handleDeleteNote(note.id)}
-                        >
-                          🗑️
-                        </button>
+                        
+                        {/* Conditionally show edit/delete buttons for admins only */}
+                        {isAdmin && (
+                          <>
+                            <button
+                              style={{
+                                background: 'none', 
+                                border: 'none', 
+                                cursor: 'pointer', 
+                                color: '#4299e1',
+                                fontSize: '1rem'
+                              }}
+                              onClick={() => startEditing(note)}
+                            >
+                              ✏️
+                            </button>
+                            <button
+                              style={{
+                                background: 'none', 
+                                border: 'none', 
+                                cursor: 'pointer', 
+                                color: '#e53e3e',
+                                fontSize: '1rem'
+                              }}
+                              onClick={() => handleDeleteNote(note.id)}
+                            >
+                              🗑️
+                            </button>
+                          </>
+                        )}
                       </div>
                     </div>
                     <p style={{
@@ -644,216 +731,169 @@ const NotesPage = () => {
           )}
         </section>
 
-        <aside style={{
-          flex: 1,
-          '@media (min-width: 1024px)': {
-            position: 'sticky',
-            top: '1rem',
-            alignSelf: 'flex-start'
-          }
-        }}>
-          <div style={{
-            background: 'white',
-            borderRadius: '12px',
-            padding: '1.5rem',
-            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+        {/* Conditionally show the form only for admins */}
+        {isAdmin ? (
+          <aside style={{
+            flex: 1,
+            '@media (min-width: 1024px)': {
+              position: 'sticky',
+              top: '1rem',
+              alignSelf: 'flex-start'
+            }
           }}>
-            <h2>{isEditing ? 'Edit Note' : 'Create New Note'}</h2>
-            <form onSubmit={isEditing ? handleUpdateNote : handleCreateNote}>
-              <div style={{
-                marginBottom: '1.25rem'
-              }}>
-                <label style={{
-                  display: 'block',
-                  marginBottom: '0.5rem',
-                  fontWeight: '500',
-                  color: '#4a5568'
-                }}>Subject</label>
-                <select 
-                  style={{
-                    width: '100%',
-                    padding: '0.625rem 0.75rem',
-                    border: '1px solid #e2e8f0',
-                    borderRadius: '6px',
-                    fontSize: '1rem',
-                    transition: 'all 0.2s ease',
-                    ':focus': {
-                      outline: 'none',
-                      borderColor: '#4299e1',
-                      boxShadow: '0 0 0 2px rgba(66, 153, 225, 0.2)'
-                    }
-                  }}
-                  value={isEditing ? editingNote?.subject : newNote.subject} 
-                  onChange={(e) => isEditing 
-                    ? setEditingNote({ ...editingNote, subject: e.target.value })
-                    : setNewNote({ ...newNote, subject: e.target.value })
-                  }
-                  disabled={isEditing}
-                >
-                  {subjects.map(subject => (
-                    <option key={subject} value={subject}>{subject}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div style={{
-                marginBottom: '1.25rem'
-              }}>
-                <label style={{
-                  display: 'block',
-                  marginBottom: '0.5rem',
-                  fontWeight: '500',
-                  color: '#4a5568'
-                }}>Title*</label>
-                <input 
-                  style={{
-                    width: '100%',
-                    padding: '0.625rem 0.75rem',
-                    border: '1px solid #e2e8f0',
-                    borderRadius: '6px',
-                    fontSize: '1rem',
-                    transition: 'all 0.2s ease',
-                    ':focus': {
-                      outline: 'none',
-                      borderColor: '#4299e1',
-                      boxShadow: '0 0 0 2px rgba(66, 153, 225, 0.2)'
-                    }
-                  }}
-                  type="text" 
-                  value={isEditing ? editingNote?.title : newNote.title} 
-                  onChange={e => isEditing 
-                    ? setEditingNote({ ...editingNote, title: e.target.value })
-                    : setNewNote({ ...newNote, title: e.target.value })
-                  } 
-                  placeholder="Enter note title"
-                  required 
-                />
-              </div>
-
-              <div style={{
-                marginBottom: '1.25rem'
-              }}>
-                <label style={{
-                  display: 'block',
-                  marginBottom: '0.5rem',
-                  fontWeight: '500',
-                  color: '#4a5568'
-                }}>Answer*</label>
-                <input 
-                  style={{
-                    width: '100%',
-                    padding: '0.625rem 0.75rem',
-                    border: '1px solid #e2e8f0',
-                    borderRadius: '6px',
-                    fontSize: '1rem',
-                    transition: 'all 0.2s ease',
-                    ':focus': {
-                      outline: 'none',
-                      borderColor: '#4299e1',
-                      boxShadow: '0 0 0 2px rgba(66, 153, 225, 0.2)'
-                    }
-                  }}
-                  type="text" 
-                  value={isEditing ? editingNote?.answer : newNote.answer} 
-                  onChange={e => isEditing 
-                    ? setEditingNote({ ...editingNote, answer: e.target.value })
-                    : setNewNote({ ...newNote, answer: e.target.value })
-                  } 
-                  placeholder="Enter the answer"
-                  required 
-                />
-              </div>
-
-              <div style={{
-                marginBottom: '1.25rem'
-              }}>
-                <label style={{
-                  display: 'block',
-                  marginBottom: '0.5rem',
-                  fontWeight: '500',
-                  color: '#4a5568'
-                }}>Explanation</label>
-                <textarea 
-                  style={{
-                    width: '100%',
-                    padding: '0.625rem 0.75rem',
-                    border: '1px solid #e2e8f0',
-                    borderRadius: '6px',
-                    fontSize: '1rem',
-                    transition: 'all 0.2s ease',
-                    ':focus': {
-                      outline: 'none',
-                      borderColor: '#4299e1',
-                      boxShadow: '0 0 0 2px rgba(66, 153, 225, 0.2)'
-                    },
-                    minHeight: '100px'
-                  }}
-                  value={isEditing ? editingNote?.explanation : newNote.explanation} 
-                  onChange={e => isEditing 
-                    ? setEditingNote({ ...editingNote, explanation: e.target.value })
-                    : setNewNote({ ...newNote, explanation: e.target.value })
-                  } 
-                  placeholder="Add detailed explanation (optional)"
-                />
-              </div>
-
-              <div style={{display: 'flex', gap: '0.5rem'}}>
-                <button 
-                  type="submit" 
-                  style={{
-                    flex: 1,
-                    width: '100%',
-                    padding: '0.75rem',
-                    background: 'linear-gradient(135deg, #4299e1, #3182ce)',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '6px',
+            <div style={{
+              background: 'white',
+              borderRadius: '12px',
+              padding: '1.5rem',
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+            }}>
+              <h2>{isEditing ? 'Edit Note' : 'Create New Note'}</h2>
+              <form onSubmit={isEditing ? handleUpdateNote : handleCreateNote}>
+                <div style={{
+                  marginBottom: '1.25rem'
+                }}>
+                  <label style={{
+                    display: 'block',
+                    marginBottom: '0.5rem',
                     fontWeight: '500',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    transition: 'all 0.2s ease',
-                    ':hover': !(!isFormValid || formLoading) && {
-                      transform: 'translateY(-1px)',
-                      boxShadow: '0 2px 5px rgba(66, 153, 225, 0.3)'
-                    },
-                    ':disabled': {
-                      background: '#a0aec0',
-                      cursor: 'not-allowed',
-                      transform: 'none',
-                      boxShadow: 'none'
-                    }
-                  }}
-                  disabled={!isFormValid || formLoading}
-                >
-                  {formLoading ? (
-                    <>
-                      <span style={{
-                        display: 'inline-block',
-                        width: '1rem',
-                        height: '1rem',
-                        border: '2px solid rgba(255, 255, 255, 0.3)',
-                        borderRadius: '50%',
-                        borderTopColor: 'white',
-                        animation: 'spin 1s ease-in-out infinite'
-                      }}></span> 
-                      {isEditing ? 'Updating...' : 'Creating...'}
-                    </>
-                  ) : (
-                    isEditing ? 'Update Note' : 'Add Note'
-                  )}
-                </button>
-
-                {isEditing && (
-                  <button 
-                    type="button" 
+                    color: '#4a5568'
+                  }}>Subject</label>
+                  <select 
                     style={{
-                      flex: 0.5,
+                      width: '100%',
+                      padding: '0.625rem 0.75rem',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '6px',
+                      fontSize: '1rem',
+                      transition: 'all 0.2s ease',
+                      ':focus': {
+                        outline: 'none',
+                        borderColor: '#4299e1',
+                        boxShadow: '0 0 0 2px rgba(66, 153, 225, 0.2)'
+                      }
+                    }}
+                    value={isEditing ? editingNote?.subject : newNote.subject} 
+                    onChange={(e) => isEditing 
+                      ? setEditingNote({ ...editingNote, subject: e.target.value })
+                      : setNewNote({ ...newNote, subject: e.target.value })
+                    }
+                    disabled={isEditing}
+                  >
+                    {subjects.map(subject => (
+                      <option key={subject} value={subject}>{subject}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div style={{
+                  marginBottom: '1.25rem'
+                }}>
+                  <label style={{
+                    display: 'block',
+                    marginBottom: '0.5rem',
+                    fontWeight: '500',
+                    color: '#4a5568'
+                  }}>Title*</label>
+                  <input 
+                    style={{
+                      width: '100%',
+                      padding: '0.625rem 0.75rem',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '6px',
+                      fontSize: '1rem',
+                      transition: 'all 0.2s ease',
+                      ':focus': {
+                        outline: 'none',
+                        borderColor: '#4299e1',
+                        boxShadow: '0 0 0 2px rgba(66, 153, 225, 0.2)'
+                      }
+                    }}
+                    type="text" 
+                    value={isEditing ? editingNote?.title : newNote.title} 
+                    onChange={e => isEditing 
+                      ? setEditingNote({ ...editingNote, title: e.target.value })
+                      : setNewNote({ ...newNote, title: e.target.value })
+                    } 
+                    placeholder="Enter note title"
+                    required 
+                  />
+                </div>
+
+                <div style={{
+                  marginBottom: '1.25rem'
+                }}>
+                  <label style={{
+                    display: 'block',
+                    marginBottom: '0.5rem',
+                    fontWeight: '500',
+                    color: '#4a5568'
+                  }}>Answer*</label>
+                  <input 
+                    style={{
+                      width: '100%',
+                      padding: '0.625rem 0.75rem',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '6px',
+                      fontSize: '1rem',
+                      transition: 'all 0.2s ease',
+                      ':focus': {
+                        outline: 'none',
+                        borderColor: '#4299e1',
+                        boxShadow: '0 0 0 2px rgba(66, 153, 225, 0.2)'
+                      }
+                    }}
+                    type="text" 
+                    value={isEditing ? editingNote?.answer : newNote.answer} 
+                    onChange={e => isEditing 
+                      ? setEditingNote({ ...editingNote, answer: e.target.value })
+                      : setNewNote({ ...newNote, answer: e.target.value })
+                    } 
+                    placeholder="Enter the answer"
+                    required 
+                  />
+                </div>
+
+                <div style={{
+                  marginBottom: '1.25rem'
+                }}>
+                  <label style={{
+                    display: 'block',
+                    marginBottom: '0.5rem',
+                    fontWeight: '500',
+                    color: '#4a5568'
+                  }}>Explanation</label>
+                  <textarea 
+                    style={{
+                      width: '100%',
+                      padding: '0.625rem 0.75rem',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '6px',
+                      fontSize: '1rem',
+                      transition: 'all 0.2s ease',
+                      ':focus': {
+                        outline: 'none',
+                        borderColor: '#4299e1',
+                        boxShadow: '0 0 0 2px rgba(66, 153, 225, 0.2)'
+                      },
+                      minHeight: '100px'
+                    }}
+                    value={isEditing ? editingNote?.explanation : newNote.explanation} 
+                    onChange={e => isEditing 
+                      ? setEditingNote({ ...editingNote, explanation: e.target.value })
+                      : setNewNote({ ...newNote, explanation: e.target.value })
+                    } 
+                    placeholder="Add detailed explanation (optional)"
+                  />
+                </div>
+
+                <div style={{display: 'flex', gap: '0.5rem'}}>
+                  <button 
+                    type="submit" 
+                    style={{
+                      flex: 1,
                       width: '100%',
                       padding: '0.75rem',
-                      background: '#e53e3e',
+                      background: 'linear-gradient(135deg, #4299e1, #3182ce)',
                       color: 'white',
                       border: 'none',
                       borderRadius: '6px',
@@ -864,21 +904,115 @@ const NotesPage = () => {
                       alignItems: 'center',
                       gap: '0.5rem',
                       transition: 'all 0.2s ease',
-                      ':hover': {
-                        background: '#c53030',
+                      ':hover': !(!isFormValid || formLoading) && {
                         transform: 'translateY(-1px)',
-                        boxShadow: '0 2px 5px rgba(229, 62, 62, 0.3)'
+                        boxShadow: '0 2px 5px rgba(66, 153, 225, 0.3)'
+                      },
+                      ':disabled': {
+                        background: '#a0aec0',
+                        cursor: 'not-allowed',
+                        transform: 'none',
+                        boxShadow: 'none'
                       }
                     }}
-                    onClick={cancelEditing}
+                    disabled={!isFormValid || formLoading}
                   >
-                    Cancel
+                    {formLoading ? (
+                      <>
+                        <span style={{
+                          display: 'inline-block',
+                          width: '1rem',
+                          height: '1rem',
+                          border: '2px solid rgba(255, 255, 255, 0.3)',
+                          borderRadius: '50%',
+                          borderTopColor: 'white',
+                          animation: 'spin 1s ease-in-out infinite'
+                        }}></span> 
+                        {isEditing ? 'Updating...' : 'Creating...'}
+                      </>
+                    ) : (
+                      isEditing ? 'Update Note' : 'Add Note'
+                    )}
                   </button>
-                )}
-              </div>
-            </form>
-          </div>
-        </aside>
+
+                  {isEditing && (
+                    <button 
+                      type="button" 
+                      style={{
+                        flex: 0.5,
+                        width: '100%',
+                        padding: '0.75rem',
+                        background: '#e53e3e',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        fontWeight: '500',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        transition: 'all 0.2s ease',
+                        ':hover': {
+                          background: '#c53030',
+                          transform: 'translateY(-1px)',
+                          boxShadow: '0 2px 5px rgba(229, 62, 62, 0.3)'
+                        }
+                      }}
+                      onClick={cancelEditing}
+                    >
+                      Cancel
+                    </button>
+                  )}
+                </div>
+              </form>
+            </div>
+          </aside>
+        ) : (
+          <aside style={{
+            flex: 1,
+            '@media (min-width: 1024px)': {
+              position: 'sticky',
+              top: '1rem',
+              alignSelf: 'flex-start'
+            }
+          }}>
+            <div style={{
+              background: 'white',
+              borderRadius: '12px',
+              padding: '1.5rem',
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+              textAlign: 'center'
+            }}>
+              <h2>Admin Access Required</h2>
+              <p style={{color: '#718096', marginBottom: '1rem'}}>
+                You need administrator privileges to create or edit notes.
+              </p>
+              <button 
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  background: '#4299e1',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  ':hover': {
+                    background: '#3182ce',
+                    transform: 'translateY(-1px)'
+                  }
+                }}
+                onClick={() => {
+                  // Redirect to login page or show login modal
+                  window.location.href = '/login';
+                }}
+              >
+                Login as Admin
+              </button>
+            </div>
+          </aside>
+        )}
       </div>
 
       <style>{`

@@ -1,16 +1,36 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { loginUser } from '../api/api'; 
 
 function Login() {
   const [formData, setFormData] = useState({
     email: '',
-    password: '',
-    role: 'user' // Default role
+    password: ''
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [loginError, setLoginError] = useState('');
+  const [loginSuccess, setLoginSuccess] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      @keyframes loading {
+        0% { width: 0%; }
+        100% { width: 100%; }
+      }
+    `;
+    document.head.appendChild(style);
+    
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -51,30 +71,67 @@ function Login() {
     if (!validate()) return;
     
     setIsLoading(true);
+    setLoginError('');
     
     try {
-      // Simulate API call (replace with actual authentication)
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await loginUser(formData);
       
-      // In a real app, you would call your authentication API here
-      // const response = await fetch('/api/login', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(formData)
-      // });
-      // const data = await response.json();
-      // if (!response.ok) throw new Error(data.message || 'Login failed');
+      // Store the authentication token
+      if (response.token) {
+        localStorage.setItem('authToken', response.token);
+        localStorage.setItem('userRole', response.role || 'User');
+        localStorage.setItem('userEmail', formData.email);
+        
+        // Show success message
+        setLoginSuccess(true);
+        
+        // Redirect after 2 seconds
+        setTimeout(() => {
+          if (response.role === 'Admin') {
+            navigate('/admin');
+          } else {
+            navigate('/');
+          }
+        }, 2000);
+      } else {
+        throw new Error('No authentication token received');
+      }
       
-      console.log('Login successful', formData);
-      // Redirect based on role
-      navigate(formData.role === 'admin' ? '/admin' : '/'); 
     } catch (error) {
       console.error('Login error:', error);
-      setLoginError(error.message || 'Login failed. Please try again.');
+      setLoginError(
+        error.response?.data || 
+        error.message || 
+        'Login failed. Please check your credentials and try again.'
+      );
     } finally {
       setIsLoading(false);
     }
   };
+
+  if (loginSuccess) {
+    return (
+      <div style={successStyles.container}>
+        <div style={successStyles.card}>
+          <div style={successStyles.successIcon}>
+            <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20,6 9,17 4,12"></polyline>
+            </svg>
+          </div>
+          
+          <h1 style={successStyles.title}>Login Successful!</h1>
+          
+          <p style={successStyles.message}>
+            Welcome back! You are being redirected to your dashboard.
+          </p>
+
+          <div style={successStyles.loader}>
+            <div style={successStyles.loaderBar}></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={styles.container}>
@@ -86,20 +143,6 @@ function Login() {
         )}
         
         <form onSubmit={handleSubmit} style={styles.form}>
-          <div style={styles.formGroup}>
-            <label htmlFor="role" style={styles.label}>Role</label>
-            <select
-              id="role"
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              style={styles.input}
-            >
-              <option value="user">User</option>
-              <option value="admin">Admin</option>
-            </select>
-          </div>
-
           <div style={styles.formGroup}>
             <label htmlFor="email" style={styles.label}>Email</label>
             <input
@@ -152,7 +195,10 @@ function Login() {
             disabled={isLoading}
           >
             {isLoading ? (
-              <span>Logging in...</span>
+              <>
+                <span>Logging in...</span>
+                <div style={styles.spinner}></div>
+              </>
             ) : (
               <span>Login</span>
             )}
@@ -251,6 +297,14 @@ const styles = {
     alignItems: 'center',
     gap: '0.5rem',
   },
+  spinner: {
+    width: '16px',
+    height: '16px',
+    border: '2px solid transparent',
+    borderTop: '2px solid white',
+    borderRadius: '50%',
+    animation: 'spin 1s linear infinite',
+  },
   forgotPassword: {
     textAlign: 'right',
     marginTop: '-0.5rem',
@@ -278,6 +332,63 @@ const styles = {
     fontWeight: '600',
     padding: '0',
     textDecoration: 'underline',
+  },
+};
+
+const successStyles = {
+  container: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: '100vh',
+    backgroundColor: '#f5f5f5',
+    padding: '1rem',
+  },
+  card: {
+    backgroundColor: 'white',
+    borderRadius: '12px',
+    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+    padding: '3rem 2rem',
+    width: '100%',
+    maxWidth: '450px',
+    textAlign: 'center',
+  },
+  successIcon: {
+    width: '80px',
+    height: '80px',
+    backgroundColor: '#4CAF50',
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    margin: '0 auto 1.5rem auto',
+    boxShadow: '0 4px 10px rgba(76, 175, 80, 0.3)',
+  },
+  title: {
+    color: '#2E7D32',
+    marginBottom: '1rem',
+    fontSize: '2rem',
+    fontWeight: '600',
+  },
+  message: {
+    color: '#666',
+    fontSize: '1.1rem',
+    marginBottom: '2rem',
+    lineHeight: '1.5',
+  },
+  loader: {
+    width: '100%',
+    height: '6px',
+    backgroundColor: '#e0e0e0',
+    borderRadius: '3px',
+    overflow: 'hidden',
+  },
+  loaderBar: {
+    height: '100%',
+    width: '0%',
+    backgroundColor: '#4CAF50',
+    borderRadius: '3px',
+    animation: 'loading 2s ease-in-out forwards',
   },
 };
 

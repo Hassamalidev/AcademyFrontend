@@ -39,7 +39,7 @@ export const getNotes = async (subject, page = 1, pageSize = 6) => {
     throw err;
   }
 };
-// Update these API functions to accept a token parameter
+
 export const createNote = async (noteData, token) => {
   try {
     const response = await api.post("/notes", noteData, {
@@ -152,7 +152,6 @@ export const getQuestionsByCategory = async (categoryId) => {
     throw new Error(`Failed to fetch questions: ${err.message}`);
   }
 };
-// Student Remarks API functions
 export const getApprovedRemarks = async () => {
   try {
     const response = await axios.get(`${BASE_URL}/StudentRemarks/approved`);
@@ -205,3 +204,4 @@ export const loginUser = async (loginData) => {
     }
   }
 };
+

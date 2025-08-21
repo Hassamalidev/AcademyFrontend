@@ -75,20 +75,15 @@ function Login() {
     
     try {
       const response = await loginUser(formData);
-      
-      // Store the authentication token
+     
       if (response.token) {
         localStorage.setItem('authToken', response.token);
         localStorage.setItem('userRole', response.role || 'User');
         localStorage.setItem('userEmail', formData.email);
-        
-        // Show success message
         setLoginSuccess(true);
-        
-        // Redirect after 2 seconds
         setTimeout(() => {
           if (response.role === 'Admin') {
-            navigate('/admin');
+            navigate('/');
           } else {
             navigate('/');
           }

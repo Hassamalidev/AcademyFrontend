@@ -38,22 +38,43 @@ const NotesPage = () => {
     fetchNotes(1);
   }, [activeSubject]);
 
-  // Function to check if the current user is an admin
-  const checkAdminStatus = () => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        // Decode the token to check user role
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        setIsAdmin(payload.role === 'admin');
-      } catch (err) {
-        console.error('Error decoding token:', err);
-        setIsAdmin(false);
-      }
-    } else {
+  // In NotesPage component, replace the checkAdminStatus function:
+const checkAdminStatus = () => {
+  // First check if we have a stored role
+  const storedRole = localStorage.getItem('userRole');
+  if (storedRole) {
+    const adminStatus = storedRole.toLowerCase() === 'admin';
+    setIsAdmin(adminStatus);
+    return adminStatus;
+  }
+  
+  // Fallback to token decoding if no stored role
+  const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+  if (token) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const roleClaimKey = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role";
+      const userRole = payload[roleClaimKey] || payload.role;
+      
+      const adminStatus = userRole && userRole.toLowerCase() === 'admin';
+      setIsAdmin(adminStatus);
+      return adminStatus;
+    } catch (err) {
+      console.error('Error decoding token:', err);
       setIsAdmin(false);
+      return false;
     }
-  };
+  } else {
+    setIsAdmin(false);
+    return false;
+  }
+};
+
+const getToken = () => {
+  return localStorage.getItem('authToken') || localStorage.getItem('token');
+};
+
+ 
 
   const fetchNotes = async (pageNum = 1) => {
     setLoading(true);
@@ -84,9 +105,9 @@ const NotesPage = () => {
 
   const handleCreateNote = async (e) => {
     e.preventDefault();
-    // Check admin status again before proceeding
-    checkAdminStatus();
-    if (!isAdmin) {
+    // Check admin status again before proceeding - use the returned value
+    const adminStatus = checkAdminStatus();
+    if (!adminStatus) {
       setError('Only administrators can create notes');
       return;
     }
@@ -95,8 +116,7 @@ const NotesPage = () => {
     setError(null);
     setSuccess(null);
     try {
-      // Get token from localStorage
-      const token = localStorage.getItem('token');
+      const token = getToken();
       if (!token) {
         throw new Error('Authentication required');
       }
@@ -104,7 +124,7 @@ const NotesPage = () => {
       await createNote({ 
         ...newNote, 
         createdAt: new Date().toISOString() 
-      }, token); // Pass token to API call
+      }, token);
       
       setNewNote({ 
         title: '', 
@@ -123,9 +143,9 @@ const NotesPage = () => {
 
   const handleUpdateNote = async (e) => {
     e.preventDefault();
-    // Check admin status again before proceeding
-    checkAdminStatus();
-    if (!isAdmin) {
+    // Check admin status again before proceeding - use the returned value
+    const adminStatus = checkAdminStatus();
+    if (!adminStatus) {
       setError('Only administrators can update notes');
       return;
     }
@@ -134,13 +154,12 @@ const NotesPage = () => {
     setError(null);
     setSuccess(null);
     try {
-      // Get token from localStorage
-      const token = localStorage.getItem('token');
+      const token = getToken();
       if (!token) {
         throw new Error('Authentication required');
       }
       
-      await updateNote(editingNote.id, editingNote, token); // Pass token to API call
+      await updateNote(editingNote.id, editingNote, token);
       setSuccess('Note updated successfully!');
       setIsEditing(false);
       setEditingNote(null);
@@ -153,9 +172,9 @@ const NotesPage = () => {
   };
 
   const handleDeleteNote = async (id) => {
-    // Check admin status again before proceeding
-    checkAdminStatus();
-    if (!isAdmin) {
+    // Check admin status again before proceeding - use the returned value
+    const adminStatus = checkAdminStatus();
+    if (!adminStatus) {
       setError('Only administrators can delete notes');
       return;
     }
@@ -163,13 +182,12 @@ const NotesPage = () => {
     if (!window.confirm('Are you sure you want to delete this note?')) return;
     
     try {
-      // Get token from localStorage
-      const token = localStorage.getItem('token');
+      const token = getToken();
       if (!token) {
         throw new Error('Authentication required');
       }
       
-      await deleteNote(id, token); // Pass token to API call
+      await deleteNote(id, token);
       setSuccess('Note deleted successfully!');
       if (notes.length === 1 && pagination.page > 1) {
         fetchNotes(pagination.page - 1);
@@ -182,9 +200,9 @@ const NotesPage = () => {
   };
 
   const startEditing = (note) => {
-    // Check admin status before allowing edit
-    checkAdminStatus();
-    if (!isAdmin) {
+    // Check admin status before allowing edit - use the returned value
+    const adminStatus = checkAdminStatus();
+    if (!adminStatus) {
       setError('Only administrators can edit notes');
       return;
     }
@@ -193,6 +211,7 @@ const NotesPage = () => {
     setIsEditing(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
 
   const cancelEditing = () => {
     setIsEditing(false);
@@ -1004,7 +1023,6 @@ const NotesPage = () => {
                   }
                 }}
                 onClick={() => {
-                  // Redirect to login page or show login modal
                   window.location.href = '/login';
                 }}
               >

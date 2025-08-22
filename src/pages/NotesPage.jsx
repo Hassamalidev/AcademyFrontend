@@ -33,14 +33,10 @@ const NotesPage = () => {
   });
 
   useEffect(() => {
-    // Check if user is admin on component mount
     checkAdminStatus();
     fetchNotes(1);
   }, [activeSubject]);
-
-  // In NotesPage component, replace the checkAdminStatus function:
-const checkAdminStatus = () => {
-  // First check if we have a stored role
+  const checkAdminStatus = () => {
   const storedRole = localStorage.getItem('userRole');
   if (storedRole) {
     const adminStatus = storedRole.toLowerCase() === 'admin';
@@ -48,7 +44,6 @@ const checkAdminStatus = () => {
     return adminStatus;
   }
   
-  // Fallback to token decoding if no stored role
   const token = localStorage.getItem('authToken') || localStorage.getItem('token');
   if (token) {
     try {
@@ -73,9 +68,6 @@ const checkAdminStatus = () => {
 const getToken = () => {
   return localStorage.getItem('authToken') || localStorage.getItem('token');
 };
-
- 
-
   const fetchNotes = async (pageNum = 1) => {
     setLoading(true);
     setError(null);
@@ -105,7 +97,6 @@ const getToken = () => {
 
   const handleCreateNote = async (e) => {
     e.preventDefault();
-    // Check admin status again before proceeding - use the returned value
     const adminStatus = checkAdminStatus();
     if (!adminStatus) {
       setError('Only administrators can create notes');
@@ -143,7 +134,6 @@ const getToken = () => {
 
   const handleUpdateNote = async (e) => {
     e.preventDefault();
-    // Check admin status again before proceeding - use the returned value
     const adminStatus = checkAdminStatus();
     if (!adminStatus) {
       setError('Only administrators can update notes');
@@ -172,7 +162,6 @@ const getToken = () => {
   };
 
   const handleDeleteNote = async (id) => {
-    // Check admin status again before proceeding - use the returned value
     const adminStatus = checkAdminStatus();
     if (!adminStatus) {
       setError('Only administrators can delete notes');
@@ -200,7 +189,6 @@ const getToken = () => {
   };
 
   const startEditing = (note) => {
-    // Check admin status before allowing edit - use the returned value
     const adminStatus = checkAdminStatus();
     if (!adminStatus) {
       setError('Only administrators can edit notes');
@@ -287,7 +275,6 @@ const getToken = () => {
           marginBottom: '0'
         }}>Organize and manage your study notes</p>
         
-        {/* Admin status indicator */}
         <div style={{
           marginTop: '0.5rem',
           padding: '0.5rem 1rem',

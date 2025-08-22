@@ -152,25 +152,6 @@ export const getQuestionsByCategory = async (categoryId) => {
     throw new Error(`Failed to fetch questions: ${err.message}`);
   }
 };
-export const getApprovedRemarks = async () => {
-  try {
-    const response = await axios.get(`${BASE_URL}/StudentRemarks/approved`);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching approved remarks:", error);
-    throw error;
-  }
-};
-
-export const createRemark = async (remarkData) => {
-  try {
-    const response = await axios.post(`${BASE_URL}/StudentRemarks`, remarkData);
-    return response.data;
-  } catch (error) {
-    console.error("Error creating remark:", error);
-    throw error;
-  }
-};
 export const registerUser = async (userData) => {
   try {
     const response = await api.post("/auth/register", userData);
@@ -205,3 +186,52 @@ export const loginUser = async (loginData) => {
   }
 };
 
+export const getApprovedRemarks = async () => {
+  try {
+    const response = await api.get("/StudentRemarks/approved");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching approved remarks:", error);
+    throw error;
+  }
+};
+
+export const getAllRemarks = async () => {
+  try {
+    const response = await api.get("/StudentRemarks");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching all remarks:", error);
+    throw error;
+  }
+};
+
+export const createRemark = async (remarkData) => {
+  try {
+    const response = await api.post("/StudentRemarks", remarkData);
+    return response.data;
+  } catch (error) {
+    console.error("Error creating remark:", error);
+    throw error;
+  }
+};
+
+export const approveRemark = async (id) => {
+  try {
+    const response = await api.put(`/StudentRemarks/approve/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error approving remark:", error);
+    throw error;
+  }
+};
+
+export const deleteRemark = async (id) => {
+  try {
+    const response = await api.delete(`/StudentRemarks/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting remark:", error);
+    throw error;
+  }
+};

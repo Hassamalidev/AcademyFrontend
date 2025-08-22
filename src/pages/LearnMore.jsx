@@ -1,252 +1,528 @@
-
-import React from "react";
+import React, { useState } from "react";
 
 const LearnMore = () => {
-  return (
-    <div style={{
-      maxWidth: "1200px",
-      margin: "0 auto",
-      padding: "80px 24px",
-      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
-    }}>
-      <h1 style={{
-        fontSize: "2.5rem",
-        fontWeight: "800",
-        color: "#1e293b",
-        marginBottom: "40px",
-        textAlign: "center",
-        background: "linear-gradient(135deg, #4e1faf, #7c3aed)",
-        WebkitBackgroundClip: "text",
-        WebkitTextFillColor: "transparent"
-      }}>
-        ISSB - Inter Services Selection Board
-      </h1>
+  const [selectedCategory, setSelectedCategory] = useState(null);
 
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "1fr 1fr",
-        gap: "40px",
-        marginBottom: "60px"
+  const categories = {
+    initialTests: {
+      title: "Initial Tests",
+      icon: "📝",
+      color: "#4e1faf",
+      content: {
+        overview: "First screening phase that includes intelligence and academic assessments",
+        components: [
+          {
+            name: "Verbal Intelligence Test",
+            details: "80-90 questions in 30-40 minutes testing vocabulary, analogies, and comprehension"
+          },
+          {
+            name: "Non-Verbal Intelligence Test", 
+            details: "Pattern recognition, spatial reasoning, and logical sequences"
+          },
+          {
+            name: "Academic Test",
+            details: "Mathematics, Physics, Chemistry, English based on intermediate level"
+          }
+        ],
+        passingCriteria: "Minimum 60% marks required to proceed to next stage",
+        tips: [
+          "Practice IQ tests and reasoning questions daily",
+          "Strengthen basic mathematics and science concepts",
+          "Improve vocabulary and English comprehension",
+          "Time management is crucial - practice with timer"
+        ]
+      }
+    },
+    physical: {
+      title: "Physical Fitness",
+      icon: "🏃",
+      color: "#059669",
+      content: {
+        overview: "Physical fitness assessment to ensure candidates can handle military training demands",
+        components: [
+          {
+            name: "1.6km Run",
+            details: "Males: 6:30 minutes max, Females: 7:30 minutes max"
+          },
+          {
+            name: "Push-ups",
+            details: "Males: Minimum 30 in 2 minutes, Females: Minimum 15 in 2 minutes"
+          },
+          {
+            name: "Sit-ups",
+            details: "Males: Minimum 35 in 2 minutes, Females: Minimum 25 in 2 minutes"
+          },
+          {
+            name: "Chin-ups",
+            details: "Males: Minimum 6, Females: Flexed arm hang for 20 seconds"
+          }
+        ],
+        passingCriteria: "Must pass all components to continue",
+        tips: [
+          "Start training at least 3 months before ISSB",
+          "Focus on cardiovascular endurance",
+          "Practice proper form for exercises",
+          "Maintain consistent daily workout routine"
+        ]
+      }
+    },
+    medical: {
+      title: "Medical Examination",
+      icon: "🏥",
+      color: "#dc2626",
+      content: {
+        overview: "Comprehensive medical examination to ensure fitness for military service",
+        components: [
+          {
+            name: "Initial Medical",
+            details: "Height, weight, basic physical examination, flat feet check"
+          },
+          {
+            name: "Detailed Medical",
+            details: "Chest X-ray, blood tests, ECG, eye test, hearing test"
+          },
+          {
+            name: "Specialist Consultations",
+            details: "ENT, Ophthalmology, Cardiology as required"
+          }
+        ],
+        passingCriteria: "Must be declared medically fit in all categories",
+        tips: [
+          "Maintain good health habits before ISSB",
+          "Get regular health check-ups",
+          "Address any medical issues beforehand",
+          "Carry all medical documents if any previous treatments"
+        ]
+      }
+    }
+  };
+
+  const services = {
+    army: {
+      title: "Pakistan Army",
+      icon: "🛡️",
+      color: "#16a34a",
+      courses: [
+        {
+          name: "PMA Long Course",
+          duration: "2 years",
+          eligibility: "Intermediate with 60% marks, Age 17-22 years"
+        },
+        {
+          name: "Technical Cadet Course (TCC)",
+          duration: "4 years",
+          eligibility: "FSc Pre-Engineering with 60% marks, Age 17-22 years"
+        }
+      ],
+      specialBranches: ["Infantry", "Artillery", "Armoured Corps", "Engineers", "Signals", "Aviation"],
+      website: "www.joinpakarmy.gov.pk"
+    },
+    navy: {
+      title: "Pakistan Navy",
+      icon: "⚓",
+      color: "#0ea5e9",
+      courses: [
+        {
+          name: "Pakistan Naval Academy",
+          duration: "1.5 years",
+          eligibility: "Intermediate with 60% marks, Age 17-22 years"
+        },
+        {
+          name: "Naval Engineering",
+          duration: "4 years",
+          eligibility: "FSc Pre-Engineering with 60% marks"
+        }
+      ],
+      specialBranches: ["Operations", "Engineering", "Naval Aviation", "Marines", "Submarines"],
+      website: "www.paknavy.gov.pk"
+    },
+    airforce: {
+      title: "Pakistan Air Force",
+      icon: "✈️",
+      color: "#7c3aed",
+      courses: [
+        {
+          name: "General Duty Pilot (GDP)",
+          duration: "3 years",
+          eligibility: "Intermediate with 60% marks, Age 17-22 years"
+        },
+        {
+          name: "Aeronautical Engineering",
+          duration: "4 years",
+          eligibility: "FSc Pre-Engineering with 60% marks"
+        }
+      ],
+      specialBranches: ["Flying", "Engineering", "Air Defence", "Administration", "Education"],
+      website: "www.joinpaf.gov.pk"
+    }
+  };
+
+  const CategoryCard = ({ category, data, isSelected, onClick }) => (
+    <div
+      onClick={() => onClick(isSelected ? null : category)}
+      className={`cursor-pointer transition-all duration-300 ${
+        isSelected ? 'transform scale-105' : 'hover:transform hover:scale-102'
+      }`}
+      style={{
+        backgroundColor: isSelected ? `${data.color}10` : "white",
+        border: `2px solid ${isSelected ? data.color : '#e2e8f0'}`,
+        borderRadius: "20px",
+        padding: "24px",
+        boxShadow: isSelected ? `0 20px 40px ${data.color}20` : "0 8px 25px rgba(0, 0, 0, 0.08)"
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "16px" }}>
+        <span style={{ fontSize: "2.5rem" }}>{data.icon}</span>
+        <h3 style={{
+          fontSize: "1.5rem",
+          fontWeight: "700",
+          color: data.color,
+          margin: 0
+        }}>
+          {data.title}
+        </h3>
+      </div>
+      
+      <p style={{
+        fontSize: "1rem",
+        color: "#64748b",
+        lineHeight: "1.6",
+        margin: 0
       }}>
-        <div>
-          <h2 style={{
-            fontSize: "1.75rem",
-            fontWeight: "700",
-            color: "#1e293b",
-            marginBottom: "20px"
-          }}>
-            History of ISSB
-          </h2>
-          <p style={{
-            fontSize: "1.125rem",
-            lineHeight: "1.7",
-            color: "#475569",
-            marginBottom: "20px"
-          }}>
-            The Inter Services Selection Board (ISSB) was established in 1949 to select officers for the Pakistan Armed Forces. 
-            The system was developed based on the German Army's psychological assessment methods used during World War II.
-          </p>
-          <p style={{
-            fontSize: "1.125rem",
-            lineHeight: "1.7",
-            color: "#475569"
-          }}>
-            Over the years, ISSB has evolved into a comprehensive 4-day assessment process that evaluates candidates on 
-            intelligence, personality, leadership potential, and physical fitness through various tests and group activities.
-          </p>
-        </div>
-        <div>
-          <h2 style={{
-            fontSize: "1.75rem",
-            fontWeight: "700",
-            color: "#1e293b",
-            marginBottom: "20px"
-          }}>
-            Selection Process
-          </h2>
-          <ul style={{
-            listStyle: "none",
-            padding: 0
-          }}>
-            {[
-              "Initial Tests (Intelligence, Academic)",
-              "Psychological Tests (Personality Assessment)",
-              "Group Testing (Leadership, Teamwork)",
-              "Individual Tasks (Planning, Problem Solving)",
-              "Interview (Personal Evaluation)",
-              "Final Conference (Selection Decision)"
-            ].map((item, index) => (
-              <li key={index} style={{
+        {data.content.overview}
+      </p>
+
+      {isSelected && (
+        <div style={{ marginTop: "24px" }}>
+          <div style={{ marginBottom: "20px" }}>
+            <h4 style={{ color: data.color, fontSize: "1.2rem", fontWeight: "600", marginBottom: "12px" }}>
+              Components:
+            </h4>
+            {data.content.components.map((comp, idx) => (
+              <div key={idx} style={{
+                backgroundColor: `${data.color}05`,
+                padding: "12px 16px",
+                borderRadius: "12px",
+                marginBottom: "8px",
+                borderLeft: `4px solid ${data.color}`
+              }}>
+                <div style={{ fontWeight: "600", color: "#1e293b", marginBottom: "4px" }}>
+                  {comp.name}
+                </div>
+                <div style={{ fontSize: "0.9rem", color: "#64748b" }}>
+                  {comp.details}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ marginBottom: "20px" }}>
+            <h4 style={{ color: data.color, fontSize: "1.2rem", fontWeight: "600", marginBottom: "8px" }}>
+              Passing Criteria:
+            </h4>
+            <p style={{ 
+              backgroundColor: `${data.color}08`,
+              padding: "12px",
+              borderRadius: "8px",
+              color: "#1e293b",
+              margin: 0,
+              fontWeight: "500"
+            }}>
+              {data.content.passingCriteria}
+            </p>
+          </div>
+
+          <div>
+            <h4 style={{ color: data.color, fontSize: "1.2rem", fontWeight: "600", marginBottom: "12px" }}>
+              Preparation Tips:
+            </h4>
+            {data.content.tips.map((tip, idx) => (
+              <div key={idx} style={{
                 display: "flex",
                 alignItems: "flex-start",
-                gap: "12px",
-                marginBottom: "12px",
-                fontSize: "1.125rem",
-                color: "#475569"
+                gap: "8px",
+                marginBottom: "8px"
               }}>
-                <span style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  width: "24px",
-                  height: "24px",
-                  backgroundColor: "#4e1faf",
-                  color: "white",
-                  borderRadius: "50%",
-                  fontSize: "0.875rem",
-                  fontWeight: "bold",
-                  flexShrink: 0
-                }}>
-                  {index + 1}
-                </span>
-                {item}
-              </li>
+                <span style={{ color: data.color, fontWeight: "bold", marginTop: "2px" }}>•</span>
+                <span style={{ color: "#475569", fontSize: "0.95rem" }}>{tip}</span>
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
+      )}
+    </div>
+  );
+
+  const ServiceCard = ({ service, data }) => (
+    <div style={{
+      backgroundColor: "white",
+      border: `2px solid ${data.color}20`,
+      borderRadius: "20px",
+      padding: "24px",
+      boxShadow: "0 8px 25px rgba(0, 0, 0, 0.08)",
+      transition: "all 0.3s ease"
+    }}
+    className="hover:transform hover:scale-102">
+      
+      <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "20px" }}>
+        <span style={{ fontSize: "2.5rem" }}>{data.icon}</span>
+        <h3 style={{
+          fontSize: "1.5rem",
+          fontWeight: "700",
+          color: data.color,
+          margin: 0
+        }}>
+          {data.title}
+        </h3>
       </div>
 
-      <div style={{
-        backgroundColor: "rgba(78, 31, 175, 0.05)",
-        padding: "40px",
-        borderRadius: "20px",
-        border: "1px solid rgba(78, 31, 175, 0.1)",
-        marginBottom: "60px"
-      }}>
-        <h2 style={{
-          fontSize: "1.75rem",
-          fontWeight: "700",
-          color: "#1e293b",
-          marginBottom: "20px"
-        }}>
-          Preparation Tips
-        </h2>
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-          gap: "20px"
-        }}>
-          {[
-            {
-              title: "Physical Fitness",
-              tips: [
-                "Regular running (2.4km in under 10 minutes)",
-                "Push-ups (minimum 30 in 2 minutes)",
-                "Sit-ups (minimum 35 in 2 minutes)",
-                "Chin-ups (minimum 6 in 2 minutes)"
-              ]
-            },
-            {
-              title: "Psychological Preparation",
-              tips: [
-                "Practice group discussions",
-                "Develop decision-making skills",
-                "Work on emotional stability",
-                "Improve communication skills"
-              ]
-            },
-            {
-              title: "General Knowledge",
-              tips: [
-                "Stay updated on current affairs",
-                "Study Pakistan's history",
-                "Learn about military history",
-                "Understand basic military concepts"
-              ]
-            }
-          ].map((section, index) => (
-            <div key={index} style={{
-              backgroundColor: "white",
-              padding: "24px",
-              borderRadius: "16px",
-              boxShadow: "0 4px 20px rgba(0, 0, 0, 0.05)"
-            }}>
-              <h3 style={{
-                fontSize: "1.25rem",
-                fontWeight: "700",
-                color: "#4e1faf",
-                marginBottom: "16px"
-              }}>
-                {section.title}
-              </h3>
-              <ul style={{
-                listStyle: "none",
-                padding: 0,
-                margin: 0
-              }}>
-                {section.tips.map((tip, tipIndex) => (
-                  <li key={tipIndex} style={{
-                    display: "flex",
-                    alignItems: "flex-start",
-                    gap: "8px",
-                    marginBottom: "12px",
-                    fontSize: "1rem",
-                    color: "#475569"
-                  }}>
-                    <span style={{
-                      color: "#4e1faf",
-                      fontWeight: "bold"
-                    }}>•</span>
-                    {tip}
-                  </li>
-                ))}
-              </ul>
+      <div style={{ marginBottom: "20px" }}>
+        <h4 style={{ color: "#1e293b", fontSize: "1.1rem", fontWeight: "600", marginBottom: "12px" }}>
+          Available Courses:
+        </h4>
+        {data.courses.map((course, idx) => (
+          <div key={idx} style={{
+            backgroundColor: `${data.color}08`,
+            padding: "12px",
+            borderRadius: "12px",
+            marginBottom: "8px"
+          }}>
+            <div style={{ fontWeight: "600", color: data.color, marginBottom: "4px" }}>
+              {course.name}
             </div>
+            <div style={{ fontSize: "0.9rem", color: "#64748b", marginBottom: "2px" }}>
+              Duration: {course.duration}
+            </div>
+            <div style={{ fontSize: "0.85rem", color: "#64748b" }}>
+              {course.eligibility}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ marginBottom: "20px" }}>
+        <h4 style={{ color: "#1e293b", fontSize: "1.1rem", fontWeight: "600", marginBottom: "8px" }}>
+          Special Branches:
+        </h4>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+          {data.specialBranches.map((branch, idx) => (
+            <span key={idx} style={{
+              backgroundColor: `${data.color}`,
+              color: "white",
+              padding: "4px 12px",
+              borderRadius: "20px",
+              fontSize: "0.8rem",
+              fontWeight: "500"
+            }}>
+              {branch}
+            </span>
           ))}
         </div>
       </div>
 
       <div style={{
-        textAlign: "center",
-        padding: "40px",
-        backgroundColor: "rgba(78, 31, 175, 0.05)",
-        borderRadius: "20px",
-        border: "1px dashed rgba(78, 31, 175, 0.3)"
+        padding: "12px",
+        backgroundColor: "#f8fafc",
+        borderRadius: "8px",
+        textAlign: "center"
       }}>
-        <h3 style={{
-          fontSize: "1.5rem",
+        <span style={{ fontSize: "0.9rem", color: "#64748b" }}>
+          Apply at: {data.website}
+        </span>
+      </div>
+    </div>
+  );
+
+  return (
+    <div style={{
+      maxWidth: "1400px",
+      margin: "0 auto",
+      padding: "40px 24px",
+      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+      backgroundColor: "#fafbfc"
+    }}>
+      <div style={{ textAlign: "center", marginBottom: "60px" }}>
+        <h1 style={{
+          fontSize: "3rem",
+          fontWeight: "800",
+          background: "linear-gradient(135deg, #4e1faf, #7c3aed, #059669)",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+          marginBottom: "16px"
+        }}>
+          ISSB - Complete Guide
+        </h1>
+        <p style={{
+          fontSize: "1.2rem",
+          color: "#64748b",
+          maxWidth: "600px",
+          margin: "0 auto"
+        }}>
+          Everything you need to know about Inter Services Selection Board
+        </p>
+      </div>
+
+      {/* ISSB Test Categories */}
+      <section style={{ marginBottom: "80px" }}>
+        <h2 style={{
+          fontSize: "2rem",
           fontWeight: "700",
           color: "#1e293b",
-          marginBottom: "20px"
+          textAlign: "center",
+          marginBottom: "40px"
         }}>
-          Need Personalized Guidance?
+          ISSB Test Categories
+        </h2>
+        
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))",
+          gap: "24px"
+        }}>
+          {Object.entries(categories).map(([key, data]) => (
+            <CategoryCard
+              key={key}
+              category={key}
+              data={data}
+              isSelected={selectedCategory === key}
+              onClick={setSelectedCategory}
+            />
+          ))}
+        </div>
+      </section>
+
+      {/* Services Information */}
+      <section style={{ marginBottom: "80px" }}>
+        <h2 style={{
+          fontSize: "2rem",
+          fontWeight: "700",
+          color: "#1e293b",
+          textAlign: "center",
+          marginBottom: "40px"
+        }}>
+          Armed Forces Services
+        </h2>
+        
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))",
+          gap: "24px"
+        }}>
+          {Object.entries(services).map(([key, data]) => (
+            <ServiceCard key={key} service={key} data={data} />
+          ))}
+        </div>
+      </section>
+
+      {/* ISSB Process Timeline */}
+      <section style={{ marginBottom: "80px" }}>
+        <h2 style={{
+          fontSize: "2rem",
+          fontWeight: "700",
+          color: "#1e293b",
+          textAlign: "center",
+          marginBottom: "40px"
+        }}>
+          4-Day ISSB Process
+        </h2>
+        
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+          gap: "20px"
+        }}>
+          {[
+            { day: "Day 1", title: "Arrival & Initial Tests", activities: "Registration, Intelligence Test, Academic Test" },
+            { day: "Day 2", title: "Psychological Tests", activities: "TAT, WAT, SRT, Self Description" },
+            { day: "Day 3", title: "Group Testing", activities: "Group Discussion, Planning Exercise, Physical Tasks" },
+            { day: "Day 4", title: "Interview & Results", activities: "Personal Interview, Medical Check, Final Results" }
+          ].map((phase, idx) => (
+            <div key={idx} style={{
+              backgroundColor: "white",
+              padding: "24px",
+              borderRadius: "16px",
+              border: `3px solid ${['#4e1faf', '#059669', '#dc2626', '#7c3aed'][idx]}`,
+              textAlign: "center",
+              position: "relative"
+            }}>
+              <div style={{
+                backgroundColor: ['#4e1faf', '#059669', '#dc2626', '#7c3aed'][idx],
+                color: "white",
+                padding: "8px 16px",
+                borderRadius: "20px",
+                fontSize: "0.9rem",
+                fontWeight: "600",
+                marginBottom: "16px",
+                display: "inline-block"
+              }}>
+                {phase.day}
+              </div>
+              <h3 style={{ color: "#1e293b", fontSize: "1.2rem", fontWeight: "600", marginBottom: "12px" }}>
+                {phase.title}
+              </h3>
+              <p style={{ color: "#64748b", fontSize: "0.9rem", lineHeight: "1.5", margin: 0 }}>
+                {phase.activities}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Contact Section */}
+      <div style={{
+        textAlign: "center",
+        padding: "40px",
+        background: "linear-gradient(135deg, #4e1faf 0%, #7c3aed 50%, #059669 100%)",
+        borderRadius: "24px",
+        color: "white"
+      }}>
+        <h3 style={{
+          fontSize: "2rem",
+          fontWeight: "700",
+          marginBottom: "16px"
+        }}>
+          Ready to Start Your ISSB Journey?
         </h3>
         <p style={{
-          fontSize: "1.125rem",
-          color: "#64748b",
-          marginBottom: "24px",
-          maxWidth: "600px",
+          fontSize: "1.1rem",
+          opacity: "0.9",
+          marginBottom: "32px",
+          maxWidth: "500px",
           marginLeft: "auto",
           marginRight: "auto"
         }}>
-          Our expert instructors are ready to help you prepare for your ISSB journey.
+          Join our Defence Preparatory Academy for expert guidance and comprehensive preparation
         </p>
         <a 
-          href="https://wa.me/923001234567" 
+          href="https://whatsapp.com/channel/0029Vb6OOf2JuyABkRXFLn2m"
           target="_blank" 
           rel="noopener noreferrer"
           style={{
-            display: "inline-block",
-            background: "linear-gradient(135deg, #4e1faf 0%, #7c3aed 100%)",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "12px",
+            background: "rgba(255, 255, 255, 0.15)",
+            backdropFilter: "blur(10px)",
             color: "white",
             padding: "16px 32px",
-            fontSize: "1.125rem",
+            fontSize: "1.1rem",
             fontWeight: "600",
-            borderRadius: "16px",
+            borderRadius: "50px",
             textDecoration: "none",
-            boxShadow: "0 8px 20px rgba(78, 31, 175, 0.3)",
+            border: "2px solid rgba(255, 255, 255, 0.3)",
             transition: "all 0.3s ease"
           }}
           onMouseEnter={(e) => {
+            e.target.style.background = "rgba(255, 255, 255, 0.25)";
             e.target.style.transform = "translateY(-2px)";
-            e.target.style.boxShadow = "0 12px 30px rgba(78, 31, 175, 0.4)";
           }}
           onMouseLeave={(e) => {
+            e.target.style.background = "rgba(255, 255, 255, 0.15)";
             e.target.style.transform = "translateY(0)";
-            e.target.style.boxShadow = "0 8px 20px rgba(78, 31, 175, 0.3)";
           }}
         >
-          Contact Us on WhatsApp
+          <span style={{ fontSize: "1.5rem" }}>📱</span>
+          Follow Defence Preparatory Academy
         </a>
       </div>
     </div>

@@ -536,38 +536,8 @@ const News = () => {
 
   return (
     <div style={styles.container}>
-      {/* Header */}
-      <div style={styles.header}>
-        <div style={{ maxWidth: '72rem', margin: '0 auto' }}>
-          <h1 style={styles.title}>News Hub</h1>
-          <p style={styles.subtitle}>Stay informed with curated news from trusted sources</p>
-          
-          {/* Search Bar */}
-          <div style={styles.searchContainer}>
-            <Search style={styles.searchIcon} />
-            <input
-              type="text"
-              placeholder="Search articles..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              style={{
-                ...styles.searchInput,
-                ':focus': { borderColor: '#3b82f6', boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)' }
-              }}
-              onFocus={(e) => {
-                e.target.style.borderColor = '#3b82f6';
-                e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = '#d1d5db';
-                e.target.style.boxShadow = 'none';
-              }}
-            />
-          </div>
-        </div>
-      </div>
+     
 
-      {/* Navigation Tabs */}
       <div style={styles.navigation}>
         <div style={styles.navContainer}>
           {Object.entries(CATEGORY_CONFIG).map(([key, config]) => (
@@ -599,7 +569,6 @@ const News = () => {
         </div>
       </div>
 
-      {/* Main Content */}
       <div style={styles.mainContent}>
         {error && (
           <div style={styles.errorBanner}>
@@ -614,7 +583,6 @@ const News = () => {
           </div>
         ) : (
           <>
-            {/* Articles Grid */}
             <div style={styles.articlesGrid}>
               {filteredArticles.map(article => (
                 <article
@@ -691,7 +659,6 @@ const News = () => {
         )}
       </div>
 
-      {/* Article Modal */}
       {selectedArticle && (
         <div style={styles.modal} onClick={() => setSelectedArticle(null)}>
           <div style={styles.modalContent} onClick={(e) => e.stopPropagation()}>
@@ -744,7 +711,6 @@ const News = () => {
         </div>
       )}
 
-      {/* Floating Refresh Button */}
       <button
         onClick={() => fetchCategoryNews(activeTab)}
         style={styles.floatingButton}

@@ -11,6 +11,8 @@ import LearnMore from "./pages/LearnMore";
 import CategorySelection from "./pages/CategorySelection";
 import Courses from "./pages/Courses";
 import Signup from "./pages/Signup"
+import AiTeacher from "./pages/PsychologicalAssessmentPlatform"
+
 
 function App() {
   return (
@@ -31,6 +33,7 @@ function App() {
           <Route path="/learn-more" element={<LearnMore />} />
          
           <Route path="/category-selection" element={<CategorySelection />} />
+          <Route path="/ai" element={<AiTeacher />} />
           <Route path="/test/:categoryId" element={<TestPage />} />
         </Routes>
       </div>

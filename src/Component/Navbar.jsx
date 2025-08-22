@@ -284,7 +284,8 @@ function Navbar() {
     { to: "/courses", label: "Our Courses" },
     { to: "/contact", label: "Contact Us" },
     { to: "/bmi", label: "BMI" },
-    { to: "/news", label: "Latest News" },
+    { to: "/news", label: "News" },
+    { to: "/ai", label: "AI" },
   ];
 
   return (

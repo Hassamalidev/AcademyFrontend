@@ -1,22 +1,17 @@
 import React, { useState } from 'react';
 import { 
-  Brain, Home, CheckCircle, XCircle, Loader, 
+  Brain, Home, CheckCircle, Loader, 
   MessageSquare, Edit, BookOpen, Image, Navigation, 
   PenTool, Shield, Info, Zap, Star, TrendingUp, 
-  Users, Target, Lightbulb, FileText, ArrowRight
+  Target, Lightbulb, FileText, ArrowRight, Sparkles
 } from 'lucide-react';
 
-const CONSTANTS = {
+// Configuration constants
+const CONFIG = {
   DAILY_LIMIT: 20,
   MIN_CHARACTERS: 10,
   COLORS: {
     primaryGradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    positiveGradient: 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)',
-    negativeGradient: 'linear-gradient(135deg, #ed8936 0%, #dd6b20 100%)',
-    neutralGradient: 'linear-gradient(135deg, #a0aec0 0%, #718096 100%)',
-    strengthsGradient: 'linear-gradient(135deg, #4299e1 0%, #3182ce 100%)',
-    growthGradient: 'linear-gradient(135deg, #ed8936 0%, #dd6b20 100%)',
-    recommendationsGradient: 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)',
     white: '#ffffff',
     gray100: '#f8f9ff',
     gray200: '#e8f2ff',
@@ -49,59 +44,127 @@ const CONSTANTS = {
     lg: '25px',
     xl: '30px',
     xxl: '40px'
+  },
+  TEST_TYPES: [
+    {
+      id: 'word-association',
+      icon: MessageSquare,
+      title: 'Word Association Test',
+      description: 'Reveal unconscious thoughts through word associations',
+      color: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
+      shadowColor: 'rgba(255, 154, 158, 0.3)'
+    },
+    {
+      id: 'sentence-completion-english',
+      icon: Edit,
+      title: 'Sentence Completion (English)',
+      description: 'Complete sentences to explore thought patterns',
+      color: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+      shadowColor: 'rgba(168, 237, 234, 0.3)'
+    },
+    {
+      id: 'sentence-completion-urdu',
+      icon: BookOpen,
+      title: 'Sentence Completion (Urdu)',
+      description: 'جملے مکمل کرکے اپنے خیالات کا تجزیہ کریں',
+      color: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
+      shadowColor: 'rgba(255, 236, 210, 0.3)'
+    },
+    {
+      id: 'picture-story',
+      icon: Image,
+      title: 'Picture Story Test',
+      description: 'Create stories from images to analyze personality',
+      color: 'linear-gradient(135deg, #a8c0ff 0%, #3f2b96 100%)',
+      shadowColor: 'rgba(168, 192, 255, 0.3)'
+    },
+    {
+      id: 'pointer-story',
+      icon: Navigation,
+      title: 'Pointer Story Test',
+      description: 'Develop logical narratives for cognitive assessment',
+      color: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+      shadowColor: 'rgba(250, 112, 154, 0.3)'
+    },
+    {
+      id: 'essay-writing',
+      icon: PenTool,
+      title: 'Essay Writing',
+      description: 'Express thoughts through writing for deep analysis',
+      color: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+      shadowColor: 'rgba(79, 172, 254, 0.3)'
+    }
+  ],
+  API_CONFIG: {
+    endpoint: "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent",
+    key: 'AIzaSyBtYRn-8HyioZZ5uah6UuhTEqzjbxEcq64'
+  },
+  WELCOME_MESSAGE: {
+    title: 'Welcome to AI Psychology',
+    description: 'Get professional-level psychological insights powered by advanced AI.',
+    privacyItems: [
+      'All responses are processed securely',
+      'No personal data is stored or shared',
+      'Analysis happens in real-time'
+    ]
   }
 };
 
-const TEST_TYPES = [
-  {
-    id: 'word-association',
-    icon: MessageSquare,
-    title: 'Word Association Test',
-    description: 'Reveal unconscious thoughts through word associations',
-    color: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
-    shadowColor: 'rgba(255, 154, 158, 0.3)'
-  },
-  {
-    id: 'sentence-completion-english',
-    icon: Edit,
-    title: 'Sentence Completion (English)',
-    description: 'Complete sentences to explore thought patterns',
-    color: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
-    shadowColor: 'rgba(168, 237, 234, 0.3)'
-  },
-  {
-    id: 'sentence-completion-urdu',
-    icon: BookOpen,
-    title: 'Sentence Completion (Urdu)',
-    description: 'جملے مکمل کرکے اپنے خیالات کا تجزیہ کریں',
-    color: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
-    shadowColor: 'rgba(255, 236, 210, 0.3)'
-  },
-  {
-    id: 'picture-story',
-    icon: Image,
-    title: 'Picture Story Test',
-    description: 'Create stories from images to analyze personality',
-    color: 'linear-gradient(135deg, #a8c0ff 0%, #3f2b96 100%)',
-    shadowColor: 'rgba(168, 192, 255, 0.3)'
-  },
-  {
-    id: 'pointer-story',
-    icon: Navigation,
-    title: 'Pointer Story Test',
-    description: 'Develop logical narratives for cognitive assessment',
-    color: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-    shadowColor: 'rgba(250, 112, 154, 0.3)'
-  },
-  {
-    id: 'essay-writing',
-    icon: PenTool,
-    title: 'Essay Writing',
-    description: 'Express thoughts through writing for deep analysis',
-    color: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-    shadowColor: 'rgba(79, 172, 254, 0.3)'
-  }
-];
+// UI Components
+const Card = ({ children, style = {}, ...props }) => (
+  <div style={{
+    background: CONFIG.COLORS.white,
+    borderRadius: CONFIG.BORDER_RADIUS.lg,
+    padding: CONFIG.SPACING.xl,
+    boxShadow: CONFIG.SHADOWS.medium,
+    border: `1px solid ${CONFIG.COLORS.gray300}`,
+    ...style
+  }} {...props}>
+    {children}
+  </div>
+);
+
+const Button = ({ children, onClick, disabled = false, variant = 'primary', ...props }) => {
+  const baseStyle = {
+    border: 'none',
+    padding: `${CONFIG.SPACING.sm} ${CONFIG.SPACING.xl}`,
+    borderRadius: CONFIG.BORDER_RADIUS.lg,
+    cursor: disabled ? 'not-allowed' : 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: CONFIG.SPACING.xs,
+    fontWeight: '600',
+    fontSize: '16px',
+    transition: 'all 0.3s ease',
+    ...props.style
+  };
+
+  const variants = {
+    primary: {
+      background: disabled ? 
+        'linear-gradient(135deg, #a0a0a0 0%, #808080 100%)' : 
+        CONFIG.COLORS.primaryGradient,
+      color: CONFIG.COLORS.white,
+      boxShadow: disabled ? 'none' : CONFIG.SHADOWS.small
+    },
+    secondary: {
+      background: CONFIG.COLORS.gray100,
+      color: CONFIG.COLORS.gray700,
+      border: `1px solid ${CONFIG.COLORS.gray300}`
+    }
+  };
+
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      style={{ ...baseStyle, ...variants[variant] }}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+};
 
 const PsychologicalAssessmentPlatform = () => {
   const [currentTest, setCurrentTest] = useState('home');
@@ -112,48 +175,53 @@ const PsychologicalAssessmentPlatform = () => {
   const [currentInput, setCurrentInput] = useState('');
   const [analysisCount, setAnalysisCount] = useState(0);
   const [showWelcome, setShowWelcome] = useState(true);
+  const [error, setError] = useState(null);
+
   const performPsychologicalAnalysis = async (text, testType) => {
     setIsAnalyzing(true);
+    setError(null);
     
     try {
       const prompt = createAnalysisPrompt(text, testType);
       const analysisText = await callGeminiAPI(prompt);
-      return parseGeminiResponse(analysisText, testType, text);
+      return parseGeminiResponse(analysisText);
     } catch (error) {
-      console.error('Gemini API Error:', error);
-      return await performMockAnalysis(text, testType);
+      console.error('Analysis Error:', error);
+      setError(error.message || 'Failed to analyze response. Please try again.');
+      throw error;
     } finally {
       setIsAnalyzing(false);
     }
   };
 
   const createAnalysisPrompt = (text, testType) => {
-    if (testType.includes('sentence-completion') || testType === 'word-association') {
-      return `Analyze this psychological test response from a ${testType.replace(/-/g, ' ')} test. 
-      Follow these steps:
-      1. Classify the sentiment as either "Positive" or "Negative"
-      2. If negative, explain what it might symbolize
-      3. Provide a brief psychological interpretation
-      
-      Response: "${text}"
-      
-      Format your answer as:
-      Sentiment: [Positive/Negative]
-      Symbolism: [Explanation]
-      Interpretation: [Psychological meaning]`;
-    }
-    
-    return `Provide a psychological analysis of this ${testType.replace(/-/g, ' ')} test response. 
-    Consider emotional tone, potential underlying psychological patterns, and what it might indicate 
-    about the respondent's mental state. Focus on both strengths and areas of concern.
-    
-    Response: "${text}"
-    
-    Format your answer with clear sections for strengths, concerns, and recommendations.`;
+    return `As an expert psychological analyst with expertise in philosophical interpretation, provide a deep analysis of this ${testType.replace(/-/g, ' ')} test response.
+
+STUDENT'S RESPONSE: "${text}"
+
+Please provide your analysis in the following structured JSON format:
+{
+  "thinkingPattern": "Positive", "Negative", or "Neutral",
+  "optimismScore": number (0-100),
+  "philosophicalInterpretation": "Deep philosophical interpretation of what this response reveals about the student's worldview and underlying beliefs",
+  "positiveAspects": ["Specific positive aspects revealed in the response", "What these aspects indicate about the student's strengths"],
+  "concerns": ["Specific concerning patterns revealed in the response", "What these patterns might indicate about areas needing attention"],
+  "underlyingBeliefs": ["Key underlying beliefs or assumptions revealed", "How these beliefs shape the student's perspective"],
+  "recommendations": ["Specific, actionable recommendations for personal development", "How to build on strengths and address concerns"],
+  "overallAssessment": "Comprehensive summary connecting the response to broader psychological and philosophical patterns"
+}
+
+Guidelines for analysis:
+- Focus on the philosophical and psychological meaning behind the specific words and phrases used
+- Connect the response to broader patterns of thinking and worldview
+- Provide specific examples from the response to support your interpretation
+- Offer balanced insights that highlight both strengths and growth areas
+- Ensure recommendations are practical and actionable
+- Consider cultural context, especially for Urdu responses`;
   };
 
   const callGeminiAPI = async (prompt) => {
-    const response = await fetch(`https:generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=YOUR_API_KEY`, {
+    const response = await fetch(`${CONFIG.API_CONFIG.endpoint}?key=${CONFIG.API_CONFIG.key}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -163,182 +231,83 @@ const PsychologicalAssessmentPlatform = () => {
           parts: [{
             text: prompt
           }]
-        }]
+        }],
+        generationConfig: {
+          temperature: 0.7,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 2048,
+        }
       })
     });
 
     if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error?.message || `API error: ${response.status}`);
     }
 
     const data = await response.json();
+    if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+      throw new Error('Invalid response format from API');
+    }
+    
     return data.candidates[0].content.parts[0].text;
   };
 
-  const parseGeminiResponse = (analysisText, testType, originalText) => {
-    if (testType.includes('sentence-completion') || testType === 'word-association') {
-      return parseSimpleAnalysis(analysisText);
+  const parseGeminiResponse = (analysisText) => {
+    try {
+      // Try to extract JSON from the response
+      const jsonMatch = analysisText.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        throw new Error('No valid JSON found in response');
+      }
+      
+      const parsedData = JSON.parse(jsonMatch[0]);
+      
+      // Validate required fields
+      const requiredFields = ['thinkingPattern', 'optimismScore', 'philosophicalInterpretation', 
+                             'positiveAspects', 'concerns', 'underlyingBeliefs', 
+                             'recommendations', 'overallAssessment'];
+      
+      for (const field of requiredFields) {
+        if (parsedData[field] === undefined) {
+          throw new Error(`Missing required field: ${field}`);
+        }
+      }
+      
+      return {
+        thinkingPattern: parsedData.thinkingPattern,
+        optimismScore: parsedData.optimismScore,
+        philosophicalInterpretation: parsedData.philosophicalInterpretation,
+        positiveAspects: parsedData.positiveAspects,
+        concerns: parsedData.concerns,
+        underlyingBeliefs: parsedData.underlyingBeliefs,
+        recommendations: parsedData.recommendations,
+        overallAssessment: parsedData.overallAssessment
+      };
+    } catch (error) {
+      console.error('Failed to parse AI response:', error);
+      throw new Error('Failed to parse analysis response. Please try again.');
     }
-    return performComprehensiveAnalysis(originalText);
-  };
-
-  const parseSimpleAnalysis = (analysisText) => {
-    let sentiment = 'Neutral';
-    if (analysisText.includes('Sentiment: Positive')) sentiment = 'Positive';
-    if (analysisText.includes('Sentiment: Negative')) sentiment = 'Negative';
-    
-    const symbolismMatch = analysisText.match(/Symbolism:\s*(.*?)(?=Interpretation:|$)/s);
-    const symbolism = symbolismMatch ? symbolismMatch[1].trim() : '';
-    
-    const interpretationMatch = analysisText.match(/Interpretation:\s*(.*)/s);
-    const interpretation = interpretationMatch ? interpretationMatch[1].trim() : '';
-    
-    const optimismScore = sentiment === 'Positive' ? 
-      Math.floor(Math.random() * 30) + 70 : 
-      Math.floor(Math.random() * 30) + 30;
-    
-    return {
-      optimismScore,
-      isOptimistic: optimismScore > 55,
-      sentiment,
-      symbolism,
-      interpretation,
-      strengths: sentiment === 'Positive' ? 
-        ['Positive outlook detected', 'Constructive response pattern'] : 
-        ['Honest self-expression', 'Awareness of challenges'],
-      flaws: sentiment === 'Negative' ? 
-        ['Tendency toward negative interpretation', 'Possible emotional distress'] : 
-        ['Potential overlooking of challenges', 'May benefit from deeper critical thinking'],
-      recommendations: [
-        'Further assessment recommended for comprehensive evaluation',
-        'Consider follow-up with a qualified mental health professional',
-        'Practice mindfulness and self-reflection techniques'
-      ],
-      overallAssessment: interpretation || 'Based on your response, further evaluation would be beneficial.'
-    };
-  };
-
-  const performMockAnalysis = async (text, testType) => {
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    const positiveWords = ['good', 'great', 'happy', 'love', 'success', 'positive', 'hope', 'joy'];
-    const negativeWords = ['bad', 'hate', 'fail', 'problem', 'sad', 'fear', 'worry', 'negative'];
-    
-    const lowerText = text.toLowerCase();
-    const positiveCount = positiveWords.filter(word => lowerText.includes(word)).length;
-    const negativeCount = negativeWords.filter(word => lowerText.includes(word)).length;
-    
-    const sentiment = positiveCount > negativeCount ? 'Positive' : 
-                     negativeCount > positiveCount ? 'Negative' : 'Neutral';
-    
-    const optimismScore = sentiment === 'Positive' ? 
-      Math.floor(Math.random() * 30) + 70 : 
-      Math.floor(Math.random() * 30) + 30;
-    
-    return {
-      optimismScore,
-      isOptimistic: optimismScore > 55,
-      sentiment,
-      symbolism: sentiment === 'Negative' ? 
-        'May indicate some emotional challenges or negative thought patterns' : 
-        'Suggests generally positive outlook and coping mechanisms',
-      interpretation: sentiment === 'Negative' ? 
-        'The response pattern may indicate some difficulties with emotional regulation or coping with stress' : 
-        'The response shows generally healthy psychological patterns and adaptive coping strategies',
-      strengths: sentiment === 'Positive' ? 
-        ['Positive outlook detected', 'Constructive response pattern'] : 
-        ['Honest self-expression', 'Awareness of challenges'],
-      flaws: sentiment === 'Negative' ? 
-        ['Tendency toward negative interpretation', 'Possible emotional distress'] : 
-        ['Potential overlooking of challenges', 'May benefit from deeper critical thinking'],
-      recommendations: [
-        'Further assessment recommended for comprehensive evaluation',
-        'Consider follow-up with a qualified mental health professional',
-        'Practice mindfulness and self-reflection techniques'
-      ],
-      overallAssessment: sentiment === 'Positive' ? 
-        'Your responses indicate generally healthy psychological patterns with a positive outlook on life.' : 
-        'Your responses suggest some areas of emotional difficulty that could benefit from further exploration.'
-    };
-  };
-
-  const performComprehensiveAnalysis = (text) => {
-    const wordCount = text.split(' ').length;
-    const sentenceCount = text.split(/[.!?]+/).length;
-    const avgWordsPerSentence = wordCount / Math.max(1, sentenceCount);
-    
-    const positiveWords = ['good', 'great', 'excellent', 'happy', 'joy', 'love', 'success', 'achieve', 'positive'];
-    const negativeWords = ['bad', 'terrible', 'awful', 'sad', 'hate', 'failure', 'difficult', 'problem', 'worry'];
-    
-    const lowerText = text.toLowerCase();
-    const positiveCount = positiveWords.filter(word => lowerText.includes(word)).length;
-    const negativeCount = negativeWords.filter(word => lowerText.includes(word)).length;
-    
-    const optimismScore = Math.max(20, Math.min(95, 50 + (positiveCount * 10) - (negativeCount * 8) + (avgWordsPerSentence > 12 ? 15 : 0)));
-    
-    const strengths = [];
-    const flaws = [];
-    const recommendations = [];
-    
-    if (optimismScore > 70) {
-      strengths.push('Strong positive outlook and resilience');
-      strengths.push('Ability to see opportunities in challenges');
-    } else if (optimismScore < 40) {
-      flaws.push('Tendency toward pessimistic thinking patterns');
-      recommendations.push('Practice daily gratitude exercises and positive visualization');
-    }
-    
-    if (wordCount > 200) {
-      strengths.push('Excellent self-reflection and introspective abilities');
-      strengths.push('Detailed analytical thinking');
-    } else {
-      flaws.push('May benefit from deeper self-reflection');
-      recommendations.push('Keep a daily journal to develop self-awareness');
-    }
-    
-    if (avgWordsPerSentence > 12) {
-      strengths.push('Complex reasoning and sophisticated thought processes');
-    } else {
-      recommendations.push('Practice articulating thoughts in more detail');
-    }
-    
-    recommendations.push('Regular mindfulness practice to enhance emotional regulation');
-    recommendations.push('Set specific, measurable personal growth goals');
-    
-    return {
-      optimismScore: Math.round(optimismScore),
-      isOptimistic: optimismScore > 55,
-      sentiment: optimismScore > 60 ? 'Positive' : optimismScore < 40 ? 'Negative' : 'Neutral',
-      symbolism: optimismScore > 60 ? 
-        'Indicates generally positive psychological adjustment and coping mechanisms' : 
-        'Suggests possible difficulties with emotional regulation or negative thought patterns',
-      interpretation: optimismScore > 60 ? 
-        'Your responses demonstrate healthy psychological patterns and adaptive coping strategies' : 
-        'Your responses may indicate some areas of emotional difficulty that could benefit from support',
-      strengths: strengths.length > 0 ? strengths : ['Willingness to engage in self-reflection', 'Open to personal development'],
-      flaws: flaws.length > 0 ? flaws : ['Areas for growth will be identified with more detailed responses'],
-      recommendations: recommendations.slice(0, 4),
-      overallAssessment: `Based on your response analysis, you demonstrate ${optimismScore > 60 ? 'a generally positive' : 'a developing'} psychological profile. Your communication style suggests ${avgWordsPerSentence > 12 ? 'complex analytical thinking' : 'direct, practical reasoning'}. Continue focusing on personal development through the recommended strategies.`
-    };
   };
 
   const handleSubmitTest = async () => {
     if (!currentInput.trim()) {
-      alert('Please enter your response before submitting.');
+      setError('Please enter your response before submitting.');
       return;
     }
 
-    if (currentInput.trim().length < CONSTANTS.MIN_CHARACTERS) {
-      alert(`Please provide a more detailed response (minimum ${CONSTANTS.MIN_CHARACTERS} characters) for accurate analysis.`);
+    if (currentInput.trim().length < CONFIG.MIN_CHARACTERS) {
+      setError(`Please provide a more detailed response (minimum ${CONFIG.MIN_CHARACTERS} characters) for accurate analysis.`);
       return;
     }
 
-    if (analysisCount >= CONSTANTS.DAILY_LIMIT) {
-      alert(`You've reached the analysis limit for this session (${CONSTANTS.DAILY_LIMIT} analyses). Please refresh the page to continue.`);
+    if (analysisCount >= CONFIG.DAILY_LIMIT) {
+      setError(`You've reached the analysis limit for this session (${CONFIG.DAILY_LIMIT} analyses). Please refresh the page to continue.`);
       return;
     }
 
-    setIsAnalyzing(true);
+    setError(null);
     
     try {
       setResponses(prev => ({
@@ -356,67 +325,11 @@ const PsychologicalAssessmentPlatform = () => {
       setAnalysisCount(prev => prev + 1);
       
     } catch (error) {
-      console.error('Analysis Error:', error);
-      alert('Error during analysis. Please try again.');
+      // Error is already handled in performPsychologicalAnalysis
+      console.error('Submission Error:', error);
     } finally {
-      setIsAnalyzing(false);
       setCurrentInput('');
     }
-  };
-
-  const Card = ({ children, style = {}, ...props }) => (
-    <div style={{
-      background: CONSTANTS.COLORS.white,
-      borderRadius: CONSTANTS.BORDER_RADIUS.lg,
-      padding: CONSTANTS.SPACING.xl,
-      boxShadow: CONSTANTS.SHADOWS.medium,
-      border: `1px solid ${CONSTANTS.COLORS.gray300}`,
-      ...style
-    }} {...props}>
-      {children}
-    </div>
-  );
-
-  const Button = ({ children, onClick, disabled = false, variant = 'primary', ...props }) => {
-    const baseStyle = {
-      border: 'none',
-      padding: `${CONSTANTS.SPACING.sm} ${CONSTANTS.SPACING.xl}`,
-      borderRadius: CONSTANTS.BORDER_RADIUS.lg,
-      cursor: disabled ? 'not-allowed' : 'pointer',
-      display: 'flex',
-      alignItems: 'center',
-      gap: CONSTANTS.SPACING.xs,
-      fontWeight: '600',
-      fontSize: '16px',
-      transition: 'all 0.3s ease',
-      ...props.style
-    };
-
-    const variants = {
-      primary: {
-        background: disabled ? 
-          'linear-gradient(135deg, #a0a0a0 0%, #808080 100%)' : 
-          CONSTANTS.COLORS.primaryGradient,
-        color: CONSTANTS.COLORS.white,
-        boxShadow: disabled ? 'none' : CONSTANTS.SHADOWS.small
-      },
-      secondary: {
-        background: CONSTANTS.COLORS.gray100,
-        color: CONSTANTS.COLORS.gray700,
-        border: `1px solid ${CONSTANTS.COLORS.gray300}`
-      }
-    };
-
-    return (
-      <button
-        onClick={onClick}
-        disabled={disabled}
-        style={{ ...baseStyle, ...variants[variant] }}
-        {...props}
-      >
-        {children}
-      </button>
-    );
   };
 
   const renderWelcome = () => (
@@ -441,67 +354,61 @@ const PsychologicalAssessmentPlatform = () => {
           <div style={{
             width: '80px',
             height: '80px',
-            background: CONSTANTS.COLORS.primaryGradient,
+            background: CONFIG.COLORS.primaryGradient,
             borderRadius: '50%',
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
-            marginBottom: CONSTANTS.SPACING.md
+            marginBottom: CONFIG.SPACING.md
           }}>
-            <Brain size={40} color={CONSTANTS.COLORS.white} />
+            <Brain size={40} color={CONFIG.COLORS.white} />
           </div>
           <h2 style={{ 
             fontSize: '2rem', 
             fontWeight: 'bold', 
-            color: CONSTANTS.COLORS.gray800, 
-            marginBottom: CONSTANTS.SPACING.md 
+            color: CONFIG.COLORS.gray800, 
+            marginBottom: CONFIG.SPACING.md 
           }}>
-            Welcome to AI Psychology
+            {CONFIG.WELCOME_MESSAGE.title}
           </h2>
           <p style={{ 
-            color: CONSTANTS.COLORS.gray600, 
+            color: CONFIG.COLORS.gray600, 
             fontSize: '1.1rem', 
             lineHeight: '1.6', 
-            marginBottom: CONSTANTS.SPACING.xl 
+            marginBottom: CONFIG.SPACING.xl 
           }}>
-            Get professional-level psychological insights powered by advanced AI.
+            {CONFIG.WELCOME_MESSAGE.description}
           </p>
           
           <Card style={{
-            background: CONSTANTS.COLORS.gray100,
+            background: CONFIG.COLORS.gray100,
             textAlign: 'left',
-            marginBottom: CONSTANTS.SPACING.xl
+            marginBottom: CONFIG.SPACING.xl
           }}>
             <h3 style={{ 
-              color: CONSTANTS.COLORS.gray800, 
-              marginBottom: CONSTANTS.SPACING.sm, 
+              color: CONFIG.COLORS.gray800, 
+              marginBottom: CONFIG.SPACING.sm, 
               display: 'flex', 
               alignItems: 'center', 
-              gap: CONSTANTS.SPACING.xs 
+              gap: CONFIG.SPACING.xs 
             }}>
-              <Shield size={20} color={CONSTANTS.COLORS.primaryGradient} />
+              <Shield size={20} />
               Your Privacy is Protected
             </h3>
-            <ul style={{ color: CONSTANTS.COLORS.gray700, listStyle: 'none', padding: 0 }}>
-              <li style={{ marginBottom: CONSTANTS.SPACING.xs, display: 'flex', alignItems: 'center', gap: CONSTANTS.SPACING.xs }}>
-                <CheckCircle size={16} color={CONSTANTS.COLORS.success} />
-                All responses are processed securely
-              </li>
-              <li style={{ marginBottom: CONSTANTS.SPACING.xs, display: 'flex', alignItems: 'center', gap: CONSTANTS.SPACING.xs }}>
-                <CheckCircle size={16} color={CONSTANTS.COLORS.success} />
-                No personal data is stored or shared
-              </li>
-              <li style={{ display: 'flex', alignItems: 'center', gap: CONSTANTS.SPACING.xs }}>
-                <CheckCircle size={16} color={CONSTANTS.COLORS.success} />
-                Analysis happens in real-time
-              </li>
+            <ul style={{ color: CONFIG.COLORS.gray700, listStyle: 'none', padding: 0 }}>
+              {CONFIG.WELCOME_MESSAGE.privacyItems.map((item, index) => (
+                <li key={index} style={{ marginBottom: CONFIG.SPACING.xs, display: 'flex', alignItems: 'center', gap: CONFIG.SPACING.xs }}>
+                  <CheckCircle size={16} color={CONFIG.COLORS.success} />
+                  {item}
+                </li>
+              ))}
             </ul>
           </Card>
           
           <Button
             onClick={() => setShowWelcome(false)}
             style={{
-              padding: `${CONSTANTS.SPACING.sm} ${CONSTANTS.SPACING.xxl}`,
+              padding: `${CONFIG.SPACING.sm} ${CONFIG.SPACING.xxl}`,
               fontSize: '1.1rem'
             }}
           >
@@ -515,19 +422,19 @@ const PsychologicalAssessmentPlatform = () => {
   const renderHome = () => (
     <div style={{
       minHeight: '100vh',
-      background: CONSTANTS.COLORS.white,
-      padding: CONSTANTS.SPACING.md
+      background: CONFIG.COLORS.white,
+      padding: CONFIG.SPACING.md
     }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
         {/* Header */}
         <div style={{ 
           textAlign: 'center', 
-          marginBottom: CONSTANTS.SPACING.xxl,
-          padding: CONSTANTS.SPACING.xxl,
-          background: CONSTANTS.COLORS.primaryGradient,
-          borderRadius: CONSTANTS.BORDER_RADIUS.xl,
-          color: CONSTANTS.COLORS.white,
-          boxShadow: CONSTANTS.SHADOWS.xl
+          marginBottom: CONFIG.SPACING.xxl,
+          padding: CONFIG.SPACING.xxl,
+          background: CONFIG.COLORS.primaryGradient,
+          borderRadius: CONFIG.BORDER_RADIUS.xl,
+          color: CONFIG.COLORS.white,
+          boxShadow: CONFIG.SHADOWS.xl
         }}>
           <div style={{
             width: '100px',
@@ -537,15 +444,15 @@ const PsychologicalAssessmentPlatform = () => {
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
-            marginBottom: CONSTANTS.SPACING.xl,
+            marginBottom: CONFIG.SPACING.xl,
             backdropFilter: 'blur(10px)'
           }}>
-            <Brain size={50} color={CONSTANTS.COLORS.white} />
+            <Brain size={50} color={CONFIG.COLORS.white} />
           </div>
           <h1 style={{ 
             fontSize: '3.5rem', 
             fontWeight: 'bold', 
-            marginBottom: CONSTANTS.SPACING.md, 
+            marginBottom: CONFIG.SPACING.md, 
             textShadow: '0 4px 8px rgba(0,0,0,0.1)' 
           }}>
             AI Psychology Platform
@@ -562,41 +469,41 @@ const PsychologicalAssessmentPlatform = () => {
 
         <Card style={{
           background: 'linear-gradient(135deg, #f8f9ff 0%, #e8f2ff 100%)',
-          marginBottom: CONSTANTS.SPACING.xl
+          marginBottom: CONFIG.SPACING.xl
         }}>
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
             flexWrap: 'wrap',
-            gap: CONSTANTS.SPACING.md
+            gap: CONFIG.SPACING.md
           }}>
             <div style={{ flex: 1, minWidth: '200px' }}>
               <h3 style={{ 
-                color: CONSTANTS.COLORS.gray800, 
+                color: CONFIG.COLORS.gray800, 
                 fontSize: '1.2rem', 
-                marginBottom: CONSTANTS.SPACING.xs 
+                marginBottom: CONFIG.SPACING.xs 
               }}>
                 Session Progress
               </h3>
               <span style={{ 
                 fontSize: '1.1rem', 
-                color: CONSTANTS.COLORS.gray600 
+                color: CONFIG.COLORS.gray600 
               }}>
-                Analyses Completed: {analysisCount}/{CONSTANTS.DAILY_LIMIT}
+                Analyses Completed: {analysisCount}/{CONFIG.DAILY_LIMIT}
               </span>
               <div style={{
                 width: '100%',
                 height: '10px',
-                background: CONSTANTS.COLORS.gray300,
+                background: CONFIG.COLORS.gray300,
                 borderRadius: '5px',
-                marginTop: CONSTANTS.SPACING.xs,
+                marginTop: CONFIG.SPACING.xs,
                 overflow: 'hidden'
               }}>
                 <div style={{
-                  width: `${(analysisCount / CONSTANTS.DAILY_LIMIT) * 100}%`,
+                  width: `${(analysisCount / CONFIG.DAILY_LIMIT) * 100}%`,
                   height: '100%',
-                  background: analysisCount > CONSTANTS.DAILY_LIMIT * 0.8 ? 
+                  background: analysisCount > CONFIG.DAILY_LIMIT * 0.8 ? 
                     'linear-gradient(90deg, #ff6b6b, #ee5a52)' : 
                     'linear-gradient(90deg, #4ecdc4, #44a08d)',
                   borderRadius: '5px',
@@ -605,14 +512,14 @@ const PsychologicalAssessmentPlatform = () => {
               </div>
             </div>
             <div style={{
-              background: CONSTANTS.COLORS.primaryGradient,
-              color: CONSTANTS.COLORS.white,
-              padding: `${CONSTANTS.SPACING.sm} ${CONSTANTS.SPACING.lg}`,
-              borderRadius: CONSTANTS.BORDER_RADIUS.lg,
+              background: CONFIG.COLORS.primaryGradient,
+              color: CONFIG.COLORS.white,
+              padding: `${CONFIG.SPACING.sm} ${CONFIG.SPACING.lg}`,
+              borderRadius: CONFIG.BORDER_RADIUS.lg,
               display: 'flex',
               alignItems: 'center',
-              gap: CONSTANTS.SPACING.xs,
-              boxShadow: CONSTANTS.SHADOWS.small
+              gap: CONFIG.SPACING.xs,
+              boxShadow: CONFIG.SHADOWS.small
             }}>
               <Zap size={20} />
               AI-Powered Analysis
@@ -623,13 +530,13 @@ const PsychologicalAssessmentPlatform = () => {
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
-          gap: CONSTANTS.SPACING.xl
+          gap: CONFIG.SPACING.xl
         }}>
-          {TEST_TYPES.map((test) => (
+          {CONFIG.TEST_TYPES.map((test) => (
             <Card
               key={test.id}
               style={{
-                padding: CONSTANTS.SPACING.xl,
+                padding: CONFIG.SPACING.xl,
                 boxShadow: `0 15px 35px ${test.shadowColor}`,
                 transition: 'all 0.4s ease',
                 cursor: 'pointer',
@@ -659,29 +566,29 @@ const PsychologicalAssessmentPlatform = () => {
                 width: '70px',
                 height: '70px',
                 background: test.color,
-                borderRadius: CONSTANTS.BORDER_RADIUS.md,
+                borderRadius: CONFIG.BORDER_RADIUS.md,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                marginBottom: CONSTANTS.SPACING.lg,
+                marginBottom: CONFIG.SPACING.lg,
                 boxShadow: `0 8px 20px ${test.shadowColor}`
               }}>
-                <test.icon size={32} color={CONSTANTS.COLORS.white} />
+                <test.icon size={32} color={CONFIG.COLORS.white} />
               </div>
               
               <h3 style={{
                 fontSize: '1.5rem',
                 fontWeight: 'bold',
-                color: CONSTANTS.COLORS.gray800,
-                marginBottom: CONSTANTS.SPACING.sm
+                color: CONFIG.COLORS.gray800,
+                marginBottom: CONFIG.SPACING.sm
               }}>
                 {test.title}
               </h3>
               
               <p style={{
-                color: CONSTANTS.COLORS.gray600,
+                color: CONFIG.COLORS.gray600,
                 lineHeight: '1.7',
-                marginBottom: CONSTANTS.SPACING.lg,
+                marginBottom: CONFIG.SPACING.lg,
                 fontSize: '16px'
               }}>
                 {test.description}
@@ -691,13 +598,13 @@ const PsychologicalAssessmentPlatform = () => {
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  color: CONSTANTS.COLORS.success,
+                  color: CONFIG.COLORS.success,
                   fontWeight: '600',
                   background: '#f0fff4',
-                  padding: `${CONSTANTS.SPACING.xs} ${CONSTANTS.SPACING.sm}`,
-                  borderRadius: CONSTANTS.BORDER_RADIUS.lg
+                  padding: `${CONFIG.SPACING.xs} ${CONFIG.SPACING.sm}`,
+                  borderRadius: CONFIG.BORDER_RADIUS.lg
                 }}>
-                  <CheckCircle size={18} style={{ marginRight: CONSTANTS.SPACING.xs }} />
+                  <CheckCircle size={18} style={{ marginRight: CONFIG.SPACING.xs }} />
                   Analysis Complete
                 </div>
               )}
@@ -710,351 +617,366 @@ const PsychologicalAssessmentPlatform = () => {
     </div>
   );
 
-  const renderTestInterface = () => (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #f8f9ff 0%, #e8f2ff 100%)',
-      padding: CONSTANTS.SPACING.md
-    }}>
-      <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-      
-        <Card style={{
-          padding: CONSTANTS.SPACING.xl,
-          marginBottom: CONSTANTS.SPACING.xl,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between'
-        }}>
-          <div>
-            <h1 style={{ 
-              fontSize: '2.2rem', 
-              fontWeight: 'bold', 
-              color: CONSTANTS.COLORS.gray800, 
-              marginBottom: CONSTANTS.SPACING.xs 
-            }}>
-              {currentTest.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-            </h1>
-            <p style={{ 
-              color: CONSTANTS.COLORS.gray600, 
-              fontSize: '16px' 
-            }}>
-              Enter your responses for AI-powered psychological analysis
-            </p>
-          </div>
-          <Button
-            onClick={() => setCurrentTest('home')}
-            style={{ padding: CONSTANTS.SPACING.sm }}
-          >
-            <Home size={22} />
-          </Button>
-        </Card>
+  const renderTestInterface = () => {
+    const testConfig = CONFIG.TEST_TYPES.find(test => test.id === currentTest);
+    const currentAnalysis = analysis[currentTest];
 
-        <Card style={{
-          padding: CONSTANTS.SPACING.xl,
-          marginBottom: CONSTANTS.SPACING.xl
-        }}>
-          <label style={{
-            display: 'block',
-            fontSize: '1.3rem',
-            fontWeight: '600',
-            color: CONSTANTS.COLORS.gray800,
-            marginBottom: CONSTANTS.SPACING.md
-          }}>
-            Enter Your Response:
-          </label>
-          <textarea
-            value={currentInput}
-            onChange={(e) => setCurrentInput(e.target.value)}
-            placeholder={`Type or paste your response here... Be detailed for better analysis (minimum ${CONSTANTS.MIN_CHARACTERS} characters)`}
-            style={{
-              width: '100%',
-              height: '300px',
-              padding: CONSTANTS.SPACING.lg,
-              border: `2px solid ${CONSTANTS.COLORS.gray300}`,
-              borderRadius: CONSTANTS.BORDER_RADIUS.md,
-              fontSize: '16px',
-              resize: 'vertical',
-              fontFamily: 'inherit',
-              transition: 'all 0.3s ease',
-              outline: 'none'
-            }}
-            onFocus={(e) => {
-              e.target.style.borderColor = '#667eea';
-              e.target.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)';
-            }}
-            onBlur={(e) => {
-              e.target.style.borderColor = CONSTANTS.COLORS.gray300;
-              e.target.style.boxShadow = 'none';
-            }}
-          />
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginTop: CONSTANTS.SPACING.md,
-            flexWrap: 'wrap',
-            gap: CONSTANTS.SPACING.sm
-          }}>
-            <span style={{
-              color: currentInput.length < CONSTANTS.MIN_CHARACTERS ? 
-                CONSTANTS.COLORS.error : CONSTANTS.COLORS.success,
-              fontSize: '16px',
-              fontWeight: '500'
-            }}>
-              {currentInput.length} characters {currentInput.length < CONSTANTS.MIN_CHARACTERS ? 
-                `(need at least ${CONSTANTS.MIN_CHARACTERS})` : '✓'}
-            </span>
-            <Button
-              onClick={handleSubmitTest}
-              disabled={isAnalyzing || !currentInput.trim() || 
-                       currentInput.length < CONSTANTS.MIN_CHARACTERS || 
-                       analysisCount >= CONSTANTS.DAILY_LIMIT}
-            >
-              {isAnalyzing ? (
-                <>
-                  <Loader className="animate-spin" size={20} />
-                  Analyzing...
-                </>
-              ) : (
-                <>
-                  <Brain size={20} />
-                  Get AI Analysis
-                </>
-              )}
-            </Button>
-          </div>
-        </Card>
-
-        {analysis[currentTest] && (
+    return (
+      <div style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #f8f9ff 0%, #e8f2ff 100%)',
+        padding: CONFIG.SPACING.md
+      }}>
+        <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+        
           <Card style={{
-            padding: CONSTANTS.SPACING.xl,
-            boxShadow: CONSTANTS.SHADOWS.large
+            padding: CONFIG.SPACING.xl,
+            marginBottom: CONFIG.SPACING.xl,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
           }}>
-            <h2 style={{
-              fontSize: '2rem',
-              fontWeight: 'bold',
-              color: CONSTANTS.COLORS.gray800,
-              marginBottom: CONSTANTS.SPACING.xl,
-              display: 'flex',
-              alignItems: 'center',
-              gap: CONSTANTS.SPACING.xs
-            }}>
-              <div style={{
-                background: CONSTANTS.COLORS.primaryGradient,
-                padding: CONSTANTS.SPACING.xs,
-                borderRadius: CONSTANTS.BORDER_RADIUS.sm
+            <div>
+              <h1 style={{ 
+                fontSize: '2.2rem', 
+                fontWeight: 'bold', 
+                color: CONFIG.COLORS.gray800, 
+                marginBottom: CONFIG.SPACING.xs 
               }}>
-                <Brain size={28} color={CONSTANTS.COLORS.white} />
-              </div>
-              Your Psychological Profile
-            </h2>
+                {testConfig?.title || currentTest.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+              </h1>
+              <p style={{ 
+                color: CONFIG.COLORS.gray600, 
+                fontSize: '16px' 
+              }}>
+                {testConfig?.description || 'Enter your responses for AI-powered psychological analysis'}
+              </p>
+            </div>
+            <Button
+              onClick={() => setCurrentTest('home')}
+              style={{ padding: CONFIG.SPACING.sm }}
+            >
+              <Home size={22} />
+            </Button>
+          </Card>
 
-            {analysis[currentTest].sentiment && (
+          {error && (
+            <Card style={{
+              background: 'rgba(229, 62, 62, 0.1)',
+              border: `1px solid ${CONFIG.COLORS.error}`,
+              color: CONFIG.COLORS.error,
+              marginBottom: CONFIG.SPACING.xl
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: CONFIG.SPACING.sm }}>
+                <Info size={20} />
+                <p style={{ margin: 0 }}>{error}</p>
+              </div>
+            </Card>
+          )}
+
+          <Card style={{
+            padding: CONFIG.SPACING.xl,
+            marginBottom: CONFIG.SPACING.xl
+          }}>
+            <label style={{
+              display: 'block',
+              fontSize: '1.3rem',
+              fontWeight: '600',
+              color: CONFIG.COLORS.gray800,
+              marginBottom: CONFIG.SPACING.md
+            }}>
+              Enter Your Response:
+            </label>
+            <textarea
+              value={currentInput}
+              onChange={(e) => setCurrentInput(e.target.value)}
+              placeholder={`Type or paste your response here... Be detailed for better analysis (minimum ${CONFIG.MIN_CHARACTERS} characters)`}
+              style={{
+                width: '100%',
+                height: '300px',
+                padding: CONFIG.SPACING.lg,
+                border: `2px solid ${CONFIG.COLORS.gray300}`,
+                borderRadius: CONFIG.BORDER_RADIUS.md,
+                fontSize: '16px',
+                resize: 'vertical',
+                fontFamily: 'inherit',
+                transition: 'all 0.3s ease',
+                outline: 'none'
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = '#667eea';
+                e.target.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)';
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = CONFIG.COLORS.gray300;
+                e.target.style.boxShadow = 'none';
+              }}
+            />
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginTop: CONFIG.SPACING.md,
+              flexWrap: 'wrap',
+              gap: CONFIG.SPACING.sm
+            }}>
+              <span style={{
+                color: currentInput.length < CONFIG.MIN_CHARACTERS ? 
+                  CONFIG.COLORS.error : CONFIG.COLORS.success,
+                fontSize: '16px',
+                fontWeight: '500'
+              }}>
+                {currentInput.length} characters {currentInput.length < CONFIG.MIN_CHARACTERS ? 
+                  `(need at least ${CONFIG.MIN_CHARACTERS})` : '✓'}
+              </span>
+              <Button
+                onClick={handleSubmitTest}
+                disabled={isAnalyzing || !currentInput.trim() || 
+                         currentInput.length < CONFIG.MIN_CHARACTERS || 
+                         analysisCount >= CONFIG.DAILY_LIMIT}
+              >
+                {isAnalyzing ? (
+                  <>
+                    <Loader className="animate-spin" size={20} />
+                    Analyzing...
+                  </>
+                ) : (
+                  <>
+                    <Brain size={20} />
+                    Get AI Analysis
+                  </>
+                )}
+              </Button>
+            </div>
+          </Card>
+
+          {currentAnalysis && (
+            <Card style={{
+              padding: CONFIG.SPACING.xl,
+              boxShadow: CONFIG.SHADOWS.large
+            }}>
+              <h2 style={{
+                fontSize: '2rem',
+                fontWeight: 'bold',
+                color: CONFIG.COLORS.gray800,
+                marginBottom: CONFIG.SPACING.xl,
+                display: 'flex',
+                alignItems: 'center',
+                gap: CONFIG.SPACING.xs
+              }}>
+                <div style={{
+                  background: testConfig?.color || CONFIG.COLORS.primaryGradient,
+                  padding: CONFIG.SPACING.xs,
+                  borderRadius: CONFIG.BORDER_RADIUS.sm
+                }}>
+                  <Brain size={28} color={CONFIG.COLORS.white} />
+                </div>
+                Your Psychological Profile
+              </h2>
+
               <div style={{
-                background: analysis[currentTest].sentiment === 'Positive' ? 
-                  CONSTANTS.COLORS.positiveGradient : 
-                  analysis[currentTest].sentiment === 'Negative' ?
-                  CONSTANTS.COLORS.negativeGradient :
-                  CONSTANTS.COLORS.neutralGradient,
-                borderRadius: CONSTANTS.BORDER_RADIUS.md,
-                padding: CONSTANTS.SPACING.xl,
-                color: CONSTANTS.COLORS.white,
-                marginBottom: CONSTANTS.SPACING.xl,
-                boxShadow: CONSTANTS.SHADOWS.medium
+                background: `linear-gradient(135deg, ${
+                  currentAnalysis.thinkingPattern === 'Positive' ? '#48bb78, #38a169' :
+                  currentAnalysis.thinkingPattern === 'Negative' ? '#ed8936, #dd6b20' :
+                  '#a0aec0, #718096'
+                })`,
+                borderRadius: CONFIG.BORDER_RADIUS.md,
+                padding: CONFIG.SPACING.xl,
+                color: CONFIG.COLORS.white,
+                marginBottom: CONFIG.SPACING.xl,
+                boxShadow: CONFIG.SHADOWS.medium
               }}>
                 <div style={{ 
                   display: 'flex', 
                   alignItems: 'center', 
                   justifyContent: 'space-between', 
                   flexWrap: 'wrap', 
-                  gap: CONSTANTS.SPACING.md 
+                  gap: CONFIG.SPACING.md 
                 }}>
                   <div>
                     <h3 style={{ 
                       fontSize: '1.5rem', 
-                      marginBottom: CONSTANTS.SPACING.xs 
+                      marginBottom: CONFIG.SPACING.xs 
                     }}>
-                      Sentiment: {analysis[currentTest].sentiment}
+                      Thinking Pattern: {currentAnalysis.thinkingPattern}
                     </h3>
                     <p style={{ opacity: '0.9' }}>
-                      {analysis[currentTest].symbolism}
+                      Optimism Score: {currentAnalysis.optimismScore}%
                     </p>
                   </div>
                   <div style={{ 
                     fontSize: '3.5rem', 
                     fontWeight: 'bold' 
                   }}>
-                    {analysis[currentTest].optimismScore}%
+                    {currentAnalysis.optimismScore}%
                   </div>
                 </div>
               </div>
-            )}
 
-            {analysis[currentTest].interpretation && (
               <Card style={{
                 background: 'linear-gradient(135deg, #f8f9ff 0%, #e8f2ff 100%)',
-                border: `2px solid ${CONSTANTS.COLORS.gray300}`,
-                marginBottom: CONSTANTS.SPACING.xl
+                border: `2px solid ${CONFIG.COLORS.gray300}`,
+                marginBottom: CONFIG.SPACING.xl
               }}>
                 <h3 style={{
                   fontSize: '1.3rem',
-                  color: CONSTANTS.COLORS.gray800,
-                  marginBottom: CONSTANTS.SPACING.sm,
+                  color: CONFIG.COLORS.gray800,
+                  marginBottom: CONFIG.SPACING.sm,
                   display: 'flex',
                   alignItems: 'center',
-                  gap: CONSTANTS.SPACING.xs
-              }}>
-                <Lightbulb size={20} color={CONSTANTS.COLORS.primaryGradient} />
-                Psychological Interpretation
-              </h3>
-              <p style={{ 
-                color: CONSTANTS.COLORS.gray700, 
-                lineHeight: '1.7', 
-                fontSize: '16px' 
-              }}>
-                {analysis[currentTest].interpretation}
-              </p>
-            </Card>
-            )}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-              gap: CONSTANTS.SPACING.xl,
-              marginBottom: CONSTANTS.SPACING.xl
-            }}>
-              <Card style={{
-                background: CONSTANTS.COLORS.strengthsGradient,
-                color: CONSTANTS.COLORS.white
-              }}>
-                <h3 style={{
-                  fontSize: '1.3rem',
-                  marginBottom: CONSTANTS.SPACING.md,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: CONSTANTS.SPACING.xs
+                  gap: CONFIG.SPACING.xs
                 }}>
-                  <Star size={20} />
-                  Key Strengths
+                  <Sparkles size={20} />
+                  Philosophical Interpretation
                 </h3>
-                <ul style={{ paddingLeft: CONSTANTS.SPACING.md }}>
-                  {analysis[currentTest].strengths.map((strength, index) => (
-                    <li key={index} style={{ marginBottom: CONSTANTS.SPACING.xs }}>
-                      {strength}
-                    </li>
-                  ))}
-                </ul>
+                <p style={{ 
+                  color: CONFIG.COLORS.gray700, 
+                  lineHeight: '1.7', 
+                  fontSize: '16px' 
+                }}>
+                  {currentAnalysis.philosophicalInterpretation}
+                </p>
               </Card>
 
-              <Card style={{
-                background: CONSTANTS.COLORS.growthGradient,
-                color: CONSTANTS.COLORS.white
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                gap: CONFIG.SPACING.xl,
+                marginBottom: CONFIG.SPACING.xl
               }}>
-                <h3 style={{
-                  fontSize: '1.3rem',
-                  marginBottom: CONSTANTS.SPACING.md,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: CONSTANTS.SPACING.xs
+                <Card style={{
+                  background: 'linear-gradient(135deg, #4299e1 0%, #3182ce 100%)',
+                  color: CONFIG.COLORS.white
                 }}>
-                  <Target size={20} />
-                  Growth Opportunities
-                </h3>
-                <ul style={{ paddingLeft: CONSTANTS.SPACING.md }}>
-                  {analysis[currentTest].flaws.map((flaw, index) => (
-                    <li key={index} style={{ marginBottom: CONSTANTS.SPACING.xs }}>
-                      {flaw}
-                    </li>
-                  ))}
-                </ul>
-              </Card>
-            </div>
-
-            <Card style={{
-              background: CONSTANTS.COLORS.recommendationsGradient,
-              color: CONSTANTS.COLORS.white
-            }}>
-              <h3 style={{
-                fontSize: '1.3rem',
-                marginBottom: CONSTANTS.SPACING.md,
-                display: 'flex',
-                alignItems: 'center',
-                gap: CONSTANTS.SPACING.xs
-              }}>
-                <TrendingUp size={20} />
-                Professional Recommendations
-              </h3>
-              <ul style={{ paddingLeft: CONSTANTS.SPACING.md }}>
-                {analysis[currentTest].recommendations.map((recommendation, index) => (
-                  <li key={index} style={{ 
-                    marginBottom: CONSTANTS.SPACING.sm,
+                  <h3 style={{
+                    fontSize: '1.3rem',
+                    marginBottom: CONFIG.SPACING.md,
                     display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: CONSTANTS.SPACING.xs
+                    alignItems: 'center',
+                    gap: CONFIG.SPACING.xs
                   }}>
-                    <ArrowRight size={16} style={{ marginTop: '2px', flexShrink: 0 }} />
-                    {recommendation}
-                  </li>
-                ))}
-              </ul>
-            </Card>
+                    <Star size={20} />
+                    Positive Aspects
+                  </h3>
+                  <ul style={{ paddingLeft: CONFIG.SPACING.md }}>
+                    {currentAnalysis.positiveAspects.map((aspect, index) => (
+                      <li key={index} style={{ marginBottom: CONFIG.SPACING.xs }}>
+                        {aspect}
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
 
-            <Card style={{
-              background: 'linear-gradient(135deg, #f8f9ff 0%, #e8f2ff 100%)',
-              border: `2px solid ${CONSTANTS.COLORS.gray300}`,
-              marginTop: CONSTANTS.SPACING.xl
-            }}>
-              <h3 style={{
-                fontSize: '1.3rem',
-                color: CONSTANTS.COLORS.gray800,
-                marginBottom: CONSTANTS.SPACING.sm,
-                display: 'flex',
-                alignItems: 'center',
-                gap: CONSTANTS.SPACING.xs
-              }}>
-                <FileText size={20} color={CONSTANTS.COLORS.primaryGradient} />
-                Overall Assessment
-              </h3>
-              <p style={{ 
-                color: CONSTANTS.COLORS.gray700, 
-                lineHeight: '1.7', 
-                fontSize: '16px' 
-              }}>
-                {analysis[currentTest].overallAssessment}
-              </p>
-            </Card>
+                <Card style={{
+                  background: 'linear-gradient(135deg, #ed8936 0%, #dd6b20 100%)',
+                  color: CONFIG.COLORS.white
+                }}>
+                  <h3 style={{
+                    fontSize: '1.3rem',
+                    marginBottom: CONFIG.SPACING.md,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: CONFIG.SPACING.xs
+                  }}>
+                    <Target size={20} />
+                    Areas for Attention
+                  </h3>
+                  <ul style={{ paddingLeft: CONFIG.SPACING.md }}>
+                    {currentAnalysis.concerns.map((concern, index) => (
+                      <li key={index} style={{ marginBottom: CONFIG.SPACING.xs }}>
+                        {concern}
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
+              </div>
 
-            <div style={{
-              background: CONSTANTS.COLORS.gray100,
-              padding: CONSTANTS.SPACING.md,
-              borderRadius: CONSTANTS.BORDER_RADIUS.md,
-              marginTop: CONSTANTS.SPACING.xl,
-              border: `1px solid ${CONSTANTS.COLORS.gray300}`
-            }}>
-              <p style={{ 
-                color: CONSTANTS.COLORS.gray600, 
-                fontSize: '14px', 
-                textAlign: 'center',
-                display: 'flex',
-                alignItems: 'center',
-                gap: CONSTANTS.SPACING.xs,
-                justifyContent: 'center'
+              <Card style={{
+                background: 'linear-gradient(135deg, #805ad5 0%, #6b46c1 100%)',
+                color: CONFIG.COLORS.white,
+                marginBottom: CONFIG.SPACING.xl
               }}>
-                <Info size={16} />
-                This analysis is AI-generated and should not replace professional medical advice.
-              </p>
-            </div>
-          </Card>
-        )}
+                <h3 style={{
+                  fontSize: '1.3rem',
+                    marginBottom: CONFIG.SPACING.md,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: CONFIG.SPACING.xs
+                }}>
+                  <Lightbulb size={20} />
+                  Underlying Beliefs
+                </h3>
+                <ul style={{ paddingLeft: CONFIG.SPACING.md }}>
+                  {currentAnalysis.underlyingBeliefs.map((belief, index) => (
+                    <li key={index} style={{ marginBottom: CONFIG.SPACING.xs }}>
+                      {belief}
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+
+              <Card style={{
+                background: 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)',
+                color: CONFIG.COLORS.white
+              }}>
+                <h3 style={{
+                  fontSize: '1.3rem',
+                  marginBottom: CONFIG.SPACING.md,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: CONFIG.SPACING.xs
+                }}>
+                  <TrendingUp size={20} />
+                  Recommendations for Development
+                </h3>
+                <ul style={{ paddingLeft: CONFIG.SPACING.md }}>
+                  {currentAnalysis.recommendations.map((recommendation, index) => (
+                    <li key={index} style={{ 
+                      marginBottom: CONFIG.SPACING.sm,
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: CONFIG.SPACING.xs
+                    }}>
+                      <ArrowRight size={16} style={{ marginTop: '2px', flexShrink: 0 }} />
+                      {recommendation}
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+
+              <Card style={{
+                background: 'linear-gradient(135deg, #f8f9ff 0%, #e8f2ff 100%)',
+                border: `2px solid ${CONFIG.COLORS.gray300}`,
+                marginTop: CONFIG.SPACING.xl
+              }}>
+                <h3 style={{
+                  fontSize: '1.3rem',
+                  color: CONFIG.COLORS.gray800,
+                  marginBottom: CONFIG.SPACING.sm,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: CONFIG.SPACING.xs
+                }}>
+                  <FileText size={20} />
+                  Overall Assessment
+                </h3>
+                <p style={{ 
+                  color: CONFIG.COLORS.gray700, 
+                  lineHeight: '1.7', 
+                  fontSize: '16px' 
+                }}>
+                  {currentAnalysis.overallAssessment}
+                </p>
+              </Card>
+            </Card>
+          )}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #f8f9ff 0%, #e8f2ff 100%)',
-      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif"
-    }}>
+    <div style={{ fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif" }}>
       {currentTest === 'home' ? renderHome() : renderTestInterface()}
     </div>
   );

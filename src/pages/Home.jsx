@@ -16,7 +16,7 @@ function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
-  const whatsappNumber = "923001234567";
+  const whatsappChannel = "https://whatsapp.com/channel/0029Vb6OOf2JuyABkRXFLn2m";
 
   const slides = [
     {
@@ -93,9 +93,8 @@ function Home() {
   };
 
   const openWhatsApp = (slideTitle) => {
-    const message = `Hello, I'm interested in the ${slideTitle} preparation course. Please provide me with more details.`;
-    window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
-  };
+  window.open(whatsappChannel, "_blank");
+};
 
   const handleLearnMore = () => {
     navigate('/learn-more');

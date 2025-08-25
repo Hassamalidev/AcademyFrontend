@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { RefreshCw, ExternalLink, Clock, Search } from 'lucide-react';
+import Footer from './Footer';
 
 const News = () => {
   const [news, setNews] = useState({
@@ -535,6 +536,7 @@ const News = () => {
   };
 
   return (
+    <>
     <div style={styles.container}>
      
 
@@ -738,6 +740,8 @@ const News = () => {
         }
       `}</style>
     </div>
+    <Footer/>
+    </>
   );
 };
 

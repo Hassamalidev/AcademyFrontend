@@ -391,7 +391,6 @@ const LearnMore = () => {
         </div>
       </section>
 
-      {/* Services Information */}
       <section style={{ marginBottom: "80px" }}>
         <h2 style={{
           fontSize: "2rem",
@@ -414,7 +413,6 @@ const LearnMore = () => {
         </div>
       </section>
 
-      {/* ISSB Process Timeline */}
       <section style={{ marginBottom: "80px" }}>
         <h2 style={{
           fontSize: "2rem",
@@ -468,7 +466,6 @@ const LearnMore = () => {
         </div>
       </section>
 
-      {/* Contact Section */}
       <div style={{
         textAlign: "center",
         padding: "40px",

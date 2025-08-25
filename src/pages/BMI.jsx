@@ -1,565 +1,1027 @@
-import { useState } from "react";
+import React, { useState } from 'react';
+import { 
+  Brain, Home, CheckCircle, Loader, 
+  MessageSquare, Edit, BookOpen, Image, Navigation, 
+  PenTool, Shield, Info, Zap, Star, TrendingUp, 
+  Target, Lightbulb, FileText, ArrowRight, Sparkles
+} from 'lucide-react';
 
-function BMI() {
-  const [weight, setWeight] = useState("");
-  const [height, setHeight] = useState("");
-  const [unit, setUnit] = useState("metric");
-  const [bmi, setBmi] = useState(null);
-  const [category, setCategory] = useState("");
-
-  const calculateBMI = () => {
-    if (!weight || !height) return;
-
-    let weightInKg = parseFloat(weight);
-    let heightInM = parseFloat(height);
-
-    if (unit === "imperial") {
-      weightInKg = weightInKg * 0.453592;
-      heightInM = heightInM * 0.0254;
-    } else {
-      heightInM = heightInM / 100;
+// Configuration constants
+const CONFIG = {
+  DAILY_LIMIT: 20,
+  MIN_CHARACTERS: 10,
+  COLORS: {
+    primaryGradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    white: '#ffffff',
+    gray100: '#f8f9ff',
+    gray200: '#e8f2ff',
+    gray300: '#e2e8f0',
+    gray400: '#cbd5e0',
+    gray500: '#a0aec0',
+    gray600: '#718096',
+    gray700: '#4a5568',
+    gray800: '#2d3748',
+    success: '#48bb78',
+    warning: '#ed8936',
+    error: '#e53e3e'
+  },
+  SHADOWS: {
+    small: '0 5px 15px rgba(102, 126, 234, 0.3)',
+    medium: '0 10px 25px rgba(0, 0, 0, 0.05)',
+    large: '0 15px 35px rgba(0, 0, 0, 0.1)',
+    xl: '0 20px 40px rgba(0, 0, 0, 0.15)'
+  },
+  BORDER_RADIUS: {
+    sm: '12px',
+    md: '20px',
+    lg: '25px',
+    xl: '30px'
+  },
+  SPACING: {
+    xs: '8px',
+    sm: '15px',
+    md: '20px',
+    lg: '25px',
+    xl: '30px',
+    xxl: '40px'
+  },
+  TEST_TYPES: [
+    {
+      id: 'word-association',
+      icon: MessageSquare,
+      title: 'Word Association Test',
+      description: 'Reveal unconscious thoughts through word associations',
+      color: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
+      shadowColor: 'rgba(255, 154, 158, 0.3)'
+    },
+    {
+      id: 'sentence-completion-english',
+      icon: Edit,
+      title: 'Sentence Completion (English)',
+      description: 'Complete sentences to explore thought patterns',
+      color: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+      shadowColor: 'rgba(168, 237, 234, 0.3)'
+    },
+    {
+      id: 'sentence-completion-urdu',
+      icon: BookOpen,
+      title: 'Sentence Completion (Urdu)',
+      description: 'جملے مکمل کرکے اپنے خیالات کا تجزیہ کریں',
+      color: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
+      shadowColor: 'rgba(255, 236, 210, 0.3)'
+    },
+    {
+      id: 'picture-story',
+      icon: Image,
+      title: 'Picture Story Test',
+      description: 'Create stories from images to analyze personality',
+      color: 'linear-gradient(135deg, #a8c0ff 0%, #3f2b96 100%)',
+      shadowColor: 'rgba(168, 192, 255, 0.3)'
+    },
+    {
+      id: 'pointer-story',
+      icon: Navigation,
+      title: 'Pointer Story Test',
+      description: 'Develop logical narratives for cognitive assessment',
+      color: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+      shadowColor: 'rgba(250, 112, 154, 0.3)'
+    },
+    {
+      id: 'essay-writing',
+      icon: PenTool,
+      title: 'Essay Writing',
+      description: 'Express thoughts through writing for deep analysis',
+      color: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+      shadowColor: 'rgba(79, 172, 254, 0.3)'
     }
+  ],
+  API_CONFIG: {
+    endpoint: "http://localhost:11434/api/generate",
+    model: "llama2"
+  },
+  WELCOME_MESSAGE: {
+    title: 'Welcome to AI Psychology',
+    description: 'Get professional-level psychological insights powered by advanced AI.',
+    privacyItems: [
+      'All responses are processed locally on your device',
+      'No data is sent to external servers',
+      'Analysis happens in real-time using your local AI'
+    ]
+  }
+};
 
-    const bmiValue = weightInKg / (heightInM * heightInM);
-    setBmi(bmiValue.toFixed(1));
+const Card = ({ children, style = {}, ...props }) => (
+  <div style={{
+    background: CONFIG.COLORS.white,
+    borderRadius: CONFIG.BORDER_RADIUS.lg,
+    padding: CONFIG.SPACING.xl,
+    boxShadow: CONFIG.SHADOWS.medium,
+    border: `1px solid ${CONFIG.COLORS.gray300}`,
+    ...style
+  }} {...props}>
+    {children}
+  </div>
+);
 
-    if (bmiValue < 18.5) {
-      setCategory("Underweight");
-    } else if (bmiValue >= 18.5 && bmiValue < 25) {
-      setCategory("Normal weight");
-    } else if (bmiValue >= 25 && bmiValue < 30) {
-      setCategory("Overweight");
-    } else {
-      setCategory("Obesity");
-    }
+const Button = ({ children, onClick, disabled = false, variant = 'primary', ...props }) => {
+  const baseStyle = {
+    border: 'none',
+    padding: `${CONFIG.SPACING.sm} ${CONFIG.SPACING.xl}`,
+    borderRadius: CONFIG.BORDER_RADIUS.lg,
+    cursor: disabled ? 'not-allowed' : 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: CONFIG.SPACING.xs,
+    fontWeight: '600',
+    fontSize: '16px',
+    transition: 'all 0.3s ease',
+    ...props.style
   };
 
-  const reset = () => {
-    setWeight("");
-    setHeight("");
-    setBmi(null);
-    setCategory("");
-  };
-
-  const getCategoryColor = () => {
-    switch (category) {
-      case "Underweight": return "#3b82f6";
-      case "Normal weight": return "#10b981";
-      case "Overweight": return "#f59e0b";
-      case "Obesity": return "#ef4444";
-      default: return "#333";
-    }
-  };
-
-  const getCategoryGradient = () => {
-    switch (category) {
-      case "Underweight": return "linear-gradient(135deg, #3b82f6, #1d4ed8)";
-      case "Normal weight": return "linear-gradient(135deg, #10b981, #059669)";
-      case "Overweight": return "linear-gradient(135deg, #f59e0b, #d97706)";
-      case "Obesity": return "linear-gradient(135deg, #ef4444, #dc2626)";
-      default: return "linear-gradient(135deg, #6366f1, #4f46e5)";
+  const variants = {
+    primary: {
+      background: disabled ? 
+        'linear-gradient(135deg, #a0a0a0 0%, #808080 100%)' : 
+        CONFIG.COLORS.primaryGradient,
+      color: CONFIG.COLORS.white,
+      boxShadow: disabled ? 'none' : CONFIG.SHADOWS.small
+    },
+    secondary: {
+      background: CONFIG.COLORS.gray100,
+      color: CONFIG.COLORS.gray700,
+      border: `1px solid ${CONFIG.COLORS.gray300}`
     }
   };
 
   return (
-    <div style={{
-      minHeight: "100vh",
-      backgroundColor: "#ffffff",
-      backgroundImage: `
-        radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.03) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(255, 119, 48, 0.03) 0%, transparent 50%),
-        radial-gradient(circle at 40% 40%, rgba(16, 185, 129, 0.03) 0%, transparent 50%)
-      `,
-      padding: "20px",
-      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
-    }}>
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      style={{ ...baseStyle, ...variants[variant] }}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+};
+
+const PsychologicalAssessmentPlatform = () => {
+  const [currentTest, setCurrentTest] = useState('home');
+  const [responses, setResponses] = useState({});
+  const [analysis, setAnalysis] = useState({});
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [completedTests, setCompletedTests] = useState(new Set());
+  const [currentInput, setCurrentInput] = useState('');
+  const [analysisCount, setAnalysisCount] = useState(0);
+  const [showWelcome, setShowWelcome] = useState(true);
+  const [error, setError] = useState(null);
+  const [ollamaStatus, setOllamaStatus] = useState('checking'); // checking, connected, error
+
+  // Check if Ollama is running when component mounts
+  React.useEffect(() => {
+    checkOllamaConnection();
+  }, []);
+
+  const checkOllamaConnection = async () => {
+    try {
+      const response = await fetch('http://localhost:11434/api/tags', {
+        method: 'GET',
+      });
+      
+      if (response.ok) {
+        setOllamaStatus('connected');
+      } else {
+        setOllamaStatus('error');
+        setError('Ollama is not running. Please make sure Ollama is installed and running on your computer.');
+      }
+    } catch (error) {
+      setOllamaStatus('error');
+      setError('Cannot connect to Ollama. Please make sure Ollama is installed and running on http://localhost:11434');
+    }
+  };
+
+  const performPsychologicalAnalysis = async (text, testType) => {
+    if (ollamaStatus !== 'connected') {
+      setError('Ollama is not connected. Please make sure Ollama is running.');
+      throw new Error('Ollama not connected');
+    }
+
+    setIsAnalyzing(true);
+    setError(null);
+    
+    try {
+      const prompt = createAnalysisPrompt(text, testType);
+      const analysisText = await callOllamaAPI(prompt);
+      return parseOllamaResponse(analysisText);
+    } catch (error) {
+      console.error('Analysis Error:', error);
+      setError(error.message || 'Failed to analyze response. Please try again.');
+      throw error;
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  const createAnalysisPrompt = (text, testType) => {
+    return `As an expert psychological analyst with expertise in philosophical interpretation, provide a deep analysis of this ${testType.replace(/-/g, ' ')} test response.
+
+STUDENT'S RESPONSE: "${text}"
+
+Please provide your analysis in the following structured JSON format:
+{
+  "thinkingPattern": "Positive", "Negative", or "Neutral",
+  "optimismScore": number (0-100),
+  "philosophicalInterpretation": "Deep philosophical interpretation of what this response reveals about the student's worldview and underlying beliefs",
+  "positiveAspects": ["Specific positive aspects revealed in the response", "What these aspects indicate about the student's strengths"],
+  "concerns": ["Specific concerning patterns revealed in the response", "What these patterns might indicate about areas needing attention"],
+  "underlyingBeliefs": ["Key underlying beliefs or assumptions revealed", "How these beliefs shape the student's perspective"],
+  "recommendations": ["Specific, actionable recommendations for personal development", "How to build on strengths and address concerns"],
+  "overallAssessment": "Comprehensive summary connecting the response to broader psychological and philosophical patterns"
+}
+
+Guidelines for analysis:
+- Focus on the philosophical and psychological meaning behind the specific words and phrases used
+- Connect the response to broader patterns of thinking and worldview
+- Provide specific examples from the response to support your interpretation
+- Offer balanced insights that highlight both strengths and growth areas
+- Ensure recommendations are practical and actionable
+- Consider cultural context, especially for Urdu responses
+
+IMPORTANT: Return ONLY valid JSON without any additional text, markdown, or code formatting.`;
+  };
+
+  const callOllamaAPI = async (prompt) => {
+    try {
+      const response = await fetch(CONFIG.API_CONFIG.endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: CONFIG.API_CONFIG.model,
+          prompt: prompt,
+          stream: false,
+          options: {
+            temperature: 0.7,
+            top_p: 0.9,
+          }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Ollama API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (!data.response) {
+        throw new Error('Invalid response format from Ollama');
+      }
+      
+      return data.response;
+    } catch (error) {
+      console.error('Ollama API Error:', error);
+      setOllamaStatus('error');
+      throw new Error(`Failed to connect to Ollama: ${error.message}`);
+    }
+  };
+
+  const parseOllamaResponse = (analysisText) => {
+    try {
+      // Try to extract JSON from the response
+      const jsonMatch = analysisText.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        throw new Error('No valid JSON found in Ollama response. The AI might not have followed instructions.');
+      }
+      
+      const parsedData = JSON.parse(jsonMatch[0]);
+      
+      // Validate required fields
+      const requiredFields = ['thinkingPattern', 'optimismScore', 'philosophicalInterpretation', 
+                             'positiveAspects', 'concerns', 'underlyingBeliefs', 
+                             'recommendations', 'overallAssessment'];
+      
+      for (const field of requiredFields) {
+        if (parsedData[field] === undefined) {
+          throw new Error(`Missing required field: ${field}`);
+        }
+      }
+      
+      return {
+        thinkingPattern: parsedData.thinkingPattern,
+        optimismScore: parsedData.optimismScore,
+        philosophicalInterpretation: parsedData.philosophicalInterpretation,
+        positiveAspects: Array.isArray(parsedData.positiveAspects) ? 
+          parsedData.positiveAspects : [parsedData.positiveAspects],
+        concerns: Array.isArray(parsedData.concerns) ? 
+          parsedData.concerns : [parsedData.concerns],
+        underlyingBeliefs: Array.isArray(parsedData.underlyingBeliefs) ? 
+          parsedData.underlyingBeliefs : [parsedData.underlyingBeliefs],
+        recommendations: Array.isArray(parsedData.recommendations) ? 
+          parsedData.recommendations : [parsedData.recommendations],
+        overallAssessment: parsedData.overallAssessment
+      };
+    } catch (error) {
+      console.error('Failed to parse Ollama response:', error, analysisText);
+      throw new Error('Failed to parse analysis response. The AI might not have followed the JSON format instructions.');
+    }
+  };
+
+  const handleSubmitTest = async () => {
+    if (!currentInput.trim()) {
+      setError('Please enter your response before submitting.');
+      return;
+    }
+
+    if (currentInput.trim().length < CONFIG.MIN_CHARACTERS) {
+      setError(`Please provide a more detailed response (minimum ${CONFIG.MIN_CHARACTERS} characters) for accurate analysis.`);
+      return;
+    }
+
+    if (analysisCount >= CONFIG.DAILY_LIMIT) {
+      setError(`You've reached the analysis limit for this session (${CONFIG.DAILY_LIMIT} analyses). Please refresh the page to continue.`);
+      return;
+    }
+
+    if (ollamaStatus !== 'connected') {
+      setError('Ollama is not connected. Please make sure Ollama is running.');
+      return;
+    }
+
+    setError(null);
+    
+    try {
+      setResponses(prev => ({
+        ...prev,
+        [currentTest]: currentInput.trim()
+      }));
+
+      const analysisResult = await performPsychologicalAnalysis(currentInput.trim(), currentTest);
+      
+      setAnalysis(prev => ({
+        ...prev,
+        [currentTest]: analysisResult
+      }));
+      setCompletedTests(prev => new Set([...prev, currentTest]));
+      setAnalysisCount(prev => prev + 1);
+      
+    } catch (error) {
+      // Error is already handled in performPsychologicalAnalysis
+      console.error('Submission Error:', error);
+    } finally {
+      setCurrentInput('');
+    }
+  };
+
+  const renderWelcome = () => (
+    showWelcome && (
       <div style={{
-        maxWidth: "520px",
-        margin: "0 auto",
-        paddingTop: "60px"
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'rgba(0, 0, 0, 0.8)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000
       }}>
-        {/* Header with modern styling */}
-        <div style={{
-          textAlign: "center",
-          marginBottom: "48px",
-          position: "relative"
+        <Card style={{
+          maxWidth: '600px',
+          width: '90%',
+          textAlign: 'center'
         }}>
           <div style={{
-            position: "absolute",
-            top: "-20px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            width: "60px",
-            height: "4px",
-            background: "linear-gradient(90deg, #6366f1, #8b5cf6, #ec4899)",
-            borderRadius: "2px"
-          }}></div>
+            width: '80px',
+            height: '80px',
+            background: CONFIG.COLORS.primaryGradient,
+            borderRadius: '50%',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: CONFIG.SPACING.md
+          }}>
+            <Brain size={40} color={CONFIG.COLORS.white} />
+          </div>
+          <h2 style={{ 
+            fontSize: '2rem', 
+            fontWeight: 'bold', 
+            color: CONFIG.COLORS.gray800, 
+            marginBottom: CONFIG.SPACING.md 
+          }}>
+            {CONFIG.WELCOME_MESSAGE.title}
+          </h2>
+          <p style={{ 
+            color: CONFIG.COLORS.gray600, 
+            fontSize: '1.1rem', 
+            lineHeight: '1.6', 
+            marginBottom: CONFIG.SPACING.xl 
+          }}>
+            {CONFIG.WELCOME_MESSAGE.description}
+          </p>
           
-          <h1 style={{
-            fontSize: "42px",
-            fontWeight: "800",
-            background: "linear-gradient(135deg, #1f2937, #374151)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            margin: "0 0 12px 0",
-            letterSpacing: "-1px",
-            lineHeight: "1.1"
+          <Card style={{
+            background: CONFIG.COLORS.gray100,
+            textAlign: 'left',
+            marginBottom: CONFIG.SPACING.xl
           }}>
-            BMI Calculator
+            <h3 style={{ 
+              color: CONFIG.COLORS.gray800, 
+              marginBottom: CONFIG.SPACING.sm, 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: CONFIG.SPACING.xs 
+            }}>
+              <Shield size={20} />
+              Your Privacy is Protected
+            </h3>
+            <ul style={{ color: CONFIG.COLORS.gray700, listStyle: 'none', padding: 0 }}>
+              {CONFIG.WELCOME_MESSAGE.privacyItems.map((item, index) => (
+                <li key={index} style={{ marginBottom: CONFIG.SPACING.xs, display: 'flex', alignItems: 'center', gap: CONFIG.SPACING.xs }}>
+                  <CheckCircle size={16} color={CONFIG.COLORS.success} />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </Card>
+
+          <div style={{
+            background: ollamaStatus === 'connected' ? '#f0fff4' : '#fff5f5',
+            border: `1px solid ${ollamaStatus === 'connected' ? CONFIG.COLORS.success : CONFIG.COLORS.error}`,
+            borderRadius: CONFIG.BORDER_RADIUS.md,
+            padding: CONFIG.SPACING.md,
+            marginBottom: CONFIG.SPACING.xl,
+            textAlign: 'left'
+          }}>
+            <h4 style={{
+              color: ollamaStatus === 'connected' ? CONFIG.COLORS.success : CONFIG.COLORS.error,
+              marginBottom: CONFIG.SPACING.xs,
+              display: 'flex',
+              alignItems: 'center',
+              gap: CONFIG.SPACING.xs
+            }}>
+              {ollamaStatus === 'connected' ? (
+                <>
+                  <CheckCircle size={18} />
+                  Ollama Connected
+                </>
+              ) : (
+                <>
+                  <Info size={18} />
+                  Ollama Not Detected
+                </>
+              )}
+            </h4>
+            <p style={{ 
+              color: CONFIG.COLORS.gray700, 
+              fontSize: '14px', 
+              margin: 0,
+              lineHeight: '1.5'
+            }}>
+              {ollamaStatus === 'connected' 
+                ? 'Your local AI is ready for analysis. All processing happens on your device.'
+                : 'Please install and run Ollama to use this application. Visit ollama.ai for instructions.'}
+            </p>
+          </div>
+          
+          <Button
+            onClick={() => setShowWelcome(false)}
+            style={{
+              padding: `${CONFIG.SPACING.sm} ${CONFIG.SPACING.xxl}`,
+              fontSize: '1.1rem'
+            }}
+            disabled={ollamaStatus !== 'connected'}
+          >
+            Start Your Assessment
+          </Button>
+
+          {ollamaStatus !== 'connected' && (
+            <p style={{ 
+              color: CONFIG.COLORS.error, 
+              fontSize: '14px', 
+              marginTop: CONFIG.SPACING.md 
+            }}>
+              You need to install Ollama first to use this application.
+            </p>
+          )}
+        </Card>
+      </div>
+    )
+  );
+
+  const renderHome = () => (
+    <div style={{
+      minHeight: '100vh',
+      background: CONFIG.COLORS.white,
+      padding: CONFIG.SPACING.md
+    }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+        {/* Header */}
+        <div style={{ 
+          textAlign: 'center', 
+          marginBottom: CONFIG.SPACING.xxl,
+          padding: CONFIG.SPACING.xxl,
+          background: CONFIG.COLORS.primaryGradient,
+          borderRadius: CONFIG.BORDER_RADIUS.xl,
+          color: CONFIG.COLORS.white,
+          boxShadow: CONFIG.SHADOWS.xl
+        }}>
+          <div style={{
+            width: '100px',
+            height: '100px',
+            background: 'rgba(255, 255, 255, 0.2)',
+            borderRadius: '50%',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: CONFIG.SPACING.xl,
+            backdropFilter: 'blur(10px)'
+          }}>
+            <Brain size={50} color={CONFIG.COLORS.white} />
+          </div>
+          <h1 style={{ 
+            fontSize: '3.5rem', 
+            fontWeight: 'bold', 
+            marginBottom: CONFIG.SPACING.md, 
+            textShadow: '0 4px 8px rgba(0,0,0,0.1)' 
+          }}>
+            AI Psychology Platform
           </h1>
-          <p style={{
-            fontSize: "18px",
-            color: "#6b7280",
-            margin: "0",
-            fontWeight: "500",
-            letterSpacing: "0.5px"
+          <p style={{ 
+            fontSize: '1.3rem', 
+            opacity: '0.9', 
+            maxWidth: '700px', 
+            margin: '0 auto' 
           }}>
-            Discover your body mass index with precision
+            Professional psychological analysis powered by Ollama AI
           </p>
         </div>
 
-        {/* Main Card with enhanced styling */}
-        <div style={{
-          backgroundColor: "#ffffff",
-          border: "1px solid rgba(229, 231, 235, 0.8)",
-          borderRadius: "24px",
-          padding: "40px",
-          boxShadow: `
-            0 20px 25px -5px rgba(0, 0, 0, 0.08),
-            0 10px 10px -5px rgba(0, 0, 0, 0.04),
-            inset 0 1px 0 0 rgba(255, 255, 255, 0.9)
-          `,
-          marginBottom: "32px",
-          position: "relative",
-          overflow: "hidden"
+        {ollamaStatus !== 'connected' && (
+          <Card style={{
+            background: 'rgba(229, 62, 62, 0.1)',
+            border: `2px solid ${CONFIG.COLORS.error}`,
+            marginBottom: CONFIG.SPACING.xl
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: CONFIG.SPACING.md }}>
+              <Info size={24} color={CONFIG.COLORS.error} />
+              <div>
+                <h3 style={{ color: CONFIG.COLORS.error, margin: '0 0 8px 0' }}>
+                  Ollama Not Connected
+                </h3>
+                <p style={{ color: CONFIG.COLORS.gray700, margin: 0 }}>
+                  Please install and run Ollama to use this application. Visit{' '}
+                  <a 
+                    href="https://ollama.ai" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    style={{ color: CONFIG.COLORS.error, fontWeight: 'bold' }}
+                  >
+                    ollama.ai
+                  </a>{' '}
+                  for instructions. Then restart this application.
+                </p>
+              </div>
+              <Button 
+                onClick={checkOllamaConnection}
+                style={{ marginLeft: 'auto' }}
+              >
+                Check Again
+              </Button>
+            </div>
+          </Card>
+        )}
+
+        <Card style={{
+          background: 'linear-gradient(135deg, #f8f9ff 0%, #e8f2ff 100%)',
+          marginBottom: CONFIG.SPACING.xl
         }}>
-          {/* Subtle decorative elements */}
           <div style={{
-            position: "absolute",
-            top: "-50%",
-            right: "-50%",
-            width: "100%",
-            height: "100%",
-            background: "linear-gradient(45deg, transparent, rgba(99, 102, 241, 0.01), transparent)",
-            borderRadius: "50%",
-            pointerEvents: "none"
-          }}></div>
-
-          {/* Unit Toggle with modern design */}
-          <div style={{
-            marginBottom: "36px"
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: CONFIG.SPACING.md
           }}>
-            <label style={{
-              display: "block",
-              fontSize: "15px",
-              fontWeight: "700",
-              color: "#374151",
-              marginBottom: "16px",
-              letterSpacing: "0.5px",
-              textTransform: "uppercase"
-            }}>
-              Unit System
-            </label>
-            <div style={{
-              display: "flex",
-              backgroundColor: "#f8fafc",
-              borderRadius: "16px",
-              padding: "6px",
-              width: "240px",
-              border: "1px solid #e2e8f0",
-              boxShadow: "inset 0 2px 4px rgba(0, 0, 0, 0.04)"
-            }}>
-              {["metric", "imperial"].map((unitType) => (
-                <button
-                  key={unitType}
-                  onClick={() => setUnit(unitType)}
-                  style={{
-                    flex: "1",
-                    padding: "14px 20px",
-                    border: "none",
-                    borderRadius: "12px",
-                    background: unit === unitType 
-                      ? "linear-gradient(135deg, #6366f1, #4f46e5)" 
-                      : "transparent",
-                    color: unit === unitType ? "#ffffff" : "#64748b",
-                    fontSize: "15px",
-                    fontWeight: "600",
-                    cursor: "pointer",
-                    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                    textTransform: "capitalize",
-                    letterSpacing: "0.5px",
-                    boxShadow: unit === unitType 
-                      ? "0 4px 8px rgba(99, 102, 241, 0.25)" 
-                      : "none"
-                  }}
-                  onMouseOver={(e) => {
-                    if (unit !== unitType) {
-                      e.target.style.backgroundColor = "#e2e8f0";
-                      e.target.style.color = "#475569";
-                    }
-                  }}
-                  onMouseOut={(e) => {
-                    if (unit !== unitType) {
-                      e.target.style.backgroundColor = "transparent";
-                      e.target.style.color = "#64748b";
-                    }
-                  }}
-                >
-                  {unitType}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Enhanced Input Fields */}
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "24px",
-            marginBottom: "40px"
-          }}>
-            <div style={{ position: "relative" }}>
-              <label style={{
-                display: "block",
-                fontSize: "15px",
-                fontWeight: "700",
-                color: "#374151",
-                marginBottom: "12px",
-                letterSpacing: "0.5px",
-                textTransform: "uppercase"
+            <div style={{ flex: 1, minWidth: '200px' }}>
+              <h3 style={{ 
+                color: CONFIG.COLORS.gray800, 
+                fontSize: '1.2rem', 
+                marginBottom: CONFIG.SPACING.xs 
               }}>
-                Weight {unit === "metric" ? "(kg)" : "(lbs)"}
-              </label>
-              <div style={{ position: "relative" }}>
-                <input
-                  type="number"
-                  value={weight}
-                  onChange={(e) => setWeight(e.target.value)}
-                  placeholder={unit === "metric" ? "70" : "154"}
-                  style={{
-                    width: "100%",
-                    padding: "18px 20px",
-                    border: "2px solid #e5e7eb",
-                    borderRadius: "16px",
-                    fontSize: "17px",
-                    fontWeight: "500",
-                    outline: "none",
-                    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                    backgroundColor: "#ffffff",
-                    boxSizing: "border-box",
-                    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.04)"
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = "#6366f1";
-                    e.target.style.boxShadow = "0 0 0 3px rgba(99, 102, 241, 0.1), 0 1px 3px rgba(0, 0, 0, 0.04)";
-                    e.target.style.transform = "translateY(-1px)";
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = "#e5e7eb";
-                    e.target.style.boxShadow = "0 1px 3px rgba(0, 0, 0, 0.04)";
-                    e.target.style.transform = "translateY(0)";
-                  }}
-                />
-                <div style={{
-                  position: "absolute",
-                  right: "20px",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  fontSize: "14px",
-                  color: "#9ca3af",
-                  fontWeight: "600",
-                  pointerEvents: "none"
-                }}>
-                  {unit === "metric" ? "KG" : "LBS"}
-                </div>
-              </div>
-            </div>
-
-            <div style={{ position: "relative" }}>
-              <label style={{
-                display: "block",
-                fontSize: "15px",
-                fontWeight: "700",
-                color: "#374151",
-                marginBottom: "12px",
-                letterSpacing: "0.5px",
-                textTransform: "uppercase"
+                Session Progress
+              </h3>
+              <span style={{ 
+                fontSize: '1.1rem', 
+                color: CONFIG.COLORS.gray600 
               }}>
-                Height {unit === "metric" ? "(cm)" : "(in)"}
-              </label>
-              <div style={{ position: "relative" }}>
-                <input
-                  type="number"
-                  value={height}
-                  onChange={(e) => setHeight(e.target.value)}
-                  placeholder={unit === "metric" ? "175" : "69"}
-                  style={{
-                    width: "100%",
-                    padding: "18px 20px",
-                    border: "2px solid #e5e7eb",
-                    borderRadius: "16px",
-                    fontSize: "17px",
-                    fontWeight: "500",
-                    outline: "none",
-                    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                    backgroundColor: "#ffffff",
-                    boxSizing: "border-box",
-                    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.04)"
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = "#6366f1";
-                    e.target.style.boxShadow = "0 0 0 3px rgba(99, 102, 241, 0.1), 0 1px 3px rgba(0, 0, 0, 0.04)";
-                    e.target.style.transform = "translateY(-1px)";
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = "#e5e7eb";
-                    e.target.style.boxShadow = "0 1px 3px rgba(0, 0, 0, 0.04)";
-                    e.target.style.transform = "translateY(0)";
-                  }}
-                />
-                <div style={{
-                  position: "absolute",
-                  right: "20px",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  fontSize: "14px",
-                  color: "#9ca3af",
-                  fontWeight: "600",
-                  pointerEvents: "none"
-                }}>
-                  {unit === "metric" ? "CM" : "IN"}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Enhanced Buttons */}
-          <div style={{
-            display: "flex",
-            gap: "16px",
-            marginBottom: bmi ? "40px" : "0"
-          }}>
-            <button
-              onClick={calculateBMI}
-              disabled={!weight || !height}
-              style={{
-                flex: "1",
-                padding: "20px 32px",
-                background: (!weight || !height) 
-                  ? "linear-gradient(135deg, #d1d5db, #9ca3af)"
-                  : "linear-gradient(135deg, #6366f1, #4f46e5)",
-                color: "#ffffff",
-                border: "none",
-                borderRadius: "16px",
-                fontSize: "17px",
-                fontWeight: "700",
-                cursor: (!weight || !height) ? "not-allowed" : "pointer",
-                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                letterSpacing: "0.5px",
-                textTransform: "uppercase",
-                boxShadow: (!weight || !height) 
-                  ? "none"
-                  : "0 8px 16px rgba(99, 102, 241, 0.25)"
-              }}
-              onMouseOver={(e) => {
-                if (weight && height) {
-                  e.target.style.transform = "translateY(-2px)";
-                  e.target.style.boxShadow = "0 12px 24px rgba(99, 102, 241, 0.35)";
-                }
-              }}
-              onMouseOut={(e) => {
-                if (weight && height) {
-                  e.target.style.transform = "translateY(0)";
-                  e.target.style.boxShadow = "0 8px 16px rgba(99, 102, 241, 0.25)";
-                }
-              }}
-            >
-              Calculate BMI
-            </button>
-            
-            <button
-              onClick={reset}
-              style={{
-                padding: "20px 28px",
-                backgroundColor: "#ffffff",
-                color: "#6b7280",
-                border: "2px solid #e5e7eb",
-                borderRadius: "16px",
-                fontSize: "17px",
-                fontWeight: "700",
-                cursor: "pointer",
-                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                letterSpacing: "0.5px",
-                textTransform: "uppercase",
-                boxShadow: "0 1px 3px rgba(0, 0, 0, 0.04)"
-              }}
-              onMouseOver={(e) => {
-                e.target.style.backgroundColor = "#f9fafb";
-                e.target.style.borderColor = "#d1d5db";
-                e.target.style.color = "#374151";
-                e.target.style.transform = "translateY(-1px)";
-                e.target.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.08)";
-              }}
-              onMouseOut={(e) => {
-                e.target.style.backgroundColor = "#ffffff";
-                e.target.style.borderColor = "#e5e7eb";
-                e.target.style.color = "#6b7280";
-                e.target.style.transform = "translateY(0)";
-                e.target.style.boxShadow = "0 1px 3px rgba(0, 0, 0, 0.04)";
-              }}
-            >
-              Reset
-            </button>
-          </div>
-
-          {/* Enhanced Results */}
-          {bmi && (
-            <div style={{
-              background: `linear-gradient(135deg, ${getCategoryColor()}08, ${getCategoryColor()}04)`,
-              border: `2px solid ${getCategoryColor()}30`,
-              borderRadius: "20px",
-              padding: "32px",
-              textAlign: "center",
-              position: "relative",
-              overflow: "hidden",
-              animation: "slideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1)"
-            }}>
+                Analyses Completed: {analysisCount}/{CONFIG.DAILY_LIMIT}
+              </span>
               <div style={{
-                position: "absolute",
+                width: '100%',
+                height: '10px',
+                background: CONFIG.COLORS.gray300,
+                borderRadius: '5px',
+                marginTop: CONFIG.SPACING.xs,
+                overflow: 'hidden'
+              }}>
+                <div style={{
+                  width: `${(analysisCount / CONFIG.DAILY_LIMIT) * 100}%`,
+                  height: '100%',
+                  background: analysisCount > CONFIG.DAILY_LIMIT * 0.8 ? 
+                    'linear-gradient(90deg, #ff6b6b, #ee5a52)' : 
+                    'linear-gradient(90deg, #4ecdc4, #44a08d)',
+                  borderRadius: '5px',
+                  transition: 'width 0.3s ease'
+                }} />
+              </div>
+            </div>
+            <div style={{
+              background: CONFIG.COLORS.primaryGradient,
+              color: CONFIG.COLORS.white,
+              padding: `${CONFIG.SPACING.sm} ${CONFIG.SPACING.lg}`,
+              borderRadius: CONFIG.BORDER_RADIUS.lg,
+              display: 'flex',
+              alignItems: 'center',
+              gap: CONFIG.SPACING.xs,
+              boxShadow: CONFIG.SHADOWS.small
+            }}>
+              <Zap size={20} />
+              Local AI Analysis
+            </div>
+          </div>
+        </Card>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
+          gap: CONFIG.SPACING.xl
+        }}>
+          {CONFIG.TEST_TYPES.map((test) => (
+            <Card
+              key={test.id}
+              style={{
+                padding: CONFIG.SPACING.xl,
+                boxShadow: `0 15px 35px ${test.shadowColor}`,
+                transition: 'all 0.4s ease',
+                cursor: ollamaStatus === 'connected' ? 'pointer' : 'not-allowed',
+                position: 'relative',
+                overflow: 'hidden',
+                opacity: ollamaStatus === 'connected' ? 1 : 0.7
+              }}
+              onClick={() => ollamaStatus === 'connected' && setCurrentTest(test.id)}
+              onMouseEnter={(e) => {
+                if (ollamaStatus === 'connected') {
+                  e.currentTarget.style.transform = 'translateY(-10px)';
+                  e.currentTarget.style.boxShadow = `0 25px 50px ${test.shadowColor}`;
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (ollamaStatus === 'connected') {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = `0 15px 35px ${test.shadowColor}`;
+                }
+              }}
+            >
+              <div style={{
+                position: 'absolute',
                 top: 0,
                 left: 0,
                 right: 0,
-                height: "4px",
-                background: getCategoryGradient(),
-                borderRadius: "20px 20px 0 0"
-              }}></div>
+                height: '5px',
+                background: test.color
+              }} />
               
               <div style={{
-                fontSize: "64px",
-                fontWeight: "900",
-                background: getCategoryGradient(),
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                marginBottom: "12px",
-                lineHeight: "1",
-                letterSpacing: "-2px"
+                width: '70px',
+                height: '70px',
+                background: test.color,
+                borderRadius: CONFIG.BORDER_RADIUS.md,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: CONFIG.SPACING.lg,
+                boxShadow: `0 8px 20px ${test.shadowColor}`
               }}>
-                {bmi}
+                <test.icon size={32} color={CONFIG.COLORS.white} />
               </div>
               
-              <div style={{
-                fontSize: "24px",
-                fontWeight: "700",
-                color: getCategoryColor(),
-                marginBottom: "16px",
-                letterSpacing: "0.5px",
-                textTransform: "uppercase"
+              <h3 style={{
+                fontSize: '1.5rem',
+                fontWeight: 'bold',
+                color: CONFIG.COLORS.gray800,
+                marginBottom: CONFIG.SPACING.sm
               }}>
-                {category}
-              </div>
+                {test.title}
+              </h3>
+              
+              <p style={{
+                color: CONFIG.COLORS.gray600,
+                lineHeight: '1.7',
+                marginBottom: CONFIG.SPACING.lg,
+                fontSize: '16px'
+              }}>
+                {test.description}
+              </p>
 
-              <div style={{
-                fontSize: "16px",
-                color: "#6b7280",
-                lineHeight: "1.6",
-                fontWeight: "500",
-                maxWidth: "320px",
-                margin: "0 auto"
-              }}>
-                {category === "Normal weight" 
-                  ? "Excellent! You're maintaining a healthy weight range. Keep up the great work with your lifestyle!" 
-                  : "Consider consulting with a healthcare professional for personalized guidance and recommendations."
-                }
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Enhanced BMI Scale Reference */}
-        <div style={{
-          backgroundColor: "#ffffff",
-          border: "1px solid rgba(229, 231, 235, 0.8)",
-          borderRadius: "20px",
-          padding: "32px",
-          boxShadow: `
-            0 10px 15px -3px rgba(0, 0, 0, 0.06),
-            0 4px 6px -2px rgba(0, 0, 0, 0.04)
-          `
-        }}>
-          <h3 style={{
-            fontSize: "22px",
-            fontWeight: "800",
-            color: "#1f2937",
-            margin: "0 0 24px 0",
-            letterSpacing: "-0.5px"
-          }}>
-            BMI Categories Reference
-          </h3>
-          
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-            gap: "16px",
-            fontSize: "15px"
-          }}>
-            {[
-              { color: "#3b82f6", label: "Underweight", range: "< 18.5" },
-              { color: "#10b981", label: "Normal", range: "18.5 - 24.9" },
-              { color: "#f59e0b", label: "Overweight", range: "25.0 - 29.9" },
-              { color: "#ef4444", label: "Obesity", range: "≥ 30.0" }
-            ].map((item, index) => (
-              <div key={index} style={{ 
-                display: "flex", 
-                alignItems: "center", 
-                gap: "12px",
-                padding: "12px 16px",
-                backgroundColor: `${item.color}08`,
-                borderRadius: "12px",
-                border: `1px solid ${item.color}20`
-              }}>
+              {completedTests.has(test.id) && (
                 <div style={{
-                  width: "16px",
-                  height: "16px",
-                  background: `linear-gradient(135deg, ${item.color}, ${item.color}dd)`,
-                  borderRadius: "50%",
-                  boxShadow: `0 2px 4px ${item.color}40`
-                }}></div>
-                <div>
-                  <div style={{ 
-                    color: "#1f2937", 
-                    fontWeight: "700",
-                    marginBottom: "2px"
-                  }}>
-                    {item.label}
-                  </div>
-                  <div style={{ 
-                    color: "#6b7280", 
-                    fontWeight: "500",
-                    fontSize: "13px"
-                  }}>
-                    {item.range}
-                  </div>
+                  display: 'flex',
+                  alignItems: 'center',
+                  color: CONFIG.COLORS.success,
+                  fontWeight: '600',
+                  background: '#f0fff4',
+                  padding: `${CONFIG.SPACING.xs} ${CONFIG.SPACING.sm}`,
+                  borderRadius: CONFIG.BORDER_RADIUS.lg
+                }}>
+                  <CheckCircle size={18} style={{ marginRight: CONFIG.SPACING.xs }} />
+                  Analysis Complete
                 </div>
-              </div>
-            ))}
-          </div>
+              )}
+
+              {ollamaStatus !== 'connected' && (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  color: CONFIG.COLORS.error,
+                  fontWeight: '600',
+                  background: '#fff5f5',
+                  padding: `${CONFIG.SPACING.xs} ${CONFIG.SPACING.sm}`,
+                  borderRadius: CONFIG.BORDER_RADIUS.lg,
+                  marginTop: CONFIG.SPACING.sm
+                }}>
+                  <Info size={18} style={{ marginRight: CONFIG.SPACING.xs }} />
+                  Connect Ollama to use
+                </div>
+              )}
+            </Card>
+          ))}
         </div>
       </div>
 
-      <style jsx>{`
-        @keyframes slideUp {
-          from { 
-            opacity: 0; 
-            transform: translateY(20px); 
-          }
-          to { 
-            opacity: 1; 
-            transform: translateY(0); 
-          }
-        }
-      `}</style>
+      {renderWelcome()}
     </div>
   );
-}
 
-export default BMI;
+  const renderTestInterface = () => {
+    const testConfig = CONFIG.TEST_TYPES.find(test => test.id === currentTest);
+    const currentAnalysis = analysis[currentTest];
+
+    return (
+      <div style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #f8f9ff 0%, #e8f2ff 100%)',
+        padding: CONFIG.SPACING.md
+      }}>
+        <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+        
+          <Card style={{
+            padding: CONFIG.SPACING.xl,
+            marginBottom: CONFIG.SPACING.xl,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}>
+            <div>
+              <h1 style={{ 
+                fontSize: '2.2rem', 
+                fontWeight: 'bold', 
+                color: CONFIG.COLORS.gray800, 
+                marginBottom: CONFIG.SPACING.xs 
+              }}>
+                {testConfig?.title || currentTest.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+              </h1>
+              <p style={{ 
+                color: CONFIG.COLORS.gray600, 
+                fontSize: '16px' 
+              }}>
+                {testConfig?.description || 'Enter your responses for AI-powered psychological analysis'}
+              </p>
+            </div>
+            <Button
+              onClick={() => setCurrentTest('home')}
+              style={{ padding: CONFIG.SPACING.sm }}
+            >
+              <Home size={22} />
+            </Button>
+          </Card>
+
+          {error && (
+            <Card style={{
+              background: 'rgba(229, 62, 62, 0.1)',
+              border: `1px solid ${CONFIG.COLORS.error}`,
+              color: CONFIG.COLORS.error,
+              marginBottom: CONFIG.SPACING.xl
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: CONFIG.SPACING.sm }}>
+                <Info size={20} />
+                <p style={{ margin: 0 }}>{error}</p>
+              </div>
+            </Card>
+          )}
+
+          <Card style={{
+            padding: CONFIG.SPACING.xl,
+            marginBottom: CONFIG.SPACING.xl
+          }}>
+            <label style={{
+              display: 'block',
+              fontSize: '1.3rem',
+              fontWeight: '600',
+              color: CONFIG.COLORS.gray800,
+              marginBottom: CONFIG.SPACING.md
+            }}>
+              Enter Your Response:
+            </label>
+            <textarea
+              value={currentInput}
+              onChange={(e) => setCurrentInput(e.target.value)}
+              placeholder={`Type or paste your response here... Be detailed for better analysis (minimum ${CONFIG.MIN_CHARACTERS} characters)`}
+              style={{
+                width: '100%',
+                height: '300px',
+                padding: CONFIG.SPACING.lg,
+                border: `2px solid ${CONFIG.COLORS.gray300}`,
+                borderRadius: CONFIG.BORDER_RADIUS.md,
+                fontSize: '16px',
+                resize: 'vertical',
+                fontFamily: 'inherit',
+                transition: 'all 0.3s ease',
+                outline: 'none'
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = '#667eea';
+                e.target.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)';
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = CONFIG.COLORS.gray300;
+                e.target.style.boxShadow = 'none';
+              }}
+            />
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginTop: CONFIG.SPACING.md,
+              flexWrap: 'wrap',
+              gap: CONFIG.SPACING.sm
+            }}>
+              <span style={{
+                color: currentInput.length < CONFIG.MIN_CHARACTERS ? 
+                  CONFIG.COLORS.error : CONFIG.COLORS.success,
+                fontSize: '16px',
+                fontWeight: '500'
+              }}>
+                {currentInput.length} characters {currentInput.length < CONFIG.MIN_CHARACTERS ? 
+                  `(need at least ${CONFIG.MIN_CHARACTERS})` : '✓'}
+              </span>
+              <Button
+                onClick={handleSubmitTest}
+                disabled={isAnalyzing || !currentInput.trim() || 
+                         currentInput.length < CONFIG.MIN_CHARACTERS || 
+                         analysisCount >= CONFIG.DAILY_LIMIT ||
+                         ollamaStatus !== 'connected'}
+              >
+                {isAnalyzing ? (
+                  <>
+                    <Loader className="animate-spin" size={20} />
+                    Analyzing...
+                  </>
+                ) : (
+                  <>
+                    <Brain size={20} />
+                    Get AI Analysis
+                  </>
+                )}
+              </Button>
+            </div>
+          </Card>
+
+          {currentAnalysis && (
+            <Card style={{
+              padding: CONFIG.SPACING.xl,
+              boxShadow: CONFIG.SHADOWS.large
+            }}>
+              <h2 style={{
+                fontSize: '2rem',
+                fontWeight: 'bold',
+                color: CONFIG.COLORS.gray800,
+                marginBottom: CONFIG.SPACING.xl,
+                display: 'flex',
+                alignItems: 'center',
+                gap: CONFIG.SPACING.xs
+              }}>
+                <div style={{
+                  background: testConfig?.color || CONFIG.COLORS.primaryGradient,
+                  padding: CONFIG.SPACING.xs,
+                  borderRadius: CONFIG.BORDER_RADIUS.sm
+                }}>
+                  <Brain size={28} color={CONFIG.COLORS.white} />
+                </div>
+                Your Psychological Profile
+              </h2>
+
+              <div style={{
+                background: `linear-gradient(135deg, ${
+                  currentAnalysis.thinkingPattern === 'Positive' ? '#48bb78, #38a169' :
+                  currentAnalysis.thinkingPattern === 'Negative' ? '#ed8936, #dd6b20' :
+                  '#a0aec0, #718096'
+                })`,
+                borderRadius: CONFIG.BORDER_RADIUS.md,
+                padding: CONFIG.SPACING.xl,
+                color: CONFIG.COLORS.white,
+                marginBottom: CONFIG.SPACING.xl,
+                boxShadow: CONFIG.SHADOWS.medium
+              }}>
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'space-between', 
+                  flexWrap: 'wrap', 
+                  gap: CONFIG.SPACING.md 
+                }}>
+                  <div>
+                    <h3 style={{ 
+                      fontSize: '1.5rem', 
+                      marginBottom: CONFIG.SPACING.xs 
+                    }}>
+                      Thinking Pattern: {currentAnalysis.thinkingPattern}
+                    </h3>
+                     <p style={{ opacity: '0.9', fontSize: '1rem' }}>
+                      Optimism Score: {currentAnalysis.optimismScore}/100
+                    </p>
+                  </div>
+                  <div style={{
+                    background: 'rgba(255,255,255,0.2)',
+                    padding: CONFIG.SPACING.md,
+                    borderRadius: CONFIG.BORDER_RADIUS.md,
+                    fontWeight: 'bold',
+                    fontSize: '1.1rem'
+                  }}>
+                    Overall Assessment
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gap: CONFIG.SPACING.xl }}>
+                <Section title="Philosophical Interpretation" content={currentAnalysis.philosophicalInterpretation} />
+                <Section title="Positive Aspects" list={currentAnalysis.positiveAspects} />
+                <Section title="Concerns" list={currentAnalysis.concerns} />
+                <Section title="Underlying Beliefs" list={currentAnalysis.underlyingBeliefs} />
+                <Section title="Recommendations" list={currentAnalysis.recommendations} />
+                <Section title="Overall Assessment" content={currentAnalysis.overallAssessment} />
+              </div>
+            </Card>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  // Helper Section component to avoid repetition
+  const Section = ({ title, content, list }) => (
+    <div>
+      <h3 style={{
+        fontSize: '1.4rem',
+        fontWeight: '600',
+        color: CONFIG.COLORS.gray800,
+        marginBottom: CONFIG.SPACING.sm,
+        display: 'flex',
+        alignItems: 'center',
+        gap: CONFIG.SPACING.xs
+      }}>
+        <Star size={18} color={CONFIG.COLORS.gray600} />
+        {title}
+      </h3>
+      {content && (
+        <p style={{
+          fontSize: '1rem',
+          color: CONFIG.COLORS.gray700,
+          lineHeight: '1.6',
+          marginBottom: CONFIG.SPACING.md
+        }}>
+          {content}
+        </p>
+      )}
+      {list && (
+        <ul style={{
+          paddingLeft: CONFIG.SPACING.lg,
+          color: CONFIG.COLORS.gray700,
+          lineHeight: '1.6'
+        }}>
+          {list.map((item, idx) => (
+            <li key={idx} style={{ marginBottom: CONFIG.SPACING.xs }}>
+              {item}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+
+  // Final return: decide between home and test interface
+  return currentTest === 'home' ? renderHome() : renderTestInterface();
+};
+
+export default PsychologicalAssessmentPlatform;
+

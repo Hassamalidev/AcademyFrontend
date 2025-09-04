@@ -14,7 +14,6 @@ import {
   VolumeX
 } from "lucide-react";
 
-// Image imports
 import aboutBackground from "../assets/about_us_background.jpg";
 import seniorTeacher from "../assets/senior_teacher.jpg";
 import psychTeacher from "../assets/virtual_trainer.jpg";

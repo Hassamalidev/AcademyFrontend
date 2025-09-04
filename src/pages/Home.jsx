@@ -24,44 +24,52 @@ function Home() {
       title: "Pakistan Navy",
       subtitle: "Your naval career starts here! Structured lessons and comprehensive mock exams to prepare you for maritime excellence.",
       buttonText: "Enroll Today!",
-      themeColor: "#20B2AA",
-      gradientColor: "#008B8B",
+      themeColor: "#006400", // Navy Dark Green
+      gradientColor: "#1e7a1e", // Navy Medium Green
+      accentColor: "#20B2AA", // Navy Teal accent
       image: navyCadet,
       icon: "⚓",
-      shape: "wave"
+      shape: "wave",
+      pattern: "navy-pattern"
     },
     {
       id: "airforce",
       title: "Pakistan Air Force",
       subtitle: "Take flight with confidence! Expert strategies and real-time practice sessions designed for your aviation success.",
       buttonText: "Start Now",
-      themeColor: "#3a7ca5",
-      gradientColor: "#1e5f7a",
+      themeColor: "#1C4C1C", // Air Force Dark Green
+      gradientColor: "#2B6B2B", // Air Force Medium Green
+      accentColor: "#3a7ca5", // Air Force Blue accent
       image: airCadet,
       icon: "✈️",
-      shape: "cloud"
+      shape: "cloud",
+      pattern: "airforce-pattern"
     },
     {
       id: "army",
       title: "Pakistan Army",
       subtitle: "Join the elite forces! Expert guidance and comprehensive training modules for aspiring army officers.",
       buttonText: "Register Now!",
-      themeColor: "#2F4F2F",
-      gradientColor: "#1C3A1C",
+      themeColor: "#143814", // Army Dark Green
+      gradientColor: "#235823", // Army Medium Green
+      accentColor: "#8B4513", // Army Brown accent
       image: armyCadet,
       icon: "🪖",
-      shape: "blob"
+      shape: "blob",
+      pattern: "army-pattern"
     },
     {
       id: "issb",
       title: "ISSB Preparation",
       subtitle: "Your final step to commission! Complete preparation for leadership assessment and psychological evaluation tests.",
       buttonText: "Sign Up Today!",
-      themeColor: "#8B4513",
-      gradientColor: "#654321",
+      themeColor: "#1E3A1E", // ISSB Dark Green
+      gradientColor: "#2D572C", // ISSB Medium Green
+      accentColor: "#FFD700", // ISSB Gold accent
       image: IssbPic,
       icon: "🎯",
-      shape: "swirl"
+      shape: "swirl",
+      pattern: "issb-pattern"
     },
   ];
 
@@ -93,8 +101,8 @@ function Home() {
   };
 
   const openWhatsApp = (slideTitle) => {
-  window.open(whatsappChannel, "_blank");
-};
+    window.open(whatsappChannel, "_blank");
+  };
 
   const handleLearnMore = () => {
     navigate('/learn-more');
@@ -102,10 +110,10 @@ function Home() {
 
   const getShapeStyle = (shape) => {
     const shapes = {
-      wave: { borderRadius: '30% 70% 70% 30% / 30% 30% 70% 70%' },
-      cloud: { borderRadius: '60% 40% 40% 60% / 70% 50% 50% 30%' },
-      blob: { borderRadius: '53% 47% 43% 57% / 45% 43% 57% 55%' },
-      swirl: { borderRadius: '63% 37% 56% 44% / 46% 37% 63% 54%' }
+      wave: "rounded-[30%_70%_70%_30%_/_30%_30%_70%_70%]",
+      cloud: "rounded-[60%_40%_40%_60%_/_70%_50%_50%_30%]",
+      blob: "rounded-[53%_47%_43%_57%_/_45%_43%_57%_55%]",
+      swirl: "rounded-[63%_37%_56%_44%_/_46%_37%_63%_54%]"
     };
     return shapes[shape] || shapes.wave;
   };
@@ -114,353 +122,139 @@ function Home() {
 
   return (
     <>
-    
-      <div style={{
-        minHeight: "100vh",
-        position: "relative",
-        overflow: "hidden",
-        background: "#f8fafc",
-        borderRadius: "40px 40px 40px 40px" 
-      }}>
-        
-        <div style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          background: `linear-gradient(135deg, ${currentSlideData.themeColor} 0%, ${currentSlideData.gradientColor} 40%, #1a202c 100%)`,
-          transition: "all 1s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-          zIndex: 0,
-          borderRadius: "40px 40px 40px 40px" 
-        }} />
+      <div className="min-h-screen relative overflow-hidden bg-gray-50 rounded-t-[40px] md:rounded-[40px]">
+        {/* Background gradient */}
+        <div 
+          className="absolute top-0 left-0 w-full h-full transition-all duration-1000 ease-in-out z-0 rounded-t-[40px] md:rounded-[40px]"
+          style={{
+            background: `linear-gradient(135deg, ${currentSlideData.themeColor} 0%, ${currentSlideData.gradientColor} 40%, #1a202c 100%)`
+          }}
+        />
 
-        <div style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          zIndex: 1,
-          opacity: 0.15,
-          pointerEvents: "none",
-          borderRadius: "40px 40px 40px 40px" 
-        }}>
+        {/* Pattern overlay based on slide */}
+        <div className={`absolute top-0 left-0 w-full h-full z-1 opacity-10 pointer-events-none rounded-t-[40px] md:rounded-[40px] ${currentSlideData.pattern}`} />
+
+        {/* Floating particles */}
+        <div className="absolute top-0 left-0 w-full h-full z-1 opacity-15 pointer-events-none rounded-t-[40px] md:rounded-[40px]">
           {Array.from({ length: 25 }).map((_, i) => (
-            <div key={i} style={{
-              position: "absolute",
-              background: "rgba(255, 255, 255, 0.8)",
-              borderRadius: "50%",
-              width: `${Math.random() * 6 + 2}px`,
-              height: `${Math.random() * 6 + 2}px`,
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              animation: `floatParticle ${Math.random() * 8 + 6}s linear infinite`,
-              animationDelay: `${Math.random() * 5}s`,
-            }} />
+            <div 
+              key={i}
+              className="absolute bg-white/80 rounded-full animate-floatParticle"
+              style={{
+                width: `${Math.random() * 6 + 2}px`,
+                height: `${Math.random() * 6 + 2}px`,
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 5}s`,
+              }}
+            />
           ))}
         </div>
 
-        <div style={{
-          position: "relative",
-          zIndex: 2,
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          padding: isMobile ? "60px 20px" : "0 5%",
-          maxWidth: "1400px",
-          margin: "0 auto"
-        }}>
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
-            gap: isMobile ? "40px" : "60px",
-            alignItems: "center",
-            width: "100%"
-          }}>
-            <div style={{
-              color: "#fff",
-              maxWidth: isMobile ? "100%" : "600px",
-              padding: isMobile ? "30px 25px" : "50px 40px",
-              background: "rgba(0, 0, 0, 0.25)",
-              backdropFilter: "blur(15px)",
-              borderRadius: "24px",
-              border: "1px solid rgba(255, 255, 255, 0.1)",
-              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-              transform: "translateY(0)",
-              animation: "slideInLeft 0.8s ease-out"
-            }}>
-              <div style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "12px",
-                background: "rgba(255, 255, 255, 0.15)",
-                backdropFilter: "blur(10px)",
-                padding: "12px 20px",
-                borderRadius: "50px",
-                fontSize: "14px",
-                fontWeight: "600",
-                marginBottom: "24px",
-                border: "1px solid rgba(255, 255, 255, 0.1)"
-              }}>
-                <span style={{ fontSize: "20px" }}>{currentSlideData.icon}</span>
+        {/* Main content */}
+        <div className="relative z-2 min-h-screen flex items-center px-4 py-16 md:py-0 md:px-5 max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center w-full">
+            {/* Text content */}
+            <div className="text-white max-w-full md:max-w-xl p-6 md:p-10 bg-black/25 backdrop-blur-lg rounded-2xl border border-white/10 shadow-xl transform transition-all duration-800 animate-slideInLeft">
+              <div 
+                className="inline-flex items-center gap-3 backdrop-blur-md py-2 px-4 rounded-full text-sm font-semibold mb-6 border border-white/10"
+                style={{ backgroundColor: `${currentSlideData.accentColor}30` }}
+              >
+                <span className="text-xl">{currentSlideData.icon}</span>
                 <span>Military Career Preparation</span>
               </div>
 
-              <h1 style={{
-                fontSize: isMobile ? "2.5rem" : "4rem",
-                fontWeight: "800",
-                margin: "0 0 24px 0",
-                lineHeight: "1.1",
-                textShadow: "0 4px 20px rgba(0, 0, 0, 0.3)",
-                background: "linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.8) 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text"
-              }}>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-6 leading-tight bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
                 {currentSlideData.title}
               </h1>
 
-              <p style={{
-                fontSize: isMobile ? "1.1rem" : "1.3rem",
-                lineHeight: "1.7",
-                marginBottom: "40px",
-                color: "rgba(255, 255, 255, 0.9)",
-                fontWeight: "400"
-              }}>
+              <p className="text-base sm:text-lg md:text-xl mb-8 text-white/90 font-normal leading-relaxed">
                 {currentSlideData.subtitle}
               </p>
 
-              <div style={{
-                display: "flex",
-                flexDirection: isMobile ? "column" : "row",
-                gap: "16px",
-                marginBottom: "40px"
-              }}>
+              <div className="flex flex-col sm:flex-row gap-4 mb-8">
                 <button
                   onClick={() => openWhatsApp(currentSlideData.title)}
-                  style={{
-                    background: "linear-gradient(135deg, #fff 0%, #f8f9fa 100%)",
-                    color: currentSlideData.themeColor,
-                    border: "none",
-                    padding: "16px 32px",
-                    fontSize: "1.1rem",
-                    fontWeight: "700",
-                    borderRadius: "50px",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "12px",
-                    transition: "all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-                    boxShadow: "0 8px 25px rgba(0, 0, 0, 0.15)",
-                    position: "relative",
-                    overflow: "hidden"
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.transform = "translateY(-3px) scale(1.02)";
-                    e.target.style.boxShadow = "0 15px 35px rgba(0, 0, 0, 0.2)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.transform = "translateY(0) scale(1)";
-                    e.target.style.boxShadow = "0 8px 25px rgba(0, 0, 0, 0.15)";
+                  className="py-3 px-6 sm:py-4 sm:px-8 text-base sm:text-lg font-bold rounded-full cursor-pointer flex items-center justify-center gap-3 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg shadow-md relative overflow-hidden"
+                  style={{ 
+                    background: `linear-gradient(135deg, ${currentSlideData.accentColor} 0%, ${currentSlideData.themeColor} 100%)`,
+                    color: 'white'
                   }}
                 >
                   {currentSlideData.buttonText}
-                  <FaWhatsapp style={{ fontSize: "1.3rem", color: "#25D366" }} />
+                  <FaWhatsapp className="text-xl" />
                 </button>
 
                 <button 
                   onClick={handleLearnMore}
-                  style={{
-                    background: "transparent",
-                    color: "#fff",
-                    border: "2px solid rgba(255, 255, 255, 0.8)",
-                    padding: "16px 32px",
-                    fontSize: "1.1rem",
-                    fontWeight: "600",
-                    borderRadius: "50px",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "12px",
-                    transition: "all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-                    backdropFilter: "blur(10px)"
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.background = "rgba(255, 255, 255, 0.1)";
-                    e.target.style.borderColor = "#fff";
-                    e.target.style.transform = "translateY(-2px)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.background = "transparent";
-                    e.target.style.borderColor = "rgba(255, 255, 255, 0.8)";
-                    e.target.style.transform = "translateY(0)";
-                  }}
+                  className="bg-transparent text-white border-2 border-white/80 py-3 px-6 sm:py-4 sm:px-8 text-base sm:text-lg font-semibold rounded-full cursor-pointer flex items-center justify-center gap-3 transition-all duration-300 backdrop-blur-sm hover:bg-white/10 hover:border-white"
                 >
                   Learn More
                   <FaArrowRight />
                 </button>
               </div>
 
-              <div style={{
-                display: "flex",
-                gap: "12px",
-                alignItems: "center"
-              }}>
+              <div className="flex gap-3 items-center">
                 {slides.map((slide, index) => (
                   <button
                     key={index}
                     onClick={() => goToSlide(index)}
-                    style={{
-                      width: currentSlide === index ? "40px" : "12px",
-                      height: "12px",
-                      borderRadius: "6px",
-                      border: "none",
-                      background: currentSlide === index 
-                        ? "rgba(255, 255, 255, 0.9)" 
-                        : "rgba(255, 255, 255, 0.3)",
-                      cursor: "pointer",
-                      transition: "all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-                      backdropFilter: "blur(5px)"
-                    }}
-                    onMouseEnter={(e) => {
-                      if (currentSlide !== index) {
-                        e.target.style.background = "rgba(255, 255, 255, 0.5)";
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (currentSlide !== index) {
-                        e.target.style.background = "rgba(255, 255, 255, 0.3)";
-                      }
-                    }}
+                    className={`transition-all duration-300 ease-in-out backdrop-blur-sm cursor-pointer ${
+                      currentSlide === index 
+                        ? "w-8 bg-white/90" 
+                        : "w-3 bg-white/30 hover:bg-white/50"
+                    } h-3 rounded-full`}
                     aria-label={`Go to ${slide.title} slide`}
                   />
                 ))}
               </div>
             </div>
 
+            {/* Image content - hidden on mobile */}
             {!isMobile && (
-              <div style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                position: "relative",
-                height: "600px",
-                animation: "slideInRight 0.8s ease-out 0.2s both"
-              }}>
-                <div style={{
-                  position: "relative",
-                  width: "100%",
-                  maxWidth: "500px",
-                  height: "500px",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center"
-                }}>
-                  <div style={{
-                    position: "absolute",
-                    width: "120%",
-                    height: "120%",
-                    background: `radial-gradient(ellipse at center, ${currentSlideData.themeColor}40 0%, transparent 70%)`,
-                    ...getShapeStyle(currentSlideData.shape),
-                    transition: "all 1s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-                    transform: "scale(1.3)",
-                    filter: "blur(30px)",
-                    zIndex: -1
-                  }} />
+              <div className="flex justify-center items-center relative h-[400px] lg:h-[500px] animate-slideInRight">
+                <div className="relative w-full max-w-md h-full flex justify-center items-center">
+                  {/* Background glow */}
+                  <div 
+                    className={`absolute w-[120%] h-[120%] transition-all duration-1000 ease-in-out ${getShapeStyle(currentSlideData.shape)} scale-130 blur-3xl z-[-1]`}
+                    style={{ background: `radial-gradient(ellipse at center, ${currentSlideData.accentColor}40 0%, transparent 70%)` }}
+                  />
 
-                  <div style={{
-                    position: "relative",
-                    width: "100%",
-                    height: "100%",
-                    ...getShapeStyle(currentSlideData.shape),
-                    overflow: "hidden",
-                    border: "3px solid rgba(255, 255, 255, 0.2)",
-                    boxShadow: "0 30px 60px rgba(0, 0, 0, 0.3)",
-                    transition: "all 1s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-                    transform: "scale(1)",
-                    animation: "imageFloat 6s ease-in-out infinite"
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = "scale(1.05) rotateY(5deg)";
-                    e.currentTarget.style.boxShadow = "0 40px 80px rgba(0, 0, 0, 0.4)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = "scale(1)";
-                    e.currentTarget.style.boxShadow = "0 30px 60px rgba(0, 0, 0, 0.3)";
-                  }}
+                  {/* Main image container */}
+                  <div 
+                    className={`relative w-full h-full overflow-hidden border-2 border-white/20 shadow-2xl transition-all duration-1000 ease-in-out ${getShapeStyle(currentSlideData.shape)} animate-imageFloat hover:scale-105 hover:shadow-2xl`}
+                    style={{ borderColor: `${currentSlideData.accentColor}60` }}
                   >
                     <img
                       src={currentSlideData.image}
                       alt={`${currentSlideData.title} preparation course`}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                        transition: "all 1s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-                        filter: "brightness(1.1) contrast(1.05) saturate(1.1)"
-                      }}
+                      className="w-full h-full object-cover transition-all duration-1000 ease-in-out brightness-110 contrast-105 saturate-110"
                     />
-      
-                    <div style={{
-                      position: "absolute",
-                      inset: 0,
-                      background: `linear-gradient(135deg, transparent 0%, ${currentSlideData.themeColor}15 100%)`,
-                      transition: "all 1s ease"
-                    }} />
+                    
+                    {/* Overlay gradient */}
+                    <div 
+                      className="absolute inset-0 transition-all duration-1000 ease"
+                      style={{ background: `linear-gradient(135deg, transparent 0%, ${currentSlideData.themeColor}25 100%)` }}
+                    />
                   </div>
 
-                  <div style={{
-                    position: "absolute",
-                    width: "110%",
-                    height: "110%",
-                    border: "2px solid rgba(255, 255, 255, 0.1)",
-                    ...getShapeStyle(currentSlideData.shape),
-                    animation: "rotateRing 20s linear infinite",
-                    zIndex: -1
-                  }} />
+                  {/* Decorative ring */}
+                  <div 
+                    className={`absolute w-[110%] h-[110%] border-2 transition-all duration-1000 ease ${getShapeStyle(currentSlideData.shape)} animate-rotateRing z-[-1]`}
+                    style={{ borderColor: `${currentSlideData.accentColor}30` }}
+                  />
                 </div>
               </div>
             )}
           </div>
         </div>
 
+        {/* Navigation arrows - hidden on mobile */}
         {!isMobile && (
           <>
             <button
               onClick={goToPrev}
-              style={{
-                position: "absolute",
-                left: "40px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                background: "rgba(255, 255, 255, 0.15)",
-                color: "white",
-                border: "1px solid rgba(255, 255, 255, 0.2)",
-                borderRadius: "50%",
-                width: "60px",
-                height: "60px",
-                fontSize: "1.4rem",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                zIndex: 10,
-                transition: "all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-                backdropFilter: "blur(10px)"
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.background = "rgba(255, 255, 255, 0.25)";
-                e.target.style.transform = "translateY(-50%) scale(1.1)";
-                e.target.style.borderColor = "rgba(255, 255, 255, 0.4)";
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.background = "rgba(255, 255, 255, 0.15)";
-                e.target.style.transform = "translateY(-50%) scale(1)";
-                e.target.style.borderColor = "rgba(255, 255, 255, 0.2)";
-              }}
+              className="absolute left-4 md:left-10 top-1/2 -translate-y-1/2 bg-white/15 text-white border border-white/20 rounded-full w-12 h-12 md:w-14 md:h-14 text-lg cursor-pointer flex items-center justify-center z-10 transition-all duration-300 backdrop-blur-md hover:bg-white/25 hover:scale-110 hover:border-white/40"
               aria-label="Previous slide"
             >
               <FaArrowLeft />
@@ -468,36 +262,7 @@ function Home() {
 
             <button
               onClick={goToNext}
-              style={{
-                position: "absolute",
-                right: "40px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                background: "rgba(255, 255, 255, 0.15)",
-                color: "white",
-                border: "1px solid rgba(255, 255, 255, 0.2)",
-                borderRadius: "50%",
-                width: "60px",
-                height: "60px",
-                fontSize: "1.4rem",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                zIndex: 10,
-                transition: "all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-                backdropFilter: "blur(10px)"
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.background = "rgba(255, 255, 255, 0.25)";
-                e.target.style.transform = "translateY(-50%) scale(1.1)";
-                e.target.style.borderColor = "rgba(255, 255, 255, 0.4)";
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.background = "rgba(255, 255, 255, 0.15)";
-                e.target.style.transform = "translateY(-50%) scale(1)";
-                e.target.style.borderColor = "rgba(255, 255, 255, 0.2)";
-              }}
+              className="absolute right-4 md:right-10 top-1/2 -translate-y-1/2 bg-white/15 text-white border border-white/20 rounded-full w-12 h-12 md:w-14 md:h-14 text-lg cursor-pointer flex items-center justify-center z-10 transition-all duration-300 backdrop-blur-md hover:bg-white/25 hover:scale-110 hover:border-white/40"
               aria-label="Next slide"
             >
               <FaArrowRight />
@@ -506,6 +271,7 @@ function Home() {
         )}
       </div>
 
+      {/* Custom styles and animations */}
       <style>
         {`
           @keyframes floatParticle {
@@ -555,13 +321,31 @@ function Home() {
             to { transform: rotate(360deg); }
           }
           
-          .hero-slider {
-            perspective: 1000px;
+          /* Pattern styles for different slides */
+          .navy-pattern {
+            background-image: radial-gradient(circle, rgba(32, 178, 170, 0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+          }
+          
+          .airforce-pattern {
+            background-image: linear-gradient(45deg, rgba(58, 124, 165, 0.1) 25%, transparent 25%, transparent 75%, rgba(58, 124, 165, 0.1) 75%, rgba(58, 124, 165, 0.1)),
+                              linear-gradient(-45deg, rgba(58, 124, 165, 0.1) 25%, transparent 25%, transparent 75%, rgba(58, 124, 165, 0.1) 75%, rgba(58, 124, 165, 0.1));
+            background-size: 20px 20px;
+          }
+          
+          .army-pattern {
+            background-image: repeating-linear-gradient(0deg, transparent, transparent 10px, rgba(139, 69, 19, 0.1) 10px, rgba(139, 69, 19, 0.1) 12px);
+          }
+          
+          .issb-pattern {
+            background-image: radial-gradient(circle, rgba(255, 215, 0, 0.1) 1px, transparent 1px);
+            background-size: 15px 15px;
           }
           
           @media (max-width: 768px) {
-            .hero-slider .particles {
-              display: none;
+            .hero-content {
+              padding-top: 4rem;
+              padding-bottom: 4rem;
             }
           }
         `}

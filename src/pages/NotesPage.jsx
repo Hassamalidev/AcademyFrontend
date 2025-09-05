@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getNotes, createNote, updateNote, deleteNote } from '../api/api';
+import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const subjects = [
   "Maths", "Computer", "General Knowledge",
@@ -36,43 +37,50 @@ const NotesPage = () => {
     checkAdminStatus();
     fetchNotes(1);
   }, [activeSubject]);
+
   const checkAdminStatus = () => {
-  const storedRole = localStorage.getItem('userRole');
-  if (storedRole) {
-    const adminStatus = storedRole.toLowerCase() === 'admin';
-    setIsAdmin(adminStatus);
-    return adminStatus;
-  }
-  
-  const token = localStorage.getItem('authToken') || localStorage.getItem('token');
-  if (token) {
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const roleClaimKey = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role";
-      const userRole = payload[roleClaimKey] || payload.role;
-      
-      const adminStatus = userRole && userRole.toLowerCase() === 'admin';
+    const storedRole = localStorage.getItem('userRole');
+    if (storedRole) {
+      const adminStatus = storedRole.toLowerCase() === 'admin';
       setIsAdmin(adminStatus);
       return adminStatus;
-    } catch (err) {
-      console.error('Error decoding token:', err);
+    }
+    
+    const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const roleClaimKey = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role";
+        const userRole = payload[roleClaimKey] || payload.role;
+        
+        const adminStatus = userRole && userRole.toLowerCase() === 'admin';
+        setIsAdmin(adminStatus);
+        return adminStatus;
+      } catch (err) {
+        console.error('Error decoding token:', err);
+        setIsAdmin(false);
+        return false;
+      }
+    } else {
       setIsAdmin(false);
       return false;
     }
-  } else {
-    setIsAdmin(false);
-    return false;
-  }
-};
+  };
 
-const getToken = () => {
-  return localStorage.getItem('authToken') || localStorage.getItem('token');
-};
+  const getToken = () => {
+    return localStorage.getItem('authToken') || localStorage.getItem('token');
+  };
+
   const fetchNotes = async (pageNum = 1) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await getNotes(activeSubject, pageNum, pagination.limit);
+      const token = getToken();
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+      
+      const response = await getNotes(activeSubject, pageNum, pagination.limit, token);
       setNotes(response?.items || []);
       setPagination({
         page: response?.pageNumber || 1,
@@ -126,7 +134,7 @@ const getToken = () => {
       setSuccess('Note created successfully!');
       fetchNotes(1);
     } catch (err) {
-      setError('Failed to create note. Please try again.');
+      setError(`Failed to create note: ${err.response?.data?.message || err.message}`);
     } finally {
       setFormLoading(false);
     }
@@ -155,7 +163,7 @@ const getToken = () => {
       setEditingNote(null);
       fetchNotes(pagination.page);
     } catch (err) {
-      setError('Failed to update note. Please try again.');
+      setError(`Failed to update note: ${err.response?.data?.message || err.message}`);
     } finally {
       setFormLoading(false);
     }
@@ -184,7 +192,7 @@ const getToken = () => {
         fetchNotes(pagination.page);
       }
     } catch (err) {
-      setError('Failed to delete note. Please try again.');
+      setError(`Failed to delete note: ${err.response?.data?.message || err.message}`);
     }
   };
 
@@ -197,9 +205,8 @@ const getToken = () => {
     
     setEditingNote({ ...note });
     setIsEditing(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.getElementById('form-section')?.scrollIntoView({ behavior: 'smooth' });
   };
-
 
   const cancelEditing = () => {
     setIsEditing(false);
@@ -245,81 +252,34 @@ const getToken = () => {
   };
 
   return (
-    <div style={{
-      maxWidth: '1200px',
-      margin: '0 auto',
-      padding: '2rem 1rem',
-      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
-      color: '#333',
-      transition: 'all 0.3s ease'
-    }}>
-      <header style={{
-        textAlign: 'center',
-        marginBottom: '2rem',
-        animation: 'fadeIn 0.5s ease-out'
-      }}>
-        <h1 style={{
-          fontSize: '2.5rem',
-          fontWeight: '700',
-          marginBottom: '0.5rem',
-          color: '#2d3748',
-          background: 'linear-gradient(90deg, #4299e1, #38b2ac)',
-          WebkitBackgroundClip: 'text',
-          backgroundClip: 'text',
-          color: 'transparent',
-          display: 'inline-block'
-        }}>📚 Notes Manager</h1>
-        <p style={{
-          fontSize: '1.1rem',
-          color: '#718096',
-          marginBottom: '0'
-        }}>Organize and manage your study notes</p>
+    <div className="max-w-6xl mx-auto px-4 py-8 font-sans text-[#333] transition-all duration-300">
+      <header className="text-center mb-8 relative z-10 animate-fadeIn">
+        <h1 className="text-[2.5rem] font-bold mb-4 text-[#2d3748] relative inline-block">
+          <span className="bg-gradient-to-r from-[#1a4b8c] to-[#3a7ca5] bg-clip-text text-transparent">
+            📚 Notes Manager
+          </span>
+          <span className="absolute bottom-[-10px] left-1/2 transform -translate-x-1/2 w-20 h-1 bg-gradient-to-r from-[#1a4b8c] to-[#3a7ca5] rounded"></span>
+        </h1>
+        <p className="text-[1.1rem] text-[#666] max-w-[700px] mx-auto leading-relaxed">
+          Get latest study notes
+        </p>
         
-        <div style={{
-          marginTop: '0.5rem',
-          padding: '0.5rem 1rem',
-          backgroundColor: isAdmin ? '#c6f6d5' : '#fed7d7',
-          color: isAdmin ? '#22543d' : '#742a2a',
-          borderRadius: '9999px',
-          display: 'inline-block',
-          fontSize: '0.875rem',
-          fontWeight: '500'
-        }}>
+        <div className={`mt-2 px-4 py-1 rounded-full text-sm font-medium inline-block ${
+          isAdmin ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+        }`}>
           {isAdmin ? 'Admin Mode' : 'Viewer Mode'}
         </div>
       </header>
 
-      <div style={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: '0.5rem',
-        marginBottom: '2rem',
-        justifyContent: 'center'
-      }}>
+      <div className="flex flex-wrap gap-2 mb-8 justify-center">
         {subjects.map(subject => (
           <button
             key={subject}
-            style={{
-              padding: '0.5rem 1.25rem',
-              background: activeSubject === subject 
-                ? 'linear-gradient(135deg, #4299e1, #3182ce)' 
-                : '#edf2f7',
-              color: activeSubject === subject ? 'white' : 'inherit',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              border: 'none',
-              fontWeight: '500',
-              transition: 'all 0.2s ease',
-              boxShadow: activeSubject === subject 
-                ? '0 2px 5px rgba(66, 153, 225, 0.3)' 
-                : 'none',
-              ...(activeSubject !== subject && {
-                ':hover': {
-                  transform: 'translateY(-2px)',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                }
-              })
-            }}
+            className={`px-5 py-2 rounded-lg font-medium transition-all duration-200 ${
+              activeSubject === subject 
+                ? 'bg-gradient-to-br from-[#1a4b8c] to-[#3a7ca5] text-white shadow-md' 
+                : 'bg-[#edf2f7] hover:bg-gray-200 hover:-translate-y-0.5 hover:shadow'
+            }`}
             onClick={() => {
               setActiveSubject(subject);
               setIsEditing(false);
@@ -333,451 +293,205 @@ const getToken = () => {
 
       <div>
         {error && (
-          <div style={{
-            padding: '0.75rem 1rem',
-            borderRadius: '8px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            marginBottom: '1.5rem',
-            animation: 'slideDown 0.3s ease-out',
-            backgroundColor: '#fff5f5',
-            color: '#e53e3e',
-            border: '1px solid #fed7d7'
-          }}>
+          <div className="p-3 rounded-lg flex items-center gap-2 mb-6 animate-slideDown bg-[#fff5f5] text-[#e53e3e] border border-[#fed7d7]">
             <span>⚠️</span>
             {error}
           </div>
         )}
         {success && (
-          <div style={{
-            padding: '0.75rem 1rem',
-            borderRadius: '8px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            marginBottom: '1.5rem',
-            animation: 'slideDown 0.3s ease-out',
-            backgroundColor: '#f0fff4',
-            color: '#38a169',
-            border: '1px solid #c6f6d5'
-          }}>
+          <div className="p-3 rounded-lg flex items-center gap-2 mb-6 animate-slideDown bg-[#f0fff4] text-[#38a169] border border-[#c6f6d5]">
             <span>✅</span>
             {success}
           </div>
         )}
       </div>
 
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '2rem',
-        '@media (min-width: 1024px)': {
-          flexDirection: 'row'
-        }
-      }}>
-        <section style={{
-          flex: 2,
-          background: 'white',
-          borderRadius: '12px',
-          padding: '1.5rem',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-          transition: 'all 0.3s ease'
-        }}>
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: '1.5rem'
-          }}>
-            <h2>{activeSubject} Notes</h2>
-            <span style={{
-              background: '#edf2f7',
-              padding: '0.25rem 0.75rem',
-              borderRadius: '9999px',
-              fontSize: '0.875rem',
-              fontWeight: '500'
-            }}>{pagination.totalCount} notes</span>
-          </div>
+      {/* Notes Display Section */}
+      <section className="bg-white rounded-[15px] p-6 shadow-[0_10px_30px_rgba(0,0,0,0.08)] transition-all duration-300 mb-8">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-[1.5rem] font-bold text-[#333]">{activeSubject} Notes</h2>
+          <span className="bg-[#edf2f7] px-3 py-1 rounded-full text-sm font-medium">
+            {pagination.totalCount} notes
+          </span>
+        </div>
 
-          <div style={{
-            marginBottom: '1.5rem',
-            display: 'flex',
-            gap: '0.5rem'
-          }}>
-            <input
-              type="text"
-              placeholder="Search notes..."
-              style={{
-                flex: 1,
-                padding: '0.625rem 0.75rem',
-                border: '1px solid #e2e8f0',
-                borderRadius: '6px',
-                fontSize: '1rem',
-                transition: 'all 0.2s ease',
-                ':focus': {
-                  outline: 'none',
-                  borderColor: '#4299e1',
-                  boxShadow: '0 0 0 2px rgba(66, 153, 225, 0.2)'
-                }
-              }}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+        <div className="mb-6 flex gap-2">
+          <input
+            type="text"
+            placeholder="Search notes..."
+            className="flex-1 px-3 py-2 border border-[#e2e8f0] rounded-md text-base transition-all duration-200 focus:outline-none focus:border-[#4299e1] focus:ring-2 focus:ring-[rgba(66,153,225,0.2)]"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+        
+        {loading ? (
+          <div className="flex justify-center items-center h-[200px] text-[#718096]">
+            <div className="w-8 h-8 border-3 border-t-[#4299e1] border-r-[rgba(66,153,225,0.3)] border-b-[rgba(66,153,225,0.3)] border-l-[rgba(66,153,225,0.3)] rounded-full animate-spin"></div>
           </div>
-          
-          {loading ? (
-            <div style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              height: '200px',
-              color: '#718096'
-            }}>
-              <div style={{
-                width: '2rem',
-                height: '2rem',
-                border: '3px solid rgba(66, 153, 225, 0.3)',
-                borderRadius: '50%',
-                borderTopColor: '#4299e1',
-                animation: 'spin 1s linear infinite'
-              }}></div>
-            </div>
-          ) : (notes?.length || 0) === 0 ? (
-            <div style={{
-              textAlign: 'center',
-              padding: '2rem',
-              color: '#718096'
-            }}>
-              <p>No notes found for this subject.</p>
-              <button 
-                style={{
-                  marginTop: '1rem',
-                  padding: '0.5rem 1rem',
-                  background: '#4299e1',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  ':hover': {
-                    background: '#3182ce',
-                    transform: 'translateY(-1px)'
-                  }
-                }}
-                onClick={() => fetchNotes(1)}
-              >
-                Refresh
-              </button>
-            </div>
-          ) : (
-            <>
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                gap: '1rem',
-                marginBottom: '1.5rem'
-              }}>
-                {filteredNotes?.map(note => (
-                  <div 
-                    style={{
-                      background: 'white',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '8px',
-                      padding: '1.25rem',
-                      boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
-                      transition: 'all 0.2s ease',
-                      ':hover': {
-                        transform: 'translateY(-3px)',
-                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-                      },
-                      ...(expandedNoteId === note.id && {
-                        gridColumn: '1 / -1'
-                      })
-                    }}
-                    key={note.id}
-                  >
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'flex-start',
-                      marginBottom: '0.5rem'
-                    }}>
-                      <h3 style={{
-                        fontSize: '1.125rem',
-                        fontWeight: '600',
-                        margin: '0',
-                        color: '#2d3748'
-                      }}>{note.title}</h3>
-                      <div style={{display: 'flex', gap: '0.5rem'}}>
-                        <button 
-                          style={{
-                            background: 'none', 
-                            border: 'none', 
-                            cursor: 'pointer',
-                            fontSize: '1rem'
-                          }}
-                          onClick={() => toggleExplanation(note.id)}
-                        >
-                          {expandedNoteId === note.id ? '▲' : '▼'}
-                        </button>
-                        
-                        {/* Conditionally show edit/delete buttons for admins only */}
-                        {isAdmin && (
-                          <>
-                            <button
-                              style={{
-                                background: 'none', 
-                                border: 'none', 
-                                cursor: 'pointer', 
-                                color: '#4299e1',
-                                fontSize: '1rem'
-                              }}
-                              onClick={() => startEditing(note)}
-                            >
-                              ✏️
-                            </button>
-                            <button
-                              style={{
-                                background: 'none', 
-                                border: 'none', 
-                                cursor: 'pointer', 
-                                color: '#e53e3e',
-                                fontSize: '1rem'
-                              }}
-                              onClick={() => handleDeleteNote(note.id)}
-                            >
-                              🗑️
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                    <p style={{
-                      margin: '0.5rem 0',
-                      color: '#4a5568'
-                    }}><strong>Answer:</strong> {note.answer}</p>
-                    
-                    {expandedNoteId === note.id && (
-                      <div style={{
-                        marginTop: '1rem',
-                        paddingTop: '1rem',
-                        borderTop: '1px solid #edf2f7',
-                        animation: 'fadeIn 0.3s ease-out'
-                      }}>
-                        <h4>Explanation:</h4>
-                        {note.explanation?.trim() ? (
-                          <p>{note.explanation}</p>
-                        ) : (
-                          <p style={{
-                            color: '#a0aec0',
-                            fontStyle: 'italic'
-                          }}>No explanation provided.</p>
-                        )}
-                      </div>
-                    )}
-                    
-                    <div style={{
-                      marginTop: '1rem',
-                      display: 'flex',
-                      justifyContent: 'flex-end'
-                    }}>
-                      <time style={{
-                        fontSize: '0.75rem',
-                        color: '#a0aec0'
-                      }}>
-                        {new Date(note.createdAt).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
-                      </time>
+        ) : (notes?.length || 0) === 0 ? (
+          <div className="text-center py-8 text-[#718096]">
+            <p>No notes found for this subject.</p>
+            <button 
+              className="mt-4 px-4 py-2 bg-[#4299e1] text-white rounded-md hover:bg-[#3182ce] transition-all duration-200 hover:-translate-y-0.5"
+              onClick={() => fetchNotes(1)}
+            >
+              Refresh
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+              {filteredNotes?.map(note => (
+                <div 
+                  className="bg-white rounded-[15px] p-6 shadow-[0_10px_30px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_15px_35px_rgba(0,0,0,0.12)] border-3 border-[#e2e8f0] hover:-translate-y-2"
+                  key={note.id}
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <h3 className="text-[1.5rem] font-bold text-[#333]">
+                      {note.title}
+                    </h3>
+                    <div className="flex gap-2">
+                      <button 
+                        className="text-gray-500 hover:text-gray-700 text-base"
+                        onClick={() => toggleExplanation(note.id)}
+                      >
+                        {expandedNoteId === note.id ? '▲' : '▼'}
+                      </button>
+                      
+                      {isAdmin && (
+                        <>
+                          <button
+                            className="text-[#4299e1] hover:text-[#3182ce] text-base"
+                            onClick={() => startEditing(note)}
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            className="text-[#e53e3e] hover:text-[#c53030] text-base"
+                            onClick={() => handleDeleteNote(note.id)}
+                          >
+                            🗑️
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
-                ))}
-              </div>
-
-              {pagination.totalPages > 1 && (
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: '1rem',
-                  marginTop: '2rem'
-                }}>
-                  <div>Showing page {pagination.page} of {pagination.totalPages}</div>
-                  <div style={{
-                    display: 'flex',
-                    gap: '0.5rem',
-                    flexWrap: 'wrap',
-                    justifyContent: 'center'
-                  }}>
-                    <button
-                      style={{
-                        padding: '0.5rem 0.75rem',
-                        border: '1px solid #e2e8f0',
-                        background: pagination.page === 1 ? '#e2e8f0' : 'white',
-                        borderRadius: '6px',
-                        cursor: pagination.page === 1 ? 'not-allowed' : 'pointer',
-                        transition: 'all 0.2s ease',
-                        minWidth: '40px',
-                        textAlign: 'center',
-                        ':hover': pagination.page !== 1 && {
-                          background: '#edf2f7'
-                        }
-                      }}
-                      onClick={() => fetchNotes(1)}
-                      disabled={pagination.page === 1}
-                    >
-                      « First
-                    </button>
-                    <button
-                      style={{
-                        padding: '0.5rem 0.75rem',
-                        border: '1px solid #e2e8f0',
-                        background: pagination.page === 1 ? '#e2e8f0' : 'white',
-                        borderRadius: '6px',
-                        cursor: pagination.page === 1 ? 'not-allowed' : 'pointer',
-                        transition: 'all 0.2s ease',
-                        minWidth: '40px',
-                        textAlign: 'center',
-                        ':hover': pagination.page !== 1 && {
-                          background: '#edf2f7'
-                        }
-                      }}
-                      onClick={() => fetchNotes(pagination.page - 1)}
-                      disabled={pagination.page === 1}
-                    >
-                      ‹ Prev
-                    </button>
-                    
-                    {getVisiblePages().map(pageNum => (
-                      <button
-                        key={pageNum}
-                        style={{
-                          padding: '0.5rem 0.75rem',
-                          border: pagination.page === pageNum 
-                            ? '1px solid #4299e1' 
-                            : '1px solid #e2e8f0',
-                          background: pagination.page === pageNum 
-                            ? '#4299e1' 
-                            : 'white',
-                          color: pagination.page === pageNum 
-                            ? 'white' 
-                            : 'inherit',
-                          borderRadius: '6px',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s ease',
-                          minWidth: '40px',
-                          textAlign: 'center',
-                          ':hover': {
-                            background: pagination.page === pageNum 
-                              ? '#3182ce' 
-                              : '#edf2f7'
-                          }
-                        }}
-                        onClick={() => fetchNotes(pageNum)}
-                      >
-                        {pageNum}
-                      </button>
-                    ))}
-                    
-                    <button
-                      style={{
-                        padding: '0.5rem 0.75rem',
-                        border: '1px solid #e2e8f0',
-                        background: pagination.page === pagination.totalPages 
-                          ? '#e2e8f0' 
-                          : 'white',
-                        borderRadius: '6px',
-                        cursor: pagination.page === pagination.totalPages 
-                          ? 'not-allowed' 
-                          : 'pointer',
-                        transition: 'all 0.2s ease',
-                        minWidth: '40px',
-                        textAlign: 'center',
-                        ':hover': pagination.page !== pagination.totalPages && {
-                          background: '#edf2f7'
-                        }
-                      }}
-                      onClick={() => fetchNotes(pagination.page + 1)}
-                      disabled={pagination.page === pagination.totalPages}
-                    >
-                      Next ›
-                    </button>
-                    <button
-                      style={{
-                        padding: '0.5rem 0.75rem',
-                        border: '1px solid #e2e8f0',
-                        background: pagination.page === pagination.totalPages 
-                          ? '#e2e8f0' 
-                          : 'white',
-                        borderRadius: '6px',
-                        cursor: pagination.page === pagination.totalPages 
-                          ? 'not-allowed' 
-                          : 'pointer',
-                        transition: 'all 0.2s ease',
-                        minWidth: '40px',
-                        textAlign: 'center',
-                        ':hover': pagination.page !== pagination.totalPages && {
-                          background: '#edf2f7'
-                        }
-                      }}
-                      onClick={() => fetchNotes(pagination.totalPages)}
-                      disabled={pagination.page === pagination.totalPages}
-                    >
-                      Last »
-                    </button>
+                  <p className="my-3 text-[#666] leading-relaxed">
+                    <strong>Answer:</strong> {note.answer}
+                  </p>
+                  
+                  {expandedNoteId === note.id && (
+                    <div className="mt-4 pt-4 border-t border-[#edf2f7] animate-fadeIn">
+                      <h4 className="font-semibold mb-2">Explanation:</h4>
+                      {note.explanation?.trim() ? (
+                        <p className="text-[#666]">{note.explanation}</p>
+                      ) : (
+                        <p className="text-[#a0aec0] italic">
+                          No explanation provided.
+                        </p>
+                      )}
+                    </div>
+                  )}
+                  
+                  <div className="mt-4 flex justify-end">
+                    <time className="text-xs text-[#a0aec0]">
+                      {new Date(note.createdAt).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </time>
                   </div>
                 </div>
-              )}
-            </>
-          )}
-        </section>
+              ))}
+            </div>
 
-        {/* Conditionally show the form only for admins */}
+            {pagination.totalPages > 1 && (
+              <div className="flex flex-col items-center gap-4 mt-8">
+                <div>Showing page {pagination.page} of {pagination.totalPages}</div>
+                <div className="flex gap-2 flex-wrap justify-center">
+                  <button
+                    className={`px-3 py-2 border border-[#e2e8f0] rounded-md text-center min-w-[40px] transition-all duration-200 ${
+                      pagination.page === 1 
+                        ? 'bg-[#e2e8f0] cursor-not-allowed' 
+                        : 'bg-white hover:bg-[#edf2f7]'
+                    }`}
+                    onClick={() => fetchNotes(1)}
+                    disabled={pagination.page === 1}
+                  >
+                    « First
+                  </button>
+                  <button
+                    className={`px-3 py-2 border border-[#e2e8f0] rounded-md text-center min-w-[40px] transition-all duration-200 ${
+                      pagination.page === 1 
+                        ? 'bg-[#e2e8f0] cursor-not-allowed' 
+                        : 'bg-white hover:bg-[#edf2f7]'
+                    }`}
+                    onClick={() => fetchNotes(pagination.page - 1)}
+                    disabled={pagination.page === 1}
+                  >
+                    ‹ Prev
+                  </button>
+                  
+                  {getVisiblePages().map(pageNum => (
+                    <button
+                      key={pageNum}
+                      className={`px-3 py-2 border rounded-md text-center min-w-[40px] transition-all duration-200 ${
+                        pagination.page === pageNum 
+                          ? 'border-[#4299e1] bg-[#4299e1] text-white' 
+                          : 'border-[#e2e8f0] bg-white hover:bg-[#edf2f7]'
+                      }`}
+                      onClick={() => fetchNotes(pageNum)}
+                    >
+                      {pageNum}
+                    </button>
+                  ))}
+                  
+                  <button
+                    className={`px-3 py-2 border border-[#e2e8f0] rounded-md text-center min-w-[40px] transition-all duration-200 ${
+                      pagination.page === pagination.totalPages 
+                        ? 'bg-[#e2e8f0] cursor-not-allowed' 
+                        : 'bg-white hover:bg-[#edf2f7]'
+                    }`}
+                    onClick={() => fetchNotes(pagination.page + 1)}
+                    disabled={pagination.page === pagination.totalPages}
+                  >
+                    Next ›
+                  </button>
+                  <button
+                    className={`px-3 py-2 border border-[#e2e8f0] rounded-md text-center min-w-[40px] transition-all duration-200 ${
+                      pagination.page === pagination.totalPages 
+                        ? 'bg-[#e2e8f0] cursor-not-allowed' 
+                        : 'bg-white hover:bg-[#edf2f7]'
+                    }`}
+                    onClick={() => fetchNotes(pagination.totalPages)}
+                    disabled={pagination.page === pagination.totalPages}
+                  >
+                    Last »
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </section>
+
+      {/* Form Section */}
+      <section id="form-section" className="bg-white rounded-[15px] p-6 shadow-[0_10px_30px_rgba(0,0,0,0.08)] transition-all duration-300">
         {isAdmin ? (
-          <aside style={{
-            flex: 1,
-            '@media (min-width: 1024px)': {
-              position: 'sticky',
-              top: '1rem',
-              alignSelf: 'flex-start'
-            }
-          }}>
-            <div style={{
-              background: 'white',
-              borderRadius: '12px',
-              padding: '1.5rem',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
-            }}>
-              <h2>{isEditing ? 'Edit Note' : 'Create New Note'}</h2>
-              <form onSubmit={isEditing ? handleUpdateNote : handleCreateNote}>
-                <div style={{
-                  marginBottom: '1.25rem'
-                }}>
-                  <label style={{
-                    display: 'block',
-                    marginBottom: '0.5rem',
-                    fontWeight: '500',
-                    color: '#4a5568'
-                  }}>Subject</label>
+          <>
+            <h2 className="text-[1.5rem] font-bold text-[#333] mb-6">
+              {isEditing ? 'Edit Note' : 'Create New Note'}
+            </h2>
+            <form onSubmit={isEditing ? handleUpdateNote : handleCreateNote}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                  <label className="block mb-2 font-medium text-[#4a5568]">Subject</label>
                   <select 
-                    style={{
-                      width: '100%',
-                      padding: '0.625rem 0.75rem',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '6px',
-                      fontSize: '1rem',
-                      transition: 'all 0.2s ease',
-                      ':focus': {
-                        outline: 'none',
-                        borderColor: '#4299e1',
-                        boxShadow: '0 0 0 2px rgba(66, 153, 225, 0.2)'
-                      }
-                    }}
+                    className="w-full px-3 py-2 border border-[#e2e8f0] rounded-md text-base transition-all duration-200 focus:outline-none focus:border-[#4299e1] focus:ring-2 focus:ring-[rgba(66,153,225,0.2)]"
                     value={isEditing ? editingNote?.subject : newNote.subject} 
                     onChange={(e) => isEditing 
                       ? setEditingNote({ ...editingNote, subject: e.target.value })
@@ -791,29 +505,10 @@ const getToken = () => {
                   </select>
                 </div>
 
-                <div style={{
-                  marginBottom: '1.25rem'
-                }}>
-                  <label style={{
-                    display: 'block',
-                    marginBottom: '0.5rem',
-                    fontWeight: '500',
-                    color: '#4a5568'
-                  }}>Title*</label>
+                <div>
+                  <label className="block mb-2 font-medium text-[#4a5568]">Title*</label>
                   <input 
-                    style={{
-                      width: '100%',
-                      padding: '0.625rem 0.75rem',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '6px',
-                      fontSize: '1rem',
-                      transition: 'all 0.2s ease',
-                      ':focus': {
-                        outline: 'none',
-                        borderColor: '#4299e1',
-                        boxShadow: '0 0 0 2px rgba(66, 153, 225, 0.2)'
-                      }
-                    }}
+                    className="w-full px-3 py-2 border border-[#e2e8f0] rounded-md text-base transition-all duration-200 focus:outline-none focus:border-[#4299e1] focus:ring-2 focus:ring-[rgba(66,153,225,0.2)]"
                     type="text" 
                     value={isEditing ? editingNote?.title : newNote.title} 
                     onChange={e => isEditing 
@@ -824,203 +519,85 @@ const getToken = () => {
                     required 
                   />
                 </div>
+              </div>
 
-                <div style={{
-                  marginBottom: '1.25rem'
-                }}>
-                  <label style={{
-                    display: 'block',
-                    marginBottom: '0.5rem',
-                    fontWeight: '500',
-                    color: '#4a5568'
-                  }}>Answer*</label>
-                  <input 
-                    style={{
-                      width: '100%',
-                      padding: '0.625rem 0.75rem',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '6px',
-                      fontSize: '1rem',
-                      transition: 'all 0.2s ease',
-                      ':focus': {
-                        outline: 'none',
-                        borderColor: '#4299e1',
-                        boxShadow: '0 0 0 2px rgba(66, 153, 225, 0.2)'
-                      }
-                    }}
-                    type="text" 
-                    value={isEditing ? editingNote?.answer : newNote.answer} 
-                    onChange={e => isEditing 
-                      ? setEditingNote({ ...editingNote, answer: e.target.value })
-                      : setNewNote({ ...newNote, answer: e.target.value })
-                    } 
-                    placeholder="Enter the answer"
-                    required 
-                  />
-                </div>
+              <div className="mb-6">
+                <label className="block mb-2 font-medium text-[#4a5568]">Answer*</label>
+                <input 
+                  className="w-full px-3 py-2 border border-[#e2e8f0] rounded-md text-base transition-all duration-200 focus:outline-none focus:border-[#4299e1] focus:ring-2 focus:ring-[rgba(66,153,225,0.2)]"
+                  type="text" 
+                  value={isEditing ? editingNote?.answer : newNote.answer} 
+                  onChange={e => isEditing 
+                    ? setEditingNote({ ...editingNote, answer: e.target.value })
+                    : setNewNote({ ...newNote, answer: e.target.value })
+                  } 
+                  placeholder="Enter the answer"
+                  required 
+                />
+              </div>
 
-                <div style={{
-                  marginBottom: '1.25rem'
-                }}>
-                  <label style={{
-                    display: 'block',
-                    marginBottom: '0.5rem',
-                    fontWeight: '500',
-                    color: '#4a5568'
-                  }}>Explanation</label>
-                  <textarea 
-                    style={{
-                      width: '100%',
-                      padding: '0.625rem 0.75rem',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '6px',
-                      fontSize: '1rem',
-                      transition: 'all 0.2s ease',
-                      ':focus': {
-                        outline: 'none',
-                        borderColor: '#4299e1',
-                        boxShadow: '0 0 0 2px rgba(66, 153, 225, 0.2)'
-                      },
-                      minHeight: '100px'
-                    }}
-                    value={isEditing ? editingNote?.explanation : newNote.explanation} 
-                    onChange={e => isEditing 
-                      ? setEditingNote({ ...editingNote, explanation: e.target.value })
-                      : setNewNote({ ...newNote, explanation: e.target.value })
-                    } 
-                    placeholder="Add detailed explanation (optional)"
-                  />
-                </div>
+              <div className="mb-6">
+                <label className="block mb-2 font-medium text-[#4a5568]">Explanation</label>
+                <textarea 
+                  className="w-full px-3 py-2 border border-[#e2e8f0] rounded-md text-base transition-all duration-200 focus:outline-none focus:border-[#4299e1] focus:ring-2 focus:ring-[rgba(66,153,225,0.2)] min-h-[100px]"
+                  value={isEditing ? editingNote?.explanation : newNote.explanation} 
+                  onChange={e => isEditing 
+                    ? setEditingNote({ ...editingNote, explanation: e.target.value })
+                    : setNewNote({ ...newNote, explanation: e.target.value })
+                  } 
+                  placeholder="Add detailed explanation (optional)"
+                />
+              </div>
 
-                <div style={{display: 'flex', gap: '0.5rem'}}>
-                  <button 
-                    type="submit" 
-                    style={{
-                      flex: 1,
-                      width: '100%',
-                      padding: '0.75rem',
-                      background: 'linear-gradient(135deg, #4299e1, #3182ce)',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '6px',
-                      fontWeight: '500',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      gap: '0.5rem',
-                      transition: 'all 0.2s ease',
-                      ':hover': !(!isFormValid || formLoading) && {
-                        transform: 'translateY(-1px)',
-                        boxShadow: '0 2px 5px rgba(66, 153, 225, 0.3)'
-                      },
-                      ':disabled': {
-                        background: '#a0aec0',
-                        cursor: 'not-allowed',
-                        transform: 'none',
-                        boxShadow: 'none'
-                      }
-                    }}
-                    disabled={!isFormValid || formLoading}
-                  >
-                    {formLoading ? (
-                      <>
-                        <span style={{
-                          display: 'inline-block',
-                          width: '1rem',
-                          height: '1rem',
-                          border: '2px solid rgba(255, 255, 255, 0.3)',
-                          borderRadius: '50%',
-                          borderTopColor: 'white',
-                          animation: 'spin 1s ease-in-out infinite'
-                        }}></span> 
-                        {isEditing ? 'Updating...' : 'Creating...'}
-                      </>
-                    ) : (
-                      isEditing ? 'Update Note' : 'Add Note'
-                    )}
-                  </button>
-
-                  {isEditing && (
-                    <button 
-                      type="button" 
-                      style={{
-                        flex: 0.5,
-                        width: '100%',
-                        padding: '0.75rem',
-                        background: '#e53e3e',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '6px',
-                        fontWeight: '500',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        transition: 'all 0.2s ease',
-                        ':hover': {
-                          background: '#c53030',
-                          transform: 'translateY(-1px)',
-                          boxShadow: '0 2px 5px rgba(229, 62, 62, 0.3)'
-                        }
-                      }}
-                      onClick={cancelEditing}
-                    >
-                      Cancel
-                    </button>
+              <div className="flex gap-2">
+                <button 
+                  type="submit" 
+                  disabled={!isFormValid || formLoading}
+                  className="px-6 py-3 bg-[#4299e1] text-white font-medium rounded-full flex justify-center items-center gap-2 transition-all duration-300 hover:bg-[#333] hover:translate-x-1 shadow-[0_4px_15px_rgba(66,153,225,0.25)] disabled:bg-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
+                >
+                  {formLoading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      {isEditing ? 'Updating...' : 'Creating...'}
+                    </>
+                  ) : (
+                    <>
+                      {isEditing ? 'Update Note' : 'Add Note'} <ArrowRight size={16} />
+                    </>
                   )}
-                </div>
-              </form>
-            </div>
-          </aside>
-        ) : (
-          <aside style={{
-            flex: 1,
-            '@media (min-width: 1024px)': {
-              position: 'sticky',
-              top: '1rem',
-              alignSelf: 'flex-start'
-            }
-          }}>
-            <div style={{
-              background: 'white',
-              borderRadius: '12px',
-              padding: '1.5rem',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-              textAlign: 'center'
-            }}>
-              <h2>Admin Access Required</h2>
-              <p style={{color: '#718096', marginBottom: '1rem'}}>
-                You need administrator privileges to create or edit notes.
-              </p>
-              <button 
-                style={{
-                  padding: '0.75rem 1.5rem',
-                  background: '#4299e1',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  fontWeight: '500',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  ':hover': {
-                    background: '#3182ce',
-                    transform: 'translateY(-1px)'
-                  }
-                }}
-                onClick={() => {
-                  window.location.href = '/login';
-                }}
-              >
-                Login as Admin
-              </button>
-            </div>
-          </aside>
-        )}
-      </div>
+                </button>
 
-      <style>{`
+                {isEditing && (
+                  <button 
+                    type="button" 
+                    className="px-6 py-3 bg-[#e53e3e] text-white font-medium rounded-full flex justify-center items-center gap-2 transition-all duration-300 hover:bg-[#c53030] hover:shadow-[0_4px_15px_rgba(229,62,62,0.25)]"
+                    onClick={cancelEditing}
+                  >
+                    Cancel
+                  </button>
+                )}
+              </div>
+            </form>
+          </>
+        ) : (
+          <div className="text-center">
+            <h2 className="text-[1.5rem] font-bold text-[#333] mb-4">Admin Access Required</h2>
+            <p className="text-[#718096] mb-4">
+              You need administrator privileges to create or edit notes.
+            </p>
+            <button 
+              className="px-6 py-3 bg-[#4299e1] text-white font-medium rounded-full transition-all duration-300 hover:bg-[#3182ce] hover:-translate-y-0.5 hover:shadow-[0_4px_15px_rgba(66,153,225,0.25)]"
+              onClick={() => {
+                window.location.href = '/login';
+              }}
+            >
+              Login as Admin
+            </button>
+          </div>
+        )}
+      </section>
+
+      <style jsx>{`
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
@@ -1032,6 +609,15 @@ const getToken = () => {
         @keyframes slideDown {
           0% { transform: translateY(-10px); opacity: 0; }
           100% { transform: translateY(0); opacity: 1; }
+        }
+        .animate-spin {
+          animation: spin 1s linear infinite;
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.5s ease-out;
+        }
+        .animate-slideDown {
+          animation: slideDown 0.3s ease-out;
         }
       `}</style>
     </div>
